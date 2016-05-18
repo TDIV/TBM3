@@ -30,7 +30,7 @@
 #include <cmath>
 using namespace std;
 
-#include "gramat.h"
+#include "../Gramat/include/gramat.h"
 
 namespace lift{
 	

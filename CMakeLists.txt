@@ -37,10 +37,9 @@ endif()
 
 
 # --- Execute -----------------------------------------
-include_directories(SYSTEM ~/GitHub/Gramat/include)
-include_directories(SYSTEM ~/GitHub/TBM3-new/include)
+include_directories(SYSTEM ~/opt/TBM3/include)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../TBM3-new)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../TBM3)
 
 add_executable(run_cubic examples/main_cubic.cpp)
 target_link_libraries(run_cubic ${LIBS} ${EXTRA_LIBS} stdc++)

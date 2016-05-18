@@ -3,9 +3,9 @@
    The library is used to create a tighbinding interface for different lattice structure and multi orbital freedom.
 */
 
-#ifndef __LATTE__H__
-#define __LATTE__H__
+#ifndef __TBMMM_H__
+#define __TBMMM_H__
 
-#include "../src/lat.h"
+#include "../src/tbmmm.h"
 
 #endif
