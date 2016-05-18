@@ -1,0 +1,8 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}
+\contentsline {section}{\numberline {2}Package setup and essentials}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}C++: CUDA and MAGMA library}{4}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}PYTHON: Numpy, matplotlib, vpython, wx}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Setup the TBM$^3$ package}{4}{subsection.2.3}
+\contentsline {section}{\numberline {3}The structure of TBM$^{3}$}{5}{section.3}
+\contentsline {section}{\numberline {4}Input file format}{5}{section.4}
+\contentsline {section}{\numberline {5}The programming structure}{7}{section.5}

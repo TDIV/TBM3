@@ -1,0 +1,54 @@
+#0 Parameters
+ isCalculateMu  = 1              
+ isCalculateVar = 0              
+ isCalculateLDOS = 0              
+ isCalculateBand = 0              
+ Temperature    = 0.001          
+ Mu             = 0              
+
+ t0             = 1              
+ t              =-1              
+ Jh             = 2              
+ Nb1            = 4              
+ Nb2            = 4              
+ Nb3            = 4              
+ vdt            = 0.1            
+
+#1 Basis Vector
+ a1        1.0                 0.0                 0.0                
+ a2        0.0                 1.0                 0.0                
+ a3        0.0                 0.0                 1.0                
+
+#2 Sub Atoms
+ Fe   1s   0.0                 0.0                 0.0                
+
+#3 Cell Dim
+ 2    2    2   
+
+#4 Bonding basis
+ x         1.0                 0.0                 0.0                
+ y         0.0                 1.0                 0.0                
+ z         0.0                 0.0                 1.0                
+
+#5 Bondings
++x        -x        +y        -y        +z        -z        
+
+#7 Cell
+ 0         0         Fe-0      0.0                 0.0                 0.0                
+ 1         1         Fe-0      1.0                 0.0                 0.0                
+ 2         2         Fe-0      0.0                 1.0                 0.0                
+ 3         3         Fe-0      1.0                 1.0                 0.0                
+ 4         4         Fe-0      0.0                 0.0                 1.0                
+ 5         5         Fe-0      1.0                 0.0                 1.0                
+ 6         6         Fe-0      0.0                 1.0                 1.0                
+ 7         7         Fe-0      1.0                 1.0                 1.0                
+
+#8 Neighbors
+ 0        +x:1      -x:1      +y:2      -y:2      +z:4      -z:4      
+ 1        +x:0      -x:0      +y:3      -y:3      +z:5      -z:5      
+ 2        +x:3      -x:3      +y:0      -y:0      +z:6      -z:6      
+ 3        +x:2      -x:2      +y:1      -y:1      +z:7      -z:7      
+ 4        +x:5      -x:5      +y:6      -y:6      +z:0      -z:0      
+ 5        +x:4      -x:4      +y:7      -y:7      +z:1      -z:1      
+ 6        +x:7      -x:7      +y:4      -y:4      +z:2      -z:2      
+ 7        +x:6      -x:6      +y:5      -y:5      +z:3      -z:3      

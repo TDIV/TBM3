@@ -1,0 +1,8 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Package setup and essentials}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{C++: CUDA and MAGMA library}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{PYTHON: Numpy, matplotlib, vpython, wx}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Setup the TBM3 package}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{The structure of TBM3}{}% 6
+\BOOKMARK [1][-]{section.4}{Input file format}{}% 7
+\BOOKMARK [1][-]{section.5}{The programming structure}{}% 8
