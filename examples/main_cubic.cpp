@@ -27,10 +27,10 @@ public:
 			
 			double theta=0, phi=0;
 			if (mag_sign > 0) {
-				theta	= 0+0.2;
+				theta	= 0;
 				phi		= 0;
 			} else if (mag_sign < 0) {
-				theta	= pi-0.2;
+				theta	= pi;
 				phi		= 0;
 			}
 			
