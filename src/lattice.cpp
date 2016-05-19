@@ -197,23 +197,18 @@ private:
 		}
 	}
 
-
-	map<string, string> bondTranslationMap;
-
 public:
+	map<string, string> bondStringMap;
 	void	addBondTranslator(string fromStr, string toStr)		{
-		bondTranslationMap[fromStr] = toStr;
+		bondStringMap[fromStr] = toStr;
 	}
-	string	pairOperationTranslator(string opt){
-		replaceAll(opt, ".", "+0");
-		return opt;
-	}
+
 	string	translateBondString(string bondStr)					{
 		string retBondStr = bondStr;
 		
 		// The first layer translation that could be defined by the user.
-		auto it = bondTranslationMap.find(bondStr);
-		if (it != bondTranslationMap.end()) { retBondStr = it->first; }
+		auto it = bondStringMap.find(bondStr);
+		if (it != bondStringMap.end()) { retBondStr = it->second; }
 		
 		// The second layer translation to replace the dot, '.', symbol to "+0".
 		replaceAll(retBondStr, ".", "+0");
@@ -224,7 +219,7 @@ public:
 	string	filename;
 	
 	Lattice			()											{ _index_size=0; }
-	Lattice			(string _filename, H_SYMMETRY sym)			{ open(_filename+".lif", sym); }
+	Lattice			(string _filename, H_SYMMETRY sym)			{ open(_filename, sym); }
 	~Lattice		()											{
 		strBasisVector.clear();
 		subAtom.clear();
@@ -249,7 +244,8 @@ public:
 		
 		vector<string>		lattice_neighbor;	//The neighboring relations
 		
-        ifstream infile(filename.c_str());
+		string filename_lif = filename+".lif";
+        ifstream infile(filename_lif.c_str());
 
 		
 		// ------ Read in the file and construct the parts
@@ -328,8 +324,6 @@ public:
 		
 		return true;
 	}
-	
-
 
 	H_SYMMETRY		getSymmetry	()								{ return symmetry; }
 

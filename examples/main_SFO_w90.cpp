@@ -44,18 +44,25 @@ public:
 			initOrder(si, si.Name()+" Sy")	=Sy;
 			initOrder(si, si.Name()+" Sz")	=Sz;
 		}
-		initOrder.save(Lat, "");
+		initOrder.save("");
 		
 		OrderParameter pairOrder(Lat);
-		pairOrder.load(Lat, "pair.test2");
+		pairOrder.load("pair.test2");
 		
+		Lat.bondStringMap["+x"] = "+1..";
+		Lat.bondStringMap["-x"] = "-1..";
+		Lat.bondStringMap["+y"] = ".+1.";
+		Lat.bondStringMap["-y"] = ".-1.";
+		Lat.bondStringMap["+z"] = "..+1";
+		Lat.bondStringMap["-z"] = "..-1";
+		                             
 		while (pair_iterate()) {
 			auto pit = getPair();
 			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 0;
 			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 0;
 		}
 		
-		pairOrder.save(Lat, "pair.test2");
+		pairOrder.save("pair.test2");
 	}
 	
 	void Hamiltonian()		{
@@ -76,19 +83,19 @@ public:
 			auto si = pit.AtomI;
 			auto sj = pit.AtomJ;
 			
-			add_bond( "Fe:1u  Fe:1u  +1..", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  .+1.", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  ..+1", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  +1..", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  .+1.", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  ..+1", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +x", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +y", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +z", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +x", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +y", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +z", +VAR("t") );
 			                         
-			add_bond( "Fe:1u  Fe:1u  -1..", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  .-1.", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  ..-1", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  -1..", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  .-1.", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  ..-1", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -x", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -y", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -z", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -x", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -y", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -z", +VAR("t") );
 		}                            
 	}
 

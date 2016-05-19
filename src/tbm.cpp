@@ -275,7 +275,7 @@ protected:
 		auto word=split(opt, " ");
 		
 		if (word.size() !=3)	 return e(-1,-1,0, string("Wrong arguments in operation: ")+opt);
-		if (ap.bond!= Lat.pairOperationTranslator(word[2]) )	 return e(-1,-1,0, "non");
+		if (ap.bond!= Lat.translateBondString(word[2]) )	 return e(-1,-1,0, "non");
 		
 		
 		auto AtI=split(word[0], ":");
@@ -909,7 +909,7 @@ protected:
 			}
 		}
 		
-		order.save(Lat, "p-spin");
+		order.save("p-spin");
 		
 		return order;
 	}
@@ -1068,7 +1068,7 @@ protected:
 			if (iter>iterations) break;
 			if (iter!=0) is_init_mu = false;
 			
-			initDenOrder.save(Lat, "den.ini");
+			initDenOrder.save("den.ini");
 			
 			auto var_list = calcChemicalPotential(is_init_mu);
 
@@ -1112,7 +1112,7 @@ protected:
 			initDenOrder = newDenMix*newDenOrder+(1-newDenMix)*initDenOrder;
 			
 			saveElectronFilling(initDenOrder);
-			initOrder.save(Lat, "");
+			initOrder.save("");
 			iter++;
 		}
 	}
@@ -1158,7 +1158,7 @@ protected:
 		Mu = destMu;
 		cout<<endl;
 		newDenOrder = efOrder;
-		newDenOrder.save(Lat, "den.calc");
+		newDenOrder.save("den.calc");
 		return var_lis;
 	}
 	void			saveElectronFilling		(OrderParameter eOrder)					{
@@ -1178,7 +1178,7 @@ protected:
 				else if (words[0][0] == '#') { break; }
 				if (control_flag == "Chemical_Potential") { Mu = StrToDouble(line); continue; }
 			}
-			initDenOrder.load(Lat, "den", 1);
+			initDenOrder.load("den", 1);
 		}
 		infile.close();
 	}

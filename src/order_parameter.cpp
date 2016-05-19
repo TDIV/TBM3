@@ -111,7 +111,7 @@ public:
 			return empty_value_for_return;
 		}
 		
-		if ( Lat.pairOperationTranslator( ss[2] ) != Ap.bond ) {
+		if ( Lat.translateBondString( ss[2] ) != Ap.bond ) {
 			return empty_value_for_return;
 		}
 		
@@ -355,7 +355,7 @@ public:
 	}
 	
 	// ---- Save/load the order parameter in a unified formate.
-	bool		save(Lattice Lat, string order_sub_name){
+	bool		save(string order_sub_name){
 
 		auto siter = Lat.site_iteration();
 		auto piter = Lat.pair_iteration();
@@ -383,7 +383,7 @@ public:
 		out.close();
 		return true;
 	}
-	bool		load(Lattice Lat, string order_sub_name, unsigned name_flag = 2){
+	bool		load(string order_sub_name, unsigned name_flag = 2){
 		
 		auto siter = Lat.site_iteration();
 		auto piter = Lat.pair_iteration();
@@ -495,9 +495,9 @@ public:
 					}
 					
 					// Check if the bondKey exist in the Lat (Lattice) formate.
-					if (Lat.hasBondKey(bondKey)) {
-						cout<<bondKey<<endl;
-					}
+					//if (Lat.hasBondKey(bondKey)) {
+					//	cout<<bondKey<<endl;
+					//}
 				}
 				else{
 					string warningStr= "Warning, formate not matched for w90:"+line+" of file:"+filename+"!";
