@@ -43,17 +43,6 @@ public:
 			initOrder(si, si.Name()+" Sz")	=Sz;
 		}
 		initOrder.save(Lat, "");
-		
-		OrderParameter pairOrder(Lat);
-		pairOrder.load(Lat, "pair.test2");
-		
-		while (pair_iterate()) {
-			auto pit = getPair();
-			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 0;
-			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 0;
-		}
-		
-		pairOrder.save(Lat, "pair.test2");
 	}
 	
 	void Hamiltonian()		{
@@ -103,15 +92,14 @@ public:
 		Mu			= VAR("Mu").real();			// Setup chemical potential from input file.
 		Temperature = VAR("Temperature").real();// Setup Temperature from input file.
 
-		
 		// Set k-points for general purpose calculation
 		clear_k_point();
 		unsigned N1=VAR("Nb1").real(), N2=VAR("Nb2").real(), N3=VAR("Nb3").real();
 		for (double i1=0; i1<N1; i1++)
-			for (double i2=0; i2<N2; i2++)
-				for (double i3=0; i3<N3; i3++) {
-					add_k_point( (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3 );
-				}
+		for (double i2=0; i2<N2; i2++)
+		for (double i3=0; i3<N3; i3++) {
+			add_k_point( (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3 );
+		}
 		
 		if (VAR("isCalculateMu").real() == 1) { calcChemicalPotential(); }
 		if (VAR("isCalculateVar").real() == 1){ calcVariation(); }

@@ -44,6 +44,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../TBM3)
 add_executable(run_cubic examples/main_cubic.cpp)
 target_link_libraries(run_cubic ${LIBS} ${EXTRA_LIBS} stdc++)
 
+add_executable(run_SFO_w90 examples/main_SFO_w90.cpp)
+target_link_libraries(run_SFO_w90 ${LIBS} ${EXTRA_LIBS} stdc++)
+
 # -- REPORT -------------------------------------------
 message("")
 message("Configuration results")

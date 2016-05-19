@@ -39,7 +39,7 @@ private:
 	// The lattice structure will be used to guide the orderParameter
 	Lattice Lat;
 public:
-	OrderParameter	(Lattice _lat)								{
+	OrderParameter	(Lattice _lat)					{
 		Lat = _lat;
 		empty_value_for_return = 0;
 	}
@@ -240,7 +240,7 @@ public:
 			/* End checking the structure of the pairString */
 			
 			auto indexI = StrToInt(sp_base1[0]);
-			auto bondStr = Lat.pairOperationTranslator( sp_base1[2] );
+			auto bondStr = Lat.translateBondString( sp_base1[2] );
 			auto orderName= sp_base0[1];
 			auto orderStr = pairValue[i].tostr();
 			
@@ -298,7 +298,7 @@ public:
 		return total;
 	}
 
-	OrderParameter & operator= ( const OrderParameter & order){
+	OrderParameter & operator=	(const OrderParameter & order){
 		empty_value_for_return = 0;
 		siteMap		= order.siteMap;
 		siteString	= order.siteString;
@@ -474,6 +474,48 @@ public:
 		}
 		return true;
 	}
+	bool		importHoppingFromWannier90(string filename)	{
+		
+		ifstream infile(filename.c_str());
+		
+		if (infile.is_open()) {
+			
+			string line;
+			while ( getline(infile, line)) {
+				
+				auto wordInLine = split(line," ");
+				if (wordInLine.size() == 7) {
+					
+					string bondKey = "";
+					for (int i=0 ; i<3 ; i++){
+						if (wordInLine[i][0] != '-'){
+							wordInLine[i] = "+" + wordInLine[i];
+						}
+						bondKey += wordInLine[i];
+					}
+					
+					// Check if the bondKey exist in the Lat (Lattice) formate.
+					if (Lat.hasBondKey(bondKey)) {
+						cout<<bondKey<<endl;
+					}
+				}
+				else{
+					string warningStr= "Warning, formate not matched for w90:"+line+" of file:"+filename+"!";
+					cout<<warningStr<<endl;
+				}
+			}
+		}
+		else {
+			// Faild to open the file
+			string errorStr = "Error, faild to open the file:"+filename+" !";
+			cout<<errorStr<<endl;
+			throw errorStr;
+			return false;
+		}
+		
+		infile.close();
+		return true;
+	}
 };
 
 OrderParameter operator+(const OrderParameter & L_val, const OrderParameter & R_val) {
@@ -539,6 +581,11 @@ OrderParameter operator*(double d_val, const OrderParameter & O_val) {
 	
 	return ret_val;
 }
+
+
+
+
+
 
 
 

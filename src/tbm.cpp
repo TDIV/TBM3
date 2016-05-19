@@ -40,15 +40,14 @@
  Please refer to the online documentation to see more specific examples.
  -------------------------------------------------------------------*/
 
-#include <stdio.h>
-
 class TBModel{
 public:
-	TBModel(Lattice _L): Lat(_L),
-				initOrder		(Lat),
-				newOrder		(Lat),
-				initDenOrder	(Lat),
-				newDenOrder		(Lat)  {
+	TBModel	(Lattice _L):		Lat(_L),
+				initOrder			(Lat),	   
+				newOrder			(Lat),	    
+				initDenOrder		(Lat),	    
+				newDenOrder			(Lat),	    
+				hoppingOrder		(Lat){
 
 		symmetry = _L.getSymmetry();
 		Temperature = 0.0001;
@@ -138,7 +137,7 @@ private:
 	// --------------------------------
 private:	map<string, x_var>	parameter;
 protected:
-	x_var				VAR		(string str_key)			{
+	x_var			VAR		(string str_key)			{
 		double _sign=+1;
 		
 		if	(str_key[0]=='+') {
@@ -162,7 +161,7 @@ protected:
 	} /*
 	   Return the user defined variable. If user not defined this variable, return the default value.
 	*/
-	x_var				VAR		(string str_key, x_var val)	{
+	x_var			VAR		(string str_key, x_var val)	{
 		double _sign=+1;
 		
 		if	(str_key[0]=='+') {
@@ -184,6 +183,8 @@ protected:
 	} /*
 	   Return the user defined variable. If user not defined this variable, return the default value.
 	*/
+
+
 protected:
 
 	// ############################################
@@ -541,6 +542,9 @@ protected:
 	OrderParameter	initDenOrder;	// The storage of electron density information.
 	OrderParameter	newDenOrder;	// The storage of new-electron density information.
 	double			newDenMix;		// The mix-weight for the new density.
+	
+	OrderParameter	hoppingOrder;	/* A special order that allow users to storage hopping terms
+									 as an static order parameter */
 	
 	virtual	void	init_order		()=0;
 	virtual void	Hamiltonian		()=0;							// The interface for user defined Hamiltonian.

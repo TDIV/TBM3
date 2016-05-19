@@ -161,9 +161,27 @@ namespace gmt {
 		/* ---------------------------------------------
 		--- Indexing operation -------------------------
 		-----------------------------------------------*/
-		var &			operator[]	(unsigned i){if (i>=cols()*rows()) {throw "Index out of range.";} return mat->at(i); }
-	    var &			index		(unsigned i){if (i>=cols()*rows()) {throw "Index out of range.";} return mat->at(i); }
-	    var &			const_index (unsigned i) const {if (i>=cols()*rows()) {throw "Index out of range.";} return mat->at(i); }
+		var &			operator[]	(unsigned i)		{
+			if (i>=cols()*rows())	{
+				string ErrorStr = "Error, index out of range of matrix element";
+				throw ErrorStr;
+			}
+		return mat->at(i);
+		}
+	    var &			index		(unsigned i)		{
+			if (i>=cols()*rows())			{
+				string ErrorStr = "Error, index out of range of matrix element";
+				throw ErrorStr;
+			}
+		return mat->at(i);
+		}
+	    var &			const_index (unsigned i) const	{
+			if (i>=cols()*rows())	{
+				string ErrorStr = "Error, index out of range of matrix element";
+				throw ErrorStr;
+			}
+			return mat->at(i);
+		}
 	
 		var &			operator()	(unsigned i, unsigned j){return at(i,j);}
 		var &			at			(unsigned , unsigned );
