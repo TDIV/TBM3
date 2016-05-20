@@ -20,6 +20,7 @@
    The library is used to create a multi orbital lattice interface for different tight-binding models.
 */
 
+
 enum H_SYMMETRY { NORMAL, NAMBU, EXNAMBU };
 
 class Atom{
@@ -29,10 +30,23 @@ private:
 	string				atom_name;  //example: Fe-1
 	string				atom_info;  //atom_info comes from the sub_atom,
 									//example:  Fe   2s   0.5  0.5   0.5
+	
+	unsigned			orbitalNumber;
+	string				spinDegree;
+	
+	pair<int, string> getOrbitalInfo	()		const	{
+					
+		auto	ss=split(atom_info, " ");
+		string	degree_of_freedom = ss[1];
+		auto	label = analyze_atom_label(degree_of_freedom);
+		int		num_of_orbital	= StrToInt(label[0]);
+		string	sub_degree		= label[1];
+		return	make_pair(num_of_orbital, sub_degree);
+	}
 public:
     r_mat				pos;		//The atom position
-	vector<string>		index_label;//The labels for the index, example: 1u 1d 2u 2d
-	map<string, int>	index;
+	vector<string>		indexLabel;//The labels for the index, example: 1u 1d 2u 2d
+	map<string, int>	indexMap;	//The map of the orbital index, ex: {1u : 0}
 	vector<pair<double,double> > LDOS;//To storage the temporarily calculated LDOS.
 
 	Atom()					{
@@ -40,6 +54,8 @@ public:
 		atom_index=0;
 		atom_name="";
 		pos = r_mat(3,1).get();
+		orbitalNumber = 0;
+		spinDegree = "";
 	}
 	Atom(const Atom &at)	{
 		*this=at;
@@ -56,8 +72,8 @@ public:
         pos[2]=z;
     }	// The constructor from each Atom instance with a string input
 	~Atom()					{
-		index_label.clear();
-		index.clear();
+		indexLabel.clear();
+		indexMap.clear();
 	}
 	
 	Atom& operator=(const Atom &at){
@@ -67,9 +83,11 @@ public:
 			atom_name	=at.atom_name;
 			pos			=at.pos;
 			atom_info	=at.atom_info;
-			index_label	=at.index_label;
-			index		=at.index;
+			indexLabel	=at.indexLabel;
+			indexMap	=at.indexMap;
 			LDOS		=at.LDOS;
+			orbitalNumber = at.orbitalNumber;
+			spinDegree	= at.spinDegree;
 		}
 		return *this;
 	} // The copy operation
@@ -80,60 +98,57 @@ public:
 		oss<<"Atom Name  : "<< Name() <<endl;
 		oss<<"Atom Index : "<< atom_index <<endl;
 		oss<<"Labels     : ";
-		for (unsigned i=0; i<index_label.size(); i++) {
-			oss<<index_label[i]<<" ";
+		for (unsigned i=0; i<indexLabel.size(); i++) {
+			oss<<indexLabel[i]<<" ";
 		}
 		oss<<endl;
 		oss<<"Position   : ("<<pos.const_index(0)<<", "<<pos.const_index(1)<<", "<<pos.const_index(2)<<")"<<endl;
 		oss<<"In unitcell: "<<unitcell<<endl;
 		return oss.str();
 	}
-	pair<int, string>
-				OrbitalInfo	()				const	{
-					
-		auto ss=split(atom_info, " ");
-		string degree_of_freedom = ss[1];
-		auto label = analyze_atom_label(degree_of_freedom);
-		int		num_of_orbital	= StrToInt(label[0]);
-		string	sub_degree		= label[1];
-		return make_pair(num_of_orbital, sub_degree);
-	}
 	string		Name		()				const	{
 		auto ss=split(atom_name,"-");
 		return ss[0];
 	}// Get the Atom name from "atom_name"
-	string		SubName		()				const	{
+	string		subName		()				const	{
 		return atom_name;
-	}// Get the Atom name from "atom_name"
-	int			sub_index	()				const	{
+	}// Get the Atom SubName from "atom_info"
+	int			subIndex	()				const	{
 		auto ss=split(atom_name,"-");
 		return StrToInt(ss[1]);
 	}// Get the Atom sub_index from "atom_name"
-	unsigned	unitcell_index()			const	{
+	unsigned	unitcellIndex()				const	{
 		return unitcell;
 	}
-	bool		find		(string ss)		const	{
-		auto it=index.find(ss);
-		if (it!=index.end()) return true;
+	bool		hasIndex	(string ss)		const	{
+		auto it=indexMap.find(ss);
+		if (it!=indexMap.end()) return true;
 		
 		return false;
 	}
+	
+	void		setAtomInfo	(string ss)				{
+		atom_info = ss;
+		auto info = getOrbitalInfo();
+		orbitalNumber = info.first;
+		spinDegree = info.second;
+	}
+	
 	unsigned	AtomIndex	()				const	{ return atom_index; }
-	void		setAtomInfo	(string ss)				{ atom_info = ss; }
-	string		getAtomInfo	()						{ return atom_info; }
+	unsigned	getOrbitalNumber()					{ return orbitalNumber; }
+	string		getSpinLabel()						{ return spinDegree; }
 
 	int			operator[]	(string label)	const	{
-		if (find(label)) { return index.find(label)->second; }
+		if (hasIndex(label)) { return indexMap.find(label)->second; }
 		return -1;
 	}
-	unsigned		operator()	()				const	{ return atom_index; }
 	
-	void createIndexLabel(){
+	void createIndexLabel(H_SYMMETRY symmetry = NORMAL){
 		auto ss=split(atom_info, " ");
 		
-		index_label.clear();
-		if (ss.size()>2)
-		{
+		indexLabel.clear();
+		if (ss.size()>2) {
+			
 			string degree_of_freedom = ss[1];
 			
 			auto label = analyze_atom_label(degree_of_freedom);
@@ -142,32 +157,43 @@ public:
 			string	sub_degree		= label[1];
 			
 			vector<string>	sub_degree_label;
-			if (sub_degree == "") {
-				sub_degree_label.push_back("");
-				
-			} else if (sub_degree == "N"){		// Nambu space without spin
-				sub_degree_label.push_back("A");
-				sub_degree_label.push_back("B");
-				
-			} else if (sub_degree == "s"){		// Spin space
-				sub_degree_label.push_back("u");
-				sub_degree_label.push_back("d");
-				
-			} else if (sub_degree == "Ns"){		// Nambu space with spin
-				sub_degree_label.push_back("Au");
-				sub_degree_label.push_back("Bd");
-				
-			} else if (sub_degree == "Es"){		// Extended Nambu space with spin
-				sub_degree_label.push_back("Au");
-				sub_degree_label.push_back("Ad");
-				sub_degree_label.push_back("Bu");
-				sub_degree_label.push_back("Bd");
-			} else {
-				cout<<endl;
-				cout<<"Warning: In LATTICE input file, cannot find the correct index type for \'"+sub_degree+"\'."<<endl;
-				cout<<"         Please define with cases of : \"\", \"N\", \"s\", \"Ns\", \"Es\" "<<endl;
-				cout<<"         Program stoped!"<<endl;
-				throw "Program stop";
+			
+			switch( symmetry ) {
+				case NORMAL:
+					if (sub_degree == "") {		// Normal space
+						sub_degree_label.push_back("");
+					}
+					else if (sub_degree == "s"){// Spin space
+						sub_degree_label.push_back("u");
+						sub_degree_label.push_back("d");
+					}
+					break;
+					
+				case NAMBU:
+					if (sub_degree == "N"){		// Nambu space without spin
+						sub_degree_label.push_back("A");
+						sub_degree_label.push_back("B");
+					}
+					else if (sub_degree == "Ns"){// Nambu space with spin
+						sub_degree_label.push_back("Au");
+						sub_degree_label.push_back("Bd");
+					}
+					break;
+					
+				case EXNAMBU:
+					if (sub_degree == "") {
+						cout<<endl;
+						cout<<"Error: A spinless atom cannot be assigned with 'Extended Nambu' space."<<endl;
+						cout<<"Program stoped!"<<endl;
+						throw "Program stop";
+					}
+					else if (sub_degree == "Es"){	// Extended Nambu space with spin
+						sub_degree_label.push_back("Au");
+						sub_degree_label.push_back("Ad");
+						sub_degree_label.push_back("Bu");
+						sub_degree_label.push_back("Bd");
+					}
+					break;
 			}
 			
 			// Create the index_label  ... ex: for a 2-orbital system
@@ -180,13 +206,12 @@ public:
 				for (int j=0; j<sub_degree_label.size(); j++){
 					ostringstream oss;
 					oss<<i+1<<sub_degree_label[j];
-					index_label.push_back(oss.str());
+					indexLabel.push_back(oss.str());
 				}
 			}
 		}
 	} // Create "index_label"
 };
-
 
 class AtomPair{
 public:

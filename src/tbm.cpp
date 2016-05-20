@@ -257,7 +257,7 @@ protected:
 		if (word.size() !=3)	 return e(-1,-1,0, string("Wrong arguments in operation: ")+opt);
 		
 		if (word[0] != at.Name()) { return e(-1,-1,0,"non"); }
-		if (at.find(word[1]) and at.find(word[2])) {
+		if (at.hasIndex(word[1]) and at.hasIndex(word[2])) {
 			int		I=at[word[1]];
 			int		J=at[word[2]];
 			e(I,J,val);
@@ -287,11 +287,11 @@ protected:
 		bool flagAtom=false;
 		
 		if		( AtI[0] == ap.AtomI.Name()		and AtJ[0] == ap.AtomJ.Name())		flagAtom=true;
-		else if ( AtI[0] == ap.AtomI.SubName()	and AtJ[0] == ap.AtomJ.SubName())	flagAtom=true;
-		else if ( AtI[0] == ap.AtomI.Name()		and AtJ[0] == ap.AtomJ.SubName())	flagAtom=true;
-		else if ( AtI[0] == ap.AtomI.SubName()	and AtJ[0] == ap.AtomJ.Name())		flagAtom=true;
+		else if ( AtI[0] == ap.AtomI.subName()	and AtJ[0] == ap.AtomJ.subName())	flagAtom=true;
+		else if ( AtI[0] == ap.AtomI.Name()		and AtJ[0] == ap.AtomJ.subName())	flagAtom=true;
+		else if ( AtI[0] == ap.AtomI.subName()	and AtJ[0] == ap.AtomJ.Name())		flagAtom=true;
 		
-		if ( flagAtom and ap.AtomI.find(AtI[1]) and ap.AtomJ.find(AtJ[1]) ){
+		if ( flagAtom and ap.AtomI.hasIndex(AtI[1]) and ap.AtomJ.hasIndex(AtJ[1]) ){
 			int		I=ap.AtomI[ AtI[1] ];
 			int 	J=ap.AtomJ[ AtJ[1] ];
 			auto	bvec=ap.bvec;
@@ -466,7 +466,7 @@ protected:
 			auto si = siter[ii];
 			
 			// Add chemical potential
-			auto label = si.index_label;
+			auto label = si.indexLabel;
 			for (unsigned i=0; i<label.size(); i++) {
 				string opt = si.Name()+" "+label[i]+" "+label[i];
 				add_site(si, opt, -Mu);
@@ -675,7 +675,7 @@ protected:
 	void			select_All_LDOSsite		()										{
 		while (site_iterate()) {
 			auto si = getSite();
-			if (si.index_label.size()>0) {
+			if (si.indexLabel.size()>0) {
 				LDOSsites.push_back(si);
 			}
 		}
@@ -721,7 +721,7 @@ protected:
 						for (unsigned site_index=0; site_index<LDOSsites.size(); site_index++) {
 							
 							auto si = LDOSsites[site_index];
-							auto index_label = LDOSsites[site_index].index_label;
+							auto index_label = LDOSsites[site_index].indexLabel;
 							for (unsigned ll_index=0; ll_index<index_label.size(); ll_index++) {
 								auto site_label_index = indexSite(si, si.Name()+" "+index_label[ll_index]);
 								
@@ -862,7 +862,7 @@ protected:
 		OrderParameter order(Lat);
 		while (site_iterate()) {
 			auto si = getSite();
-			auto label = si.index_label;
+			auto label = si.indexLabel;
 			order(si,si.Name()+" den")=0;
 			
 			for (unsigned i=0; i<label.size(); i++) {
@@ -881,9 +881,8 @@ protected:
 		for (unsigned i=0; i<siter.size(); i++) {
 			auto si = siter[i];
 			
-			auto atom_orb_info = si.OrbitalInfo();
-			int	orb_number = atom_orb_info.first;
-			string spin_degree = atom_orb_info.second;
+			int	orb_number = si.getOrbitalNumber();
+			string spin_degree = si.getSpinLabel();
 			if (spin_degree == "s" and
 				(si.Name()!="VA" or si.Name()!="VC" or si.Name()!="BD")
 				)

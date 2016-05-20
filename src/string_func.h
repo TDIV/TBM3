@@ -100,9 +100,12 @@ int				WordCount(string token, string line){
 	return count;
 }
 
+// This function will extract the atom informations, for:
+// 1. Number of orbitals.
+// 2. If the atom has spin degree of freedom.
 vector<string>	analyze_atom_label(string label){
 	vector<string> lab_list;
-	string L_num    = "";
+	string L_num  = "";
 	string L_spin = "";
 	for (unsigned i=0; i<label.size(); i++) {
 		if ( label[i] >= '0' and label[i] <= '9') {

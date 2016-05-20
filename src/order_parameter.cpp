@@ -139,7 +139,7 @@ public:
 	x_var &			order		(const AtomPair & Ap, string opt){ return operator()(Ap, opt);}
 	// --------------------------------------------------------
 	
-	string		getSiteOrderStr	(Lattice Lat)	{
+	string		getSiteOrderStr	(Lattice Lat)			{
 		/* Firstly -----------------------------------
 		 Save the On-site order parameter in the formate:
 		 
@@ -172,13 +172,13 @@ public:
 			oss<<"#S On-site order parameters."<<endl;
 			for (unsigned ii=0 ; ii<siter.size(); ii++) {
 				auto si = siter[ii];
-				auto label = si.index_label;
+				auto label = si.indexLabel;
 				r_mat ppos(1,3);
 				ppos.setPrintLength(10);
 				for (unsigned i=0; i<ppos.size(); i++) { ppos[i]=si.pos[i]; }
 				
 				// Output the Atom index, name and position.
-				oss<< fmt(si.unitcell_index(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.SubName(),4)<<" "<< ppos<<" >>      " ;
+				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
 				
 				for (unsigned i=0; i<siteString.size(); i++) {
 					auto	opt		= siteString[i];
@@ -197,7 +197,7 @@ public:
 
 		return oss.str();
 	}
-	string		getPairOrderStr	(Lattice Lat)	{
+	string		getPairOrderStr	(Lattice Lat)			{
 		/*
 		 Save the bond-pair order parameter in the formate:
 		 ...
@@ -263,13 +263,13 @@ public:
 			oss<<"#P bond-pair order parameters."<<endl;
 			for (unsigned ii=0 ; ii<siter.size(); ii++) {
 				auto si = siter[ii];
-				auto label = si.index_label;
+				auto label = si.indexLabel;
 				r_mat ppos(1,3);
 				ppos.setPrintLength(10);
 				for (unsigned i=0; i<ppos.size(); i++) { ppos[i]=si.pos[i]; }
 				
 				// Output the Atom index, name and position.
-				oss<< fmt(si.unitcell_index(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.SubName(),4)<<" "<< ppos<<" >>      " ;
+				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
 				
 				for (unsigned i=0; i<pairOrderMap[si.AtomIndex()].size(); i++) {
 					auto	opt		= pairOrderMap[si.AtomIndex()][i];
@@ -283,14 +283,14 @@ public:
 		return oss.str();
 	}
 	
-	x_var		totalSiteOrder	(){
+	x_var		totalSiteOrder	()						{
 		x_var total=0;
 		for (unsigned i=0; i<siteValue.size(); i++) {
 			total+=siteValue[i];
 		}
 		return total;
 	}
-	x_var		totalPairOrder	(){
+	x_var		totalPairOrder	()						{
 		x_var total=0;
 		for (unsigned i=0; i<pairString.size(); i++) {
 			total+=pairValue[i];

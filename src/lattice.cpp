@@ -16,6 +16,7 @@
 //  Created by Yuan Yen Tai on 7/02/15.
 //
 
+
 /* -------------------------------------------------------------------
  The BondNameVectorPair class will be used to be the element of bonding map.
  -------------------------------------------------------------------*/
@@ -68,23 +69,23 @@ private:
 	 ----------------------------------------------------------------------------------*/
 	vector<Atom>		atomList;	 // Place holder for all the atoms
 	vector<AtomPair>	atomPairList;// Pair up two neighboring atoms as : "AtomI - bondName - AtomJ"
-	void				createIndex	(H_SYMMETRY sym)			{
+	void				createIndex	()			{
 		_index_size=0;
 		int Index=-1;
 		
 		for (unsigned i=0 ; i<atomList.size() ; i++) {
 			
-			atomList[i].createIndexLabel();
-			for (unsigned j=0; j<atomList[i].index_label.size(); j++) {
+			atomList[i].createIndexLabel(symmetry);
+			for (unsigned j=0; j<atomList[i].indexLabel.size(); j++) {
 			
 				if (atomList[i].Name()!="VA" or atomList[i].Name()!="VC" or atomList[i].Name()!="BD") {
 					
 					Index++;
-					string label=atomList[i].index_label[j];
-					atomList[i].index[label]=Index;
+					string label=atomList[i].indexLabel[j];
+					atomList[i].indexMap[label]=Index;
 				
 				} else {
-					atomList[i].index_label.clear();
+					atomList[i].indexLabel.clear();
 				}
 			}
 		}
@@ -199,10 +200,6 @@ private:
 
 public:
 	map<string, string> bondStringMap;
-	void	addBondTranslator(string fromStr, string toStr)		{
-		bondStringMap[fromStr] = toStr;
-	}
-
 	string	translateBondString(string bondStr)					{
 		string retBondStr = bondStr;
 		
@@ -228,10 +225,10 @@ public:
 		latticeBondIndexMapList.clear();
 		bondNameVectorList.clear();
 	}
-	bool			open(string _filename, H_SYMMETRY sym)		{
+	bool			open(string _filename, H_SYMMETRY _symmetry)		{
 		_index_size = 0;
 		filename = _filename;
-		symmetry = sym;
+		symmetry = _symmetry;
 		
 		strBasisVector.clear();
 		subAtom.clear();
@@ -291,7 +288,7 @@ public:
 			// ------ Assign atom_info --------------
 			for (unsigned i=0 ; i<atomList.size() ; i++) {
 				atomList[i].setAtomInfo(
-									subAtom[atomList[i].sub_index()]
+									subAtom[atomList[i].subIndex()]
 									);
 			}
 			
@@ -313,7 +310,7 @@ public:
 			}
 
 		createBondVectorList();
-		createIndex(sym);
+		createIndex();
         }
 		else{
 			string ErrorMsg = "Error, cannot find correspond .lif file for: "+filename+".";
