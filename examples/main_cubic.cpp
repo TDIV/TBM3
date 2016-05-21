@@ -11,9 +11,12 @@ public:
 		init_order();
 		render();
 	}
-	
+
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
+		
+		//hoppingOrder.importHoppingFromWannier90("SFO.w90");
+		HoppingConstructor wannierSFO("SFO-SFO", Lat, "SFO-SFO.w90");
 
 		// Initialize the magnetic order
 		while (site_iterate()) {
@@ -42,7 +45,25 @@ public:
 			initOrder(si, si.Name()+" Sy")	=Sy;
 			initOrder(si, si.Name()+" Sz")	=Sz;
 		}
-		initOrder.save(Lat, "");
+		initOrder.save("");
+		
+		OrderParameter pairOrder(Lat);
+		pairOrder.load("pair.test2");
+		
+		Lat.bondStringMap["+x"] = "+1..";
+		Lat.bondStringMap["-x"] = "-1..";
+		Lat.bondStringMap["+y"] = ".+1.";
+		Lat.bondStringMap["-y"] = ".-1.";
+		Lat.bondStringMap["+z"] = "..+1";
+		Lat.bondStringMap["-z"] = "..-1";
+		                             
+		while (pair_iterate()) {
+			auto pit = getPair();
+			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 2;
+			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 2;
+		}
+		
+		pairOrder.save("pair.test2");
 	}
 	
 	void Hamiltonian()		{
@@ -63,19 +84,19 @@ public:
 			auto si = pit.AtomI;
 			auto sj = pit.AtomJ;
 			
-			add_bond( "Fe:1u  Fe:1u  +1..", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  .+1.", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  ..+1", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  +1..", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  .+1.", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  ..+1", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +x", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +y", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  +z", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +x", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +y", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  +z", +VAR("t") );
 			                         
-			add_bond( "Fe:1u  Fe:1u  -1..", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  .-1.", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  ..-1", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  -1..", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  .-1.", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  ..-1", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -x", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -y", +VAR("t") );
+			add_bond( "Fe:1u  Fe:1u  -z", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -x", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -y", +VAR("t") );
+			add_bond( "Fe:1d  Fe:1d  -z", +VAR("t") );
 		}                            
 	}
 
@@ -89,8 +110,8 @@ public:
 		auto	b1=B.row(0)*0.5;
 		auto	b2=B.row(1)*0.5;
 		auto	b3=B.row(2)*0.5;
-		Mu			= VAR("Mu").real();			// Setup chemical potential from input file.
-		Temperature = VAR("Temperature").real();// Setup Temperature from input file.
+		Mu			= VAR("Mu",0).real();			// Setup chemical potential from input file.
+		Temperature = VAR("Temperature",0).real();// Setup Temperature from input file.
 
 		// Set k-points for general purpose calculation
 		clear_k_point();

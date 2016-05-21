@@ -16,7 +16,9 @@ public:
 		cout<<"Initialize the calculation ..."<<endl<<endl;
 		
 		//hoppingOrder.importHoppingFromWannier90("SFO.w90");
-		HoppingConstructor wannierSFO("SFO", Lat, "SFO.w90");
+		HoppingConstructor wannierSFO("SFO-SFO", Lat, "SFO-SFO.w90");
+		
+		initOrder.load("");
 
 		// Initialize the magnetic order
 		while (site_iterate()) {
@@ -59,8 +61,8 @@ public:
 		                             
 		while (pair_iterate()) {
 			auto pit = getPair();
-			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 0;
-			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 0;
+			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 2;
+			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 2;
 		}
 		
 		pairOrder.save("pair.test2");
