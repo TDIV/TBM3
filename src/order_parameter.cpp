@@ -22,8 +22,20 @@
  It can be used to construct the Hamiltonian when calling the super class in "tbm.cpp".
  -------------------------------------------------------------------*/
 
+struct PairOperationStructure{
+	AtomPair	atomPair;
+	string		pairOperationString;
+	x_var		pairValue;
+	
+	PairOperationStructure(const AtomPair & ap, string opt, x_var val){
+		atomPair = ap;
+		pairOperationString = opt;
+		pairValue = val;
+	}
+};
+
 class OrderParameter{
-private:
+protected:
 	x_var					empty_value_for_return;
 	
 	// Data structure for the site
@@ -35,9 +47,28 @@ private:
 	map<string, unsigned>	pairMap;
 	vector<string>			pairString;
 	vector<x_var>			pairValue;
+	//vector<PairOperationStructure> pairOpterationList;
+	
 	
 	// The lattice structure will be used to guide the orderParameter
 	Lattice Lat;
+public:
+	unsigned	siteMapSize		()				const	{ return siteMap.size(); }
+	unsigned	siteStringSize	()				const	{ return siteString.size(); }
+	unsigned	siteValueSize	()				const	{ return siteValue.size(); }
+	
+	unsigned	pairMapSize		()				const	{ return pairMap.size(); }
+	unsigned	pairStringSize	()				const	{ return pairString.size(); }
+	unsigned	pairValueSize	()				const	{ return pairValue.size(); }
+	
+	string		sString			(unsigned ii)	const	{ return siteString[ii]; }
+	x_var		sValue			(unsigned ii)	const	{ return siteValue[ii]; }
+	x_var	&	setSiteValue	(unsigned ii)			{ return siteValue[ii]; }
+	
+	string		pString			(unsigned ii)	const	{ return pairString[ii]; }
+	x_var		pValue			(unsigned ii)	const	{ return pairValue[ii]; }
+	x_var	&	setPairValue	(unsigned ii)			{ return pairValue[ii]; }
+	
 public:
 	OrderParameter	(Lattice _lat)					{
 		Lat = _lat;
@@ -69,7 +100,7 @@ public:
 			return empty_value_for_return;
 		}
 		
-		string skey = IntToStr(At.AtomIndex()) +" "+ word[1];
+		string skey = IntToStr(At.atomIndex()) +" "+ word[1];
 		
 		auto it = siteMap.find(skey);
 		if (it == siteMap.end()) {
@@ -94,7 +125,7 @@ public:
 	}
 	
 	// Example:    v-----str-key----v   v---value
-	// order( Ap, "Fe:Fe:-x pair.1u1d")=val;
+	// order( Ap, "Fe:Fe:+1+0+0 pair.1u1d")=val;
 	x_var &			operator()	(const AtomPair & Ap, string opt){
 		empty_value_for_return = 0;
 
@@ -120,8 +151,9 @@ public:
 		}
 		
 		// ---------------------------------------------------------------------
-		// All the condition passed, assign/update new pair-order into the pool.
-		string skey = IntToStr(Ap.AtomI.AtomIndex())+":"+IntToStr(Ap.AtomJ.AtomIndex())+":"+Ap.bond+" "+ word[1];
+		// All conditions passed.
+		// Now, assign/update new pair-order into the pool.
+		string skey = IntToStr(Ap.AtomI.atomIndex())+":"+IntToStr(Ap.AtomJ.atomIndex())+":"+Ap.bond+" "+ word[1];
 		
 		auto it = pairMap.find(skey);
 		if (it == pairMap.end()) {
@@ -178,7 +210,7 @@ public:
 				for (unsigned i=0; i<ppos.size(); i++) { ppos[i]=si.pos[i]; }
 				
 				// Output the Atom index, name and position.
-				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
+				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.atomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
 				
 				for (unsigned i=0; i<siteString.size(); i++) {
 					auto	opt		= siteString[i];
@@ -269,10 +301,10 @@ public:
 				for (unsigned i=0; i<ppos.size(); i++) { ppos[i]=si.pos[i]; }
 				
 				// Output the Atom index, name and position.
-				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.AtomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
+				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.atomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
 				
-				for (unsigned i=0; i<pairOrderMap[si.AtomIndex()].size(); i++) {
-					auto	opt		= pairOrderMap[si.AtomIndex()][i];
+				for (unsigned i=0; i<pairOrderMap[si.atomIndex()].size(); i++) {
+					auto	opt		= pairOrderMap[si.atomIndex()][i];
 					
 					oss<<fmt(opt,34)<<" ";
 				}
@@ -312,22 +344,6 @@ public:
 		return *this;
 	}
 	
-	unsigned	siteMapSize		()				const	{ return siteMap.size(); }
-	unsigned	siteStringSize	()				const	{ return siteString.size(); }
-	unsigned	siteValueSize	()				const	{ return siteValue.size(); }
-	
-	unsigned	pairMapSize		()				const	{ return pairMap.size(); }
-	unsigned	pairStringSize	()				const	{ return pairString.size(); }
-	unsigned	pairValueSize	()				const	{ return pairValue.size(); }
-	
-	string		sString			(unsigned ii)	const	{ return siteString[ii]; }
-	x_var		sValue			(unsigned ii)	const	{ return siteValue[ii]; }
-	x_var	&	setSiteValue	(unsigned ii)			{ return siteValue[ii]; }
-	
-	string		pString			(unsigned ii)	const	{ return pairString[ii]; }
-	x_var		pValue			(unsigned ii)	const	{ return pairValue[ii]; }
-	x_var	&	setPairValue	(unsigned ii)			{ return pairValue[ii]; }
-
 	/* Clear all the stored information and data structures */
 	void		clear			()						{
 		siteMap.clear();
@@ -355,7 +371,7 @@ public:
 	}
 	
 	// ---- Save/load the order parameter in a unified formate.
-	bool		save(string order_sub_name){
+	bool		save(string order_sub_name)							{
 
 		auto siter = Lat.site_iteration();
 		auto piter = Lat.pair_iteration();
@@ -383,7 +399,7 @@ public:
 		out.close();
 		return true;
 	}
-	bool		load(string order_sub_name, unsigned name_flag = 2){
+	bool		load(string order_sub_name, unsigned name_flag = 2)	{
 		
 		auto siter = Lat.site_iteration();
 		auto piter = Lat.pair_iteration();
@@ -460,8 +476,8 @@ public:
 						
 						auto atomJ = Lat(atomI, var_bond);
 						
-						auto strIndexI = IntToStr(atomI.AtomIndex());
-						auto strIndexJ = IntToStr(atomJ.AtomIndex());
+						auto strIndexI = IntToStr(atomI.atomIndex());
+						auto strIndexJ = IntToStr(atomJ.atomIndex());
 						
 						auto pairKeyStr = strIndexI+":"+strIndexJ+":"+var_bond+" "+var_name;
 						//cout<<pairKeyStr<<endl;
@@ -474,48 +490,7 @@ public:
 		}
 		return true;
 	}
-	bool		importHoppingFromWannier90(string filename)	{
-		
-		ifstream infile(filename.c_str());
-		
-		if (infile.is_open()) {
-			
-			string line;
-			while ( getline(infile, line)) {
-				
-				auto wordInLine = split(line," ");
-				if (wordInLine.size() == 7) {
-					
-					string bondKey = "";
-					for (int i=0 ; i<3 ; i++){
-						if (wordInLine[i][0] != '-'){
-							wordInLine[i] = "+" + wordInLine[i];
-						}
-						bondKey += wordInLine[i];
-					}
-					
-					// Check if the bondKey exist in the Lat (Lattice) formate.
-					//if (Lat.hasBondKey(bondKey)) {
-					//	cout<<bondKey<<endl;
-					//}
-				}
-				else{
-					string warningStr= "Warning, formate not matched for w90:"+line+" of file:"+filename+"!";
-					cout<<warningStr<<endl;
-				}
-			}
-		}
-		else {
-			// Faild to open the file
-			string errorStr = "Error, faild to open the file:"+filename+" !";
-			cout<<errorStr<<endl;
-			throw errorStr;
-			return false;
-		}
-		
-		infile.close();
-		return true;
-	}
+	
 };
 
 OrderParameter operator+(const OrderParameter & L_val, const OrderParameter & R_val) {

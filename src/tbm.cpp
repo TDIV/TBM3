@@ -200,17 +200,17 @@ protected:
 	double			variational_dt;	// The time step for the variational method.
 
 	/* Use these iterate functions in the while loop to iterate through Sites/Pairs
-	// Example:
-	//			// site iterate
-	//			while(site_iterate()){
-	//				add_site("O 1d 1d +delta");
-	//			}
-	//			// pair iterate
-	//			while(pair_iterate()){
-	//				add_bond("O:1d    O:1d +x   hopping");
-	//				add_bond("O-2:1d  O-2:1d +x hopping");
-	//				add_bond("Fe:1d   O:1d +x   hopping");
-	//			}
+	 Example:
+	 // site iterate
+	 while(site_iterate()){
+	 	add_site("O 1d 1d +delta");
+	 }
+	 // pair iterate
+	 while(pair_iterate()){
+	 	add_bond("O:1d    O:1d +x   hopping");
+	 	add_bond("O-2:1d  O-2:1d +x hopping");
+	 	add_bond("Fe:1d   O:1d +x   hopping");
+	 }
 	*/
 	bool			site_iterate()						{
 		site_iteration_index ++ ;
@@ -247,9 +247,9 @@ protected:
 	// add_bond		: Mn:2d O:1d +x (non-hermition conjugate operation)
 	// add_bond_hc	: Mn:2d O:1d +x (hermitian conjgate operation)
 	// --------------------------------
-	Element	get_site_element(const Atom	 & at,	  string opt, x_var val){
+	MatrixElement	get_site_element(const Atom	 & at,	  string opt, x_var val){
 		
-		Element e;
+		MatrixElement e;
 		
 		e.opt=opt;
 		auto word=split(opt, " ");
@@ -267,9 +267,9 @@ protected:
 		
 		return e;
 	}
-	Element	get_bond_element(const AtomPair & ap, string opt, x_var val){
+	MatrixElement	get_bond_element(const AtomPair & ap, string opt, x_var val){
 		
-		Element e;
+		MatrixElement e;
 		
 		e.opt=opt;
 		auto word=split(opt, " ");
@@ -309,27 +309,27 @@ protected:
 		return e;
 	}
 	
-	Element	add_site		(const Atom		& at, string opt, x_var val){
+	MatrixElement	add_site		(const Atom		& at, string opt, x_var val){
 		
-		Element e = get_site_element(at, opt, val);
+		MatrixElement e = get_site_element(at, opt, val);
 		if (e.info == "success") {
 			Ham(e.I,e.J)+=e.val;
 		}
 
 		return e;
 	}
-	Element	add_bond		(const AtomPair & ap, string opt, x_var val){
+	MatrixElement	add_bond		(const AtomPair & ap, string opt, x_var val){
 		
-		Element e=get_bond_element(ap, opt, val);
+		MatrixElement e=get_bond_element(ap, opt, val);
 		if (e.info=="success") {
 			Ham(e.I,e.J)+=e.val;
 		}
 	
 		return e;
 	}
-	Element	add_bond_hc		(const AtomPair & ap, string opt, x_var val){
+	MatrixElement	add_bond_hc		(const AtomPair & ap, string opt, x_var val){
 	
-		Element e=get_bond_element(ap, opt, val);
+		MatrixElement e=get_bond_element(ap, opt, val);
 		if (e.info=="success") {
 			Ham(e.I,e.J)+=e.val;
 			Ham(e.J,e.I)+=e.val_conj;
@@ -337,8 +337,8 @@ protected:
 		
 		return e;
 	}
-	Element	add_site		(const Atom		& at, string opt)			{
-		Element e;
+	MatrixElement	add_site		(const Atom		& at, string opt)			{
+		MatrixElement e;
 		
 		e.opt=opt;
 		
@@ -352,8 +352,8 @@ protected:
 		
 		return e;
 	}
-	Element	add_bond		(const AtomPair & ap, string opt)			{
-		Element e;
+	MatrixElement	add_bond		(const AtomPair & ap, string opt)			{
+		MatrixElement e;
 		
 		e.opt=opt;
 		
@@ -367,8 +367,8 @@ protected:
 		
 		return e;
 	}
-	Element	add_bond_hc		(const AtomPair & ap, string opt)			{
-		Element e;
+	MatrixElement	add_bond_hc		(const AtomPair & ap, string opt)			{
+		MatrixElement e;
 		
 		e.opt=opt;
 		
@@ -383,22 +383,19 @@ protected:
 		return e;
 	}
 
-	Element	add_site		(string opt, x_var val)						{return add_site   (getSite(), opt, val);}
-	Element	add_bond		(string opt, x_var val)						{return add_bond   (getPair(), opt, val);}
-	Element	add_bond_hc		(string opt, x_var val)						{return add_bond_hc(getPair(), opt, val);}
-	Element	add_site		(string opt)								{return add_site   (getSite(), opt);}
-	Element	add_bond		(string opt)								{return add_bond   (getPair(), opt);}
-	Element	add_bond_hc		(string opt)								{return add_bond_hc(getPair(), opt);}
+	MatrixElement	add_site		(string opt, x_var val)						{return add_site   (getSite(), opt, val);}
+	MatrixElement	add_bond		(string opt, x_var val)						{return add_bond   (getPair(), opt, val);}
+	MatrixElement	add_bond_hc		(string opt, x_var val)						{return add_bond_hc(getPair(), opt, val);}
+	MatrixElement	add_site		(string opt)								{return add_site   (getSite(), opt);}
+	MatrixElement	add_bond		(string opt)								{return add_bond   (getPair(), opt);}
+	MatrixElement	add_bond_hc		(string opt)								{return add_bond_hc(getPair(), opt);}
 	
 	x_var	q_var_site		(const Atom		& at, string opt, x_var val){ setSite(at); return q_var_site(opt, val); }
 	x_var	q_var_bond		(const AtomPair	& ap, string opt, x_var val){ setPair(ap);  return q_var_bond(opt, val); }
 	x_var	q_var_site_hc	(const Atom		& at, string opt, x_var val){ setSite(at); return q_var_site_hc(opt, val); }
 	x_var	q_var_bond_hc	(const AtomPair	& ap, string opt, x_var val){ setPair(ap);  return q_var_bond_hc(opt, val); }
-	r_var	c_var_site		(const Atom		& at, string opt, r_var val){ setSite(at); return c_var_site(opt, val); }
-	r_var	c_var_bond		(const AtomPair	& ap, string opt, r_var val){ setPair(ap);  return c_var_bond(opt, val); }
-	
 	x_var	q_var_site		(string opt, x_var val)						{
-		Element e=get_site_element(getSite(), opt, val);
+		MatrixElement e=get_site_element(getSite(), opt, val);
 		
 		x_var	total=0;
 		
@@ -417,7 +414,7 @@ protected:
 		return total/KEigenVec.size();
 	}
 	x_var	q_var_bond		(string opt, x_var val)						{
-		Element e=get_bond_element(getPair(), opt, val);
+		MatrixElement e=get_bond_element(getPair(), opt, val);
 		
 		x_var	total=0;
 		
@@ -443,6 +440,9 @@ protected:
 		x_var tmp_val = q_var_bond(opt, val);
 		return 2*tmp_val.real();
 	}
+	
+	r_var	c_var_site		(const Atom		& at, string opt, r_var val){ setSite(at); return c_var_site(opt, val); }
+	r_var	c_var_bond		(const AtomPair	& ap, string opt, r_var val){ setPair(ap);  return c_var_bond(opt, val); }
 	r_var	c_var_site		(string opt, r_var val)						{
 		auto si=getSite();
 		if (opt == si.Name()) { return val; }
@@ -459,6 +459,7 @@ protected:
 		return 0;
 	}
 
+	// Apply the chemical potential
 	void	add_Chemical_Potential	()									{
 		//---site iteration---
 		auto siter = Lat.site_iteration();
@@ -480,7 +481,7 @@ protected:
 	vector<PairOperationUnit> SuperExchangeOperationList;
 	vector<PairOperationUnit> DMInteractionOperationList;
 	
-	void	add_hund_spin			(string opt, double Jh, vector<x_var> SpinI)				{
+	void	add_hund_spin		(string opt, double Jh, vector<x_var> SpinI)				{
 		auto si		= getSite();
 		auto word	= split(opt, " ");
 		
@@ -503,7 +504,7 @@ protected:
 												);
 		}
 	}
-	void	add_classical_spin		(string opt, r_var Js, vector<x_var> Si, vector<x_var> Sj)	{
+	void	add_classical_spin	(string opt, r_var Js, vector<x_var> Si, vector<x_var> Sj)	{
 		auto pit = getPair();
 		auto siteI = pit.AtomI;
 		auto siteJ = pit.AtomJ;
@@ -516,7 +517,7 @@ protected:
 												 );
 		}
 	}
-	void	add_dm_spin		(string opt, r_var Js, vector<x_var> Si, vector<x_var> Sj)	{
+	void	add_dm_spin			(string opt, r_var Js, vector<x_var> Si, vector<x_var> Sj)	{
 		auto pit = getPair();
 		auto siteI = pit.AtomI;
 		auto siteJ = pit.AtomJ;
@@ -661,7 +662,7 @@ protected:
 	void			selectLDOSsite			(unsigned index)						{
 		while (site_iterate()) {
 			auto si = getSite();
-			if (si.AtomIndex() == index and
+			if (si.atomIndex() == index and
 				(si.Name()!="VA" or si.Name()!="VC" or si.Name()!="BD")
 				)
 			{
@@ -750,7 +751,7 @@ protected:
 			for (unsigned ii=0; ii<LDOSsites.size(); ii++) {
 				auto si=LDOSsites[ii];
 
-				out<<"y"+IntToStr(si.AtomIndex())+"=[";
+				out<<"y"+IntToStr(si.atomIndex())+"=[";
 				for (unsigned i=0 ; i<si.LDOS.size(); i++) { out<<fmt(si.LDOS[i].second)<<", "; }
 				out<<"]"<<endl;
 			}
@@ -759,7 +760,7 @@ protected:
 			// Plot, using matplotlib.
 			for (unsigned ii=0; ii<LDOSsites.size(); ii++) {
 				auto si=LDOSsites[ii];
-				out<<"plt.plot(x, y"+IntToStr(si.AtomIndex())+", '-', linewidth=2)"<<endl;
+				out<<"plt.plot(x, y"+IntToStr(si.atomIndex())+", '-', linewidth=2)"<<endl;
 			}
 			out<<"plt.show()"<<endl;
 		}
@@ -882,29 +883,28 @@ protected:
 			auto si = siter[i];
 			
 			int	orb_number = si.getOrbitalNumber();
-			string spin_degree = si.getSpinLabel();
-			if (spin_degree == "s" and
-				(si.Name()!="VA" or si.Name()!="VC" or si.Name()!="BD")
-				)
-			for (unsigned orb_i=0; orb_i<orb_number; orb_i++) {
-				string orb = IntToStr(orb_i+1);
-				x_var C1uu = getSiteDensityMatrix(si, si.Name()+" "+orb+"u "+orb+"u");
-				x_var C1dd = getSiteDensityMatrix(si, si.Name()+" "+orb+"d "+orb+"d");
-				x_var C1ud = getSiteDensityMatrix(si, si.Name()+" "+orb+"u "+orb+"d");
-				x_var C1du = getSiteDensityMatrix(si, si.Name()+" "+orb+"d "+orb+"u");
-				            
-				
-				x_var psx = C1ud.real()+C1du.real();
-				x_var psy = C1ud.imag()-C1du.imag();
-				x_var psz = C1uu.real()-C1dd.real();
-				order(si, si.Name()+" "+orb+"psx")=psx;
-				order(si, si.Name()+" "+orb+"psy")=psy;
-				order(si, si.Name()+" "+orb+"psz")=psz;
-				
-				double n = abs(C1uu+C1dd);
-				double m = abs(psx*psx + psy*psy + psz*psz);
-				order(si, si.Name()+" "+orb+"pol.elec1") = (n-m)/2;
-				order(si, si.Name()+" "+orb+"pol.elec2") = (n+m)/2;
+			string spin_degree = si.getSpinDegree();
+			if (spin_degree == "s" and (si.Name()!="VA" or si.Name()!="VC" or si.Name()!="BD")) {
+				for (unsigned orb_i=0; orb_i<orb_number; orb_i++) {
+					string orb = IntToStr(orb_i+1);
+					x_var C1uu = getSiteDensityMatrix(si, si.Name()+" "+orb+"u "+orb+"u");
+					x_var C1dd = getSiteDensityMatrix(si, si.Name()+" "+orb+"d "+orb+"d");
+					x_var C1ud = getSiteDensityMatrix(si, si.Name()+" "+orb+"u "+orb+"d");
+					x_var C1du = getSiteDensityMatrix(si, si.Name()+" "+orb+"d "+orb+"u");
+					            
+					
+					x_var psx = C1ud.real()+C1du.real();
+					x_var psy = C1ud.imag()-C1du.imag();
+					x_var psz = C1uu.real()-C1dd.real();
+					order(si, si.Name()+" "+orb+"psx")=psx;
+					order(si, si.Name()+" "+orb+"psy")=psy;
+					order(si, si.Name()+" "+orb+"psz")=psz;
+					
+					double n = abs(C1uu+C1dd);
+					double m = abs(psx*psx + psy*psy + psz*psz);
+					order(si, si.Name()+" "+orb+"pol.elec1") = (n-m)/2;
+					order(si, si.Name()+" "+orb+"pol.elec2") = (n+m)/2;
+				}
 			}
 		}
 		
@@ -939,9 +939,9 @@ protected:
 		
 		map<int, r_mat> Field1, Field2, Field3;
 		while (site_iterate()) {
-			Field1[getSite().AtomIndex()] = r_mat(1,3);
-			Field2[getSite().AtomIndex()] = r_mat(1,3);
-			Field3[getSite().AtomIndex()] = r_mat(1,3);
+			Field1[getSite().atomIndex()] = r_mat(1,3);
+			Field2[getSite().atomIndex()] = r_mat(1,3);
+			Field3[getSite().atomIndex()] = r_mat(1,3);
 		} // Construct the force term
 		
 		// Field term for Hund coupling
@@ -966,7 +966,7 @@ protected:
 			F(0,1)  += Jh*q_var_site(si, sub_opt_du, Im ).real(); // \sigma_y
 			F(0,2)  += Jh*q_var_site(si, sub_opt_uu, 1  ).real(); // \sigma_z
 			F(0,2)  += Jh*q_var_site(si, sub_opt_dd,-1  ).real(); // \sigma_z
-			Field1[si.AtomIndex()] = Field1[si.AtomIndex()] + F;
+			Field1[si.atomIndex()] = Field1[si.atomIndex()] + F;
 		}
 		
 		// Field term for Super-Exchange
@@ -985,7 +985,7 @@ protected:
 				Sj(0,0) = Js*FSj[0].real();
 				Sj(0,1) = Js*FSj[1].real();
 				Sj(0,2) = Js*FSj[2].real();
-				Field2[si.AtomIndex()] = Field2[si.AtomIndex()] + Sj;
+				Field2[si.atomIndex()] = Field2[si.atomIndex()] + Sj;
 			}
 		}
 		
@@ -999,8 +999,8 @@ protected:
 		// To add up the Field term and translate to Force term and update the spin configuration.
 		while (site_iterate()) {
 			auto siteI = getSite();
-			r_mat F1 =-1.0*Field1[siteI.AtomIndex()];
-			r_mat F2 =-1.0*Field2[siteI.AtomIndex()];
+			r_mat F1 =-1.0*Field1[siteI.atomIndex()];
+			r_mat F2 =-1.0*Field2[siteI.atomIndex()];
 			//r_mat F3 =-1.0*Field3[siteI.AtomIndex()];
 			
 			r_mat Si(1,3), Snew(1,3);
@@ -1013,7 +1013,7 @@ protected:
 			auto dummy_check= sqrt(cdot(Si,Si));
 			
 			// Dummy detection for the spin operation.
-			// If dummy_check is not zero then this is a real spin site.
+			// If dummy_check is not zero then this is a real spin-polarized site.
 			if ( dummy_check > 0.00000001) {
 				
 				// --- Backup for the Gaussian-white-noise operation.

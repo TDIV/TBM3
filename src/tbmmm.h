@@ -53,6 +53,7 @@ using namespace gmt;
 #include "lattice.cpp"
 #include "order_parameter.cpp"
 #include "tbm_operation_element.cpp"
+#include "hopping_constructor.cpp"
 #include "tbm.cpp"
 
 }

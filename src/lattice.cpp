@@ -200,7 +200,7 @@ private:
 
 public:
 	map<string, string> bondStringMap;
-	string	translateBondString(string bondStr)					{
+	string	translateBondString(string bondStr)		const		{
 		string retBondStr = bondStr;
 		
 		// The first layer translation that could be defined by the user.
@@ -225,7 +225,7 @@ public:
 		latticeBondIndexMapList.clear();
 		bondNameVectorList.clear();
 	}
-	bool			open(string _filename, H_SYMMETRY _symmetry)		{
+	bool			open(string _filename, H_SYMMETRY _symmetry){
 		_index_size = 0;
 		filename = _filename;
 		symmetry = _symmetry;
@@ -322,10 +322,10 @@ public:
 		return true;
 	}
 
-	H_SYMMETRY		getSymmetry	()								{ return symmetry; }
+	H_SYMMETRY		getSymmetry	()					const		{ return symmetry; }
 
-	int				index_size	()								{return _index_size;}
-	int				lattice_size()								{return atomList.size();}
+	int				index_size	()					const		{return _index_size;}
+	int				lattice_size()					const		{return atomList.size();}
 
 	Atom			operator()	(unsigned int ii)				{ return atomList[ii]; }
 	Atom			operator()	(unsigned int ii, string bond)	{
@@ -336,24 +336,24 @@ public:
 		return atomList[jj];
 	}
 	Atom			operator()	(Atom si, string bond)			{
-		return this->operator()(si.AtomIndex(), bond);
+		return this->operator()(si.atomIndex(), bond);
 	}
 	r_mat			BVEC		(string bond)					{
 		return bondKeyVectorMap[bond];
 	}
-	vector<Atom>	site_iteration	()							{ return atomList; }
-	vector<AtomPair>pair_iteration	()							{ return atomPairList; }
-	vector<string>	getBondVectorStr()							{
+	vector<Atom>	site_iteration	()				const		{ return atomList; }
+	vector<AtomPair>pair_iteration	()				const		{ return atomPairList; }
+	vector<string>	getBondVectorStr()				const		{
 		/*This method will be depracated in the future.*/
 		return bondStringList;
 	}
-	bool			hasBondKey		(string bond)				{
+	bool			hasBondKey		(string bond)	const		{
 		auto it = bondKeyVectorMap.find(bond);
 		if (it == bondKeyVectorMap.end()) { return false; }
 		return true;
 	}
 	
-	r_mat			basis_vec()									{
+	r_mat			basis_vec()						const		{
 		r_mat vec(3,3);
 		
 		vector<int> N;
@@ -373,7 +373,7 @@ public:
 	
 		return vec;
 	}
-	r_mat			get_reciprocal()							{
+	r_mat			get_reciprocal()				const		{
 		
 		r_mat A(3,3); //Basis vector
 		r_mat B(3,3); //Reciprocal lattice vector

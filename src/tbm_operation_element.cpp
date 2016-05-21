@@ -36,7 +36,7 @@ vector<r_mat> make_line(r_mat point_a, r_mat point_b, unsigned Nsteps=10){
 }
 // -----------------------------------
 
-class	Element{
+class	MatrixElement{
 public:
 	int		I;
 	int		J;
@@ -45,7 +45,7 @@ public:
 	string	info;
 	string	opt;
 	
-	Element& operator()(int i, int j, x_var _val, string _info="success"){
+	MatrixElement& operator()(int i, int j, x_var _val, string _info="success"){
 		I=i;
 		J=j;
 		val=_val;

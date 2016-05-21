@@ -15,7 +15,8 @@ public:
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
 		
-		hoppingOrder.importHoppingFromWannier90("SFO.w90");
+		//hoppingOrder.importHoppingFromWannier90("SFO.w90");
+		HoppingConstructor wannierSFO("SFO", Lat, "SFO.w90");
 
 		// Initialize the magnetic order
 		while (site_iterate()) {

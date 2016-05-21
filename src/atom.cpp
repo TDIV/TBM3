@@ -34,7 +34,7 @@ private:
 	unsigned			orbitalNumber;
 	string				spinDegree;
 	
-	pair<int, string> getOrbitalInfo	()		const	{
+	pair<int, string>	getOrbitalInfo()	const	{
 					
 		auto	ss=split(atom_info, " ");
 		string	degree_of_freedom = ss[1];
@@ -45,11 +45,11 @@ private:
 	}
 public:
     r_mat				pos;		//The atom position
-	vector<string>		indexLabel;//The labels for the index, example: 1u 1d 2u 2d
+	vector<string>		indexLabel;	//The labels for the index, example: 1u 1d 2u 2d
 	map<string, int>	indexMap;	//The map of the orbital index, ex: {1u : 0}
 	vector<pair<double,double> > LDOS;//To storage the temporarily calculated LDOS.
 
-	Atom()					{
+	Atom	()					{
 		unitcell=0;
 		atom_index=0;
 		atom_name="";
@@ -57,10 +57,10 @@ public:
 		orbitalNumber = 0;
 		spinDegree = "";
 	}
-	Atom(const Atom &at)	{
+	Atom	(const Atom &at)	{
 		*this=at;
 	}	// The copy constructor
-	Atom(string line)		{
+	Atom	(string line)		{
         istringstream iss(line);
         double x,y,z;
         pos = r_mat(3,1).get();
@@ -71,12 +71,12 @@ public:
         pos[1]=y;
         pos[2]=z;
     }	// The constructor from each Atom instance with a string input
-	~Atom()					{
+	~Atom	()					{
 		indexLabel.clear();
 		indexMap.clear();
 	}
 	
-	Atom& operator=(const Atom &at){
+	Atom&		operator=(const Atom &at)			{
 		if ( this != &at ) {
 			unitcell	=at.unitcell;
 			atom_index	=at.atom_index;
@@ -90,7 +90,7 @@ public:
 			spinDegree	= at.spinDegree;
 		}
 		return *this;
-	} // The copy operation
+	}// The copy operation
 	
 	string		Info		()				const	{
 		ostringstream oss;
@@ -134,9 +134,9 @@ public:
 		spinDegree = info.second;
 	}
 	
-	unsigned	AtomIndex	()				const	{ return atom_index; }
+	unsigned	atomIndex	()				const	{ return atom_index; }
 	unsigned	getOrbitalNumber()					{ return orbitalNumber; }
-	string		getSpinLabel()						{ return spinDegree; }
+	string		getSpinDegree()						{ return spinDegree; }
 
 	int			operator[]	(string label)	const	{
 		if (hasIndex(label)) { return indexMap.find(label)->second; }
@@ -147,53 +147,50 @@ public:
 		auto ss=split(atom_info, " ");
 		
 		indexLabel.clear();
+		
 		if (ss.size()>2) {
 			
-			string degree_of_freedom = ss[1];
-			
-			auto label = analyze_atom_label(degree_of_freedom);
-			
-			int		num_of_orbital	= StrToInt(label[0]);
-			string	sub_degree		= label[1];
+			int		num_of_orbital	= getOrbitalNumber();
+			string	sub_degree		= getSpinDegree();
 			
 			vector<string>	sub_degree_label;
 			
 			switch( symmetry ) {
-				case NORMAL:
-					if (sub_degree == "") {		// Normal space
-						sub_degree_label.push_back("");
-					}
-					else if (sub_degree == "s"){// Spin space
-						sub_degree_label.push_back("u");
-						sub_degree_label.push_back("d");
-					}
-					break;
-					
-				case NAMBU:
-					if (sub_degree == "N"){		// Nambu space without spin
-						sub_degree_label.push_back("A");
-						sub_degree_label.push_back("B");
-					}
-					else if (sub_degree == "Ns"){// Nambu space with spin
-						sub_degree_label.push_back("Au");
-						sub_degree_label.push_back("Bd");
-					}
-					break;
-					
-				case EXNAMBU:
-					if (sub_degree == "") {
-						cout<<endl;
-						cout<<"Error: A spinless atom cannot be assigned with 'Extended Nambu' space."<<endl;
-						cout<<"Program stoped!"<<endl;
-						throw "Program stop";
-					}
-					else if (sub_degree == "Es"){	// Extended Nambu space with spin
-						sub_degree_label.push_back("Au");
-						sub_degree_label.push_back("Ad");
-						sub_degree_label.push_back("Bu");
-						sub_degree_label.push_back("Bd");
-					}
-					break;
+			case NORMAL:
+				if (sub_degree == "") {		// Normal space
+					sub_degree_label.push_back("");
+				}
+				else if (sub_degree == "s"){// Spin space
+					sub_degree_label.push_back("u");
+					sub_degree_label.push_back("d");
+				}
+				break;
+				
+			case NAMBU:
+				if (sub_degree == "N"){		// Nambu space without spin
+					sub_degree_label.push_back("A");
+					sub_degree_label.push_back("B");
+				}
+				else if (sub_degree == "Ns"){// Nambu space with spin
+					sub_degree_label.push_back("Au");
+					sub_degree_label.push_back("Bd");
+				}
+				break;
+				
+			case EXNAMBU:
+				if (sub_degree == "") {
+					cout<<endl;
+					cout<<"Error: A spinless atom cannot be assigned with 'Extended Nambu' space."<<endl;
+					cout<<"Program stoped!"<<endl;
+					throw "Program stop";
+				}
+				else if (sub_degree == "Es"){	// Extended Nambu space with spin
+					sub_degree_label.push_back("Au");
+					sub_degree_label.push_back("Ad");
+					sub_degree_label.push_back("Bu");
+					sub_degree_label.push_back("Bd");
+				}
+				break;
 			}
 			
 			// Create the index_label  ... ex: for a 2-orbital system
