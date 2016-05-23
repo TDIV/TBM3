@@ -16,28 +16,47 @@
 //  Created by Yuan Yen Tai on 8/04/15.
 //
 
-struct SiteOperationStructure{
-	Atom		atomSite;
-	string		operationStr;
-	x_var		var;
-	
-	SiteOperationStructure(const Atom & at, string opt, x_var val){
-		atomSite = at;
-		operationStr = opt;
-		var = val;
-	}
+//struct SiteOperationStructure{
+//	Atom		atomSite;
+//	string		operationStr;
+//	x_var		var;
+//	
+//	SiteOperationStructure(const Atom & at, string opt, x_var val){
+//		atomSite = at;
+//		operationStr = opt;
+//		var = val;
+//	}
+//};
+//
+//struct PairOperationStructure{
+//	AtomPair	atomPair;
+//	string		operationStr;
+//	x_var		var;
+//	
+//	PairOperationStructure(const AtomPair & ap, string opt, x_var val){
+//		atomPair = ap;
+//		operationStr = opt;
+//		var = val;
+//	}
+//};
+
+
+struct SiteOperationUnit{
+	Atom		SiteI;
+	string		opt;
+	x_var		val;
+	SiteOperationUnit(	Atom _SiteI,	string _opt,	x_var _val):
+					SiteI(_SiteI),	opt(_opt),		val(_val)
+	{ }
 };
 
-struct PairOperationStructure{
-	AtomPair	atomPair;
-	string		operationStr;
-	x_var		var;
-	
-	PairOperationStructure(const AtomPair & ap, string opt, x_var val){
-		atomPair = ap;
-		operationStr = opt;
-		var = val;
-	}
+struct PairOperationUnit{
+	AtomPair	pit;
+	string		opt;
+	x_var		val;
+	PairOperationUnit(	AtomPair ap,	string _opt,	x_var _val):
+						pit(ap),	opt(_opt),		val(_val)
+	{ }
 };
 
 /* -------------------------------------------------------------------
@@ -53,11 +72,11 @@ protected:
 	
 	// Data structure for the site
 	map<string, unsigned>	siteMap;
-	vector<SiteOperationStructure> siteOpterationList;
+	vector<SiteOperationUnit> siteOpterationList;
 	
 	// Data structure for the pair
 	map<string, unsigned>	pairMap;
-	vector<PairOperationStructure> pairOpterationList;
+	vector<PairOperationUnit> pairOpterationList;
 	
 	
 	// The lattice structure will be used to guide the orderParameter
@@ -69,13 +88,15 @@ public:
 	unsigned	pairMapSize		()				const	{ return pairMap.size(); }
 	unsigned	pairListSize	()				const	{ return pairOpterationList.size(); }
 	
-	string		sString			(unsigned ii)	const	{ return siteOpterationList[ii].operationStr; }
-	x_var		sValue			(unsigned ii)	const	{ return siteOpterationList[ii].var; }
-	x_var	&	setSiteValue	(unsigned ii)			{ return siteOpterationList[ii].var; }
+	string		sString			(unsigned ii)	const	{ return siteOpterationList[ii].opt; }
+	x_var		sValue			(unsigned ii)	const	{ return siteOpterationList[ii].val; }
+	x_var	&	setSiteValue	(unsigned ii)			{ return siteOpterationList[ii].val; }
+	SiteOperationUnit	getSiteOperationAt(unsigned ii) {return siteOpterationList[ii];}
 	
-	string		pString			(unsigned ii)	const	{ return pairOpterationList[ii].operationStr; }
-	x_var		pValue			(unsigned ii)	const	{ return pairOpterationList[ii].var; }
-	x_var	&	setPairValue	(unsigned ii)			{ return pairOpterationList[ii].var; }
+	string		pString			(unsigned ii)	const	{ return pairOpterationList[ii].opt; }
+	x_var		pValue			(unsigned ii)	const	{ return pairOpterationList[ii].val; }
+	x_var	&	setPairValue	(unsigned ii)			{ return pairOpterationList[ii].val; }
+	PairOperationUnit	getPairOperationAt(unsigned ii) {return pairOpterationList[ii];}
 	
 public:
 	OrderParameter	(Lattice _lat)					{
@@ -113,10 +134,10 @@ public:
 		auto it = siteMap.find(skey);
 		if (it == siteMap.end()) {
 			siteMap[skey] = siteOpterationList.size();
-			siteOpterationList.push_back(SiteOperationStructure(At, skey, 0));
-			return siteOpterationList[siteMap[skey]].var;
+			siteOpterationList.push_back(SiteOperationUnit(At, skey, 0));
+			return siteOpterationList[siteMap[skey]].val;
 		} else {
-			return siteOpterationList[siteMap[skey]].var;
+			return siteOpterationList[siteMap[skey]].val;
 		}
 	}
 	x_var &			order		(const Atom & At, string opt){ return operator()(At, opt); }
@@ -166,18 +187,19 @@ public:
 		if (it == pairMap.end()) {
 			pairMap[skey] = pairOpterationList.size();
 			
-			pairOpterationList.push_back(PairOperationStructure(Ap, skey, 0));
+			pairOpterationList.push_back(PairOperationUnit(Ap, skey, 0));
 			//pairString.push_back(skey);
 			//var.push_back(0);
-			return pairOpterationList[pairMap[skey]].var;
+			return pairOpterationList[pairMap[skey]].val;
 		} else {
-			return pairOpterationList[pairMap[skey]].var;
+			return pairOpterationList[pairMap[skey]].val;
 		}
 		// ---------------------------------------------------------------------
 		
 		return empty_value_for_return;
 	}
 	x_var &			order		(const AtomPair & Ap, string opt){ return operator()(Ap, opt);}
+	
 	// --------------------------------------------------------
 	
 	string		getSiteOrderStr	(Lattice Lat)			{
@@ -222,7 +244,7 @@ public:
 				oss<< fmt(si.unitcellIndex(),4)<<" "<< fmt(si.atomIndex(),4)<<" "<< fmt(si.subName(),4)<<" "<< ppos<<" >>      " ;
 				
 				for (unsigned i=0; i<siteOpterationList.size(); i++) {
-					auto	opt		= siteOpterationList[i].operationStr;
+					auto	opt		= siteOpterationList[i].opt;
 					auto	opt_word= split(opt, " ");
 					
 					string at_name=siter[StrToInt(opt_word[0])].Name();
@@ -271,19 +293,19 @@ public:
 		for (unsigned i=0; i<pairOpterationList.size(); i++) {
 			
 			/* Begin checking the structure of the pairString */
-			auto sp_base0 = split(pairOpterationList[i].operationStr, " ");
+			auto sp_base0 = split(pairOpterationList[i].opt, " ");
 			
-			if (sp_base0.size() != 2) { cout<<"Warning, not an effective formate: "<<pairOpterationList[i].operationStr<<". Ignored!"<<endl; break; }
+			if (sp_base0.size() != 2) { cout<<"Warning, not an effective formate: "<<pairOpterationList[i].opt<<". Ignored!"<<endl; break; }
 			
 			auto sp_base1 = split(sp_base0[0], ":");
 			
-			if (sp_base1.size() != 3) { cout<<"Warning, not an effective formate: "<<pairOpterationList[i].operationStr<<". Ignored!"<<endl; break; }
+			if (sp_base1.size() != 3) { cout<<"Warning, not an effective formate: "<<pairOpterationList[i].opt<<". Ignored!"<<endl; break; }
 			/* End checking the structure of the pairString */
 			
 			auto indexI = StrToInt(sp_base1[0]);
 			auto bondStr = Lat.translateBondString( sp_base1[2] );
 			auto orderName= sp_base0[1];
-			auto orderStr = pairOpterationList[i].var.tostr();
+			auto orderStr = pairOpterationList[i].val.tostr();
 			
 			auto pairOrderStr = bondStr+":"+orderName+":"+orderStr;
 			
@@ -327,14 +349,14 @@ public:
 	x_var		totalSiteOrder	()						{
 		x_var total=0;
 		for (unsigned i=0; i<siteOpterationList.size(); i++) {
-			total += siteOpterationList[i].var;
+			total += siteOpterationList[i].val;
 		}
 		return total;
 	}
 	x_var		totalPairOrder	()						{
 		x_var total=0;
 		for (unsigned i=0; i<pairOpterationList.size(); i++) {
-			total+=pairOpterationList[i].var;
+			total+=pairOpterationList[i].val;
 		}
 		return total;
 	}
@@ -363,14 +385,14 @@ public:
 	/* Preserve the datastructure and set all values to zero*/
 	void		zerolize		()						{
 		for (unsigned i=0; i<pairOpterationList.size(); i++) {
-			pairOpterationList[i].var = 0;
+			pairOpterationList[i].val = 0;
 		}
 	}
 	
 	double		max_abs			()						{
 		double mabs = 0;
 		for (unsigned i=0; i<siteOpterationList.size(); i++) {
-			double val = abs(siteOpterationList[i].var);
+			double val = abs(siteOpterationList[i].val);
 			if (mabs<val) mabs=val;
 		}
 		return mabs;
@@ -450,7 +472,7 @@ public:
 						auto var = StrToComplex(str_variable[1]);
 						
 						auto sstr = line_words[1]+" "+var_name;
-						siteOpterationList.push_back(SiteOperationStructure(atomI, sstr, var));
+						siteOpterationList.push_back(SiteOperationUnit(atomI, sstr, var));
 						siteMap[sstr] = siteOpterationList.size()-1;
 					}
 				}
@@ -494,7 +516,7 @@ public:
 						
 						auto pairKeyStr = strIndexI+":"+strIndexJ+":"+var_bond+" "+var_name;
 						
-						pairOpterationList.push_back(PairOperationStructure(atomPair, pairKeyStr, pairVar));
+						pairOpterationList.push_back(PairOperationUnit(atomPair, pairKeyStr, pairVar));
 						pairMap[pairKeyStr] = pairOpterationList.size()-1;
 					}
 				}

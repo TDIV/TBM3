@@ -15,55 +15,51 @@ public:
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
 		
-		//hoppingOrder.importHoppingFromWannier90("SFO.w90");
-		HoppingConstructor wannierSFO("SFO-SFO", Lat, "SFO-SFO.w90");
-
-		// Initialize the magnetic order
-		while (site_iterate()) {
-			auto si = getSite();
-			int rx=-1, ry=-1, rz=-1;
-			if (int(si.pos[0])%2 ) rx=1;
-			if (int(si.pos[1])%2 ) ry=1;
-			if (int(si.pos[2])%2 ) rz=1;
-			
-			int mag_sign = rx*ry*rz;
-			
-			double theta=0, phi=0;
-			if (mag_sign > 0) {
-				theta	= 0;
-				phi		= 0;
-			} else if (mag_sign < 0) {
-				theta	= pi;
-				phi		= 0;
-			}
-			
-			double	Sx = sin(theta)*cos(phi);
-			double	Sy = sin(theta)*sin(phi);
-			double	Sz = cos(theta);
-			
-			initOrder(si, si.Name()+" Sx")	=Sx;
-			initOrder(si, si.Name()+" Sy")	=Sy;
-			initOrder(si, si.Name()+" Sz")	=Sz;
-		}
-		initOrder.save("");
-		
-		OrderParameter pairOrder(Lat);
-		pairOrder.load("pair.test2");
-		
 		Lat.bondStringMap["+x"] = "+1..";
 		Lat.bondStringMap["-x"] = "-1..";
 		Lat.bondStringMap["+y"] = ".+1.";
 		Lat.bondStringMap["-y"] = ".-1.";
 		Lat.bondStringMap["+z"] = "..+1";
 		Lat.bondStringMap["-z"] = "..-1";
-		                             
-		while (pair_iterate()) {
-			auto pit = getPair();
-			pairOrder(pit, "Fe:Fe:+1.. hop.1u.2d") = 2;
-			pairOrder(pit, "Fe:Fe:.+1. hop.1u.2d") = 2;
-		}
 		
-		pairOrder.save("pair.test2");
+		// Initialize the magnetic order
+		//while (site_iterate()) {
+		//	auto si = getSite();
+		//	int rx=-1, ry=-1, rz=-1;
+		//	if (int(si.pos[0])%2 ) rx=1;
+		//	if (int(si.pos[1])%2 ) ry=1;
+		//	if (int(si.pos[2])%2 ) rz=1;
+		//	
+		//	int mag_sign = rx*ry*rz;
+		//	
+		//	double theta=0, phi=0;
+		//	if (mag_sign > 0) {
+		//		theta	= 0;
+		//		phi		= 0;
+		//	} else if (mag_sign < 0) {
+		//		theta	= pi;
+		//		phi		= 0;
+		//	}
+		//	
+		//	double	Sx = sin(theta)*cos(phi);
+		//	double	Sy = sin(theta)*sin(phi);
+		//	double	Sz = cos(theta);
+		//	
+		//	initOrder(si, si.Name()+" Sx")	=Sx;
+		//	initOrder(si, si.Name()+" Sy")	=Sy;
+		//	initOrder(si, si.Name()+" Sz")	=Sz;
+		//}
+		//initOrder.save("");
+		
+		//OrderParameter pairOrder(Lat);
+
+		//while (pair_iterate()) {
+		//	auto pit = getPair();
+		//	pairOrder(pit, "Fe:Fe:+1.. hop.1u.1u") = 2;
+		//	pairOrder(pit, "Fe:Fe:.+1. hop.1u.1u") = 2;
+		//}
+		//
+		//pairOrder.save("pair");
 	}
 	
 	void Hamiltonian()		{
@@ -97,13 +93,14 @@ public:
 			add_bond( "Fe:1d  Fe:1d  -x", +VAR("t") );
 			add_bond( "Fe:1d  Fe:1d  -y", +VAR("t") );
 			add_bond( "Fe:1d  Fe:1d  -z", +VAR("t") );
-		}                            
+		}
+		
 	}
 
 	void render()			{
 		// Set the electron carrier for different atoms
-		setElectronCarrier	(" Fe:0.6 ");
-		initElectronDensity	(" Fe:0.6 ");
+		setElectronCarrier	(" Fe:1 ");
+		initElectronDensity	(" Fe:1 ");
 		
 		// Get the reciprocal lattice vector
 		auto	B = Lat.get_reciprocal();
@@ -153,7 +150,7 @@ int main(int argc, char** argv) {
 	
 	// Construct lattice structure(class) from input.
 	string	filename="";
-	if		(args.size()==1) { filename = "input.lat"; }
+	if		(args.size()==1) { filename = "cubic.lat"; }
 	else if (args.size()==2) { filename = args[1]; }
 	
 	if (filename.size()>0) {

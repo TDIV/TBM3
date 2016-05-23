@@ -1257,7 +1257,7 @@ protected:
 			kSpaceHighSymmetryLabels.push_back(kPointLabel);
 		}
 	}
-	void			calculateBandStructure	(string filename="", unsigned Nsteps=10){
+	void			calculateBandStructure	(string filename="", unsigned Nsteps=50){
 		cout<<"Calculating the Band structure ..."<<endl;
 		
 		// Manage filename

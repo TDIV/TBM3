@@ -138,8 +138,12 @@ public:
 	unsigned	getOrbitalNumber()					{ return orbitalNumber; }
 	string		getSpinDegree()						{ return spinDegree; }
 
-	int			operator[]	(string label)	const	{
-		if (hasIndex(label)) { return indexMap.find(label)->second; }
+	int			getOrbitalIndex(string orbitalStr) const	{
+		if (hasIndex(orbitalStr)) { return indexMap.find(orbitalStr)->second; }
+		return -1;
+	}
+	int			operator[]	(string orbitalStr)	const	{
+		if (hasIndex(orbitalStr)) { return indexMap.find(orbitalStr)->second; }
 		return -1;
 	}
 	

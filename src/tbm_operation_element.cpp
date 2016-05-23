@@ -55,25 +55,6 @@ public:
 	}
 };
 
-class	SiteOperationUnit{
-public:
-	Atom		SiteI;
-	string		opt;
-	x_var		val;
-	SiteOperationUnit(	Atom _SiteI,	string _opt,	x_var _val):
-					SiteI(_SiteI),	opt(_opt),		val(_val)
-	{ }
-};
-
-class	PairOperationUnit{
-public:
-	AtomPair	pit;
-	string		opt;
-	x_var		val;
-	PairOperationUnit(	AtomPair ap,	string _opt,	x_var _val):
-						pit(ap),	opt(_opt),		val(_val)
-	{ }
-};
 
 
 

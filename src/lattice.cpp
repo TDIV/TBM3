@@ -148,6 +148,7 @@ private:
 		replaceAll(tmpBnd, "+", " ");
 		replaceAll(tmpBnd, "-", " ");
 		auto arrayNxyzStr = split(tmpBnd, " ");
+		
 		vector<char> arraySignStr;
 		for (int i=0 ; i<bond.size(); i++) {
 			if (bond[i] == '+' or bond[i] == '-') {
@@ -162,10 +163,10 @@ private:
 				if ( i< bondNameVectorList.size() ){
 					switch (arraySignStr[i]) {
 						case '+':
-							vec = vec + bondNameVectorList[i].bondVector;
+							vec = vec + StrToInt(arrayNxyzStr[i]) * bondNameVectorList[i].bondVector;
 							break;
 						case '-':
-							vec = vec - bondNameVectorList[i].bondVector;
+							vec = vec - StrToInt(arrayNxyzStr[i]) * bondNameVectorList[i].bondVector;
 							break;
 					}
 				} else {
