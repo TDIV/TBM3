@@ -112,7 +112,7 @@ public:
 	}// Get the Atom name from "atom_name"
 	string		subName		()				const	{
 		return atom_name;
-	}// Get the Atom SubName from "atom_info"
+	}// Get the Atom SubName from "atom_name"
 	int			subIndex	()				const	{
 		auto ss=split(atom_name,"-");
 		return StrToInt(ss[1]);

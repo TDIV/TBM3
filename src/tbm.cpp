@@ -135,7 +135,8 @@ private:
 	// --------------------------------
 	// Use this VAR(...) function to investigate parameters from the user defined input file.
 	// --------------------------------
-private:	map<string, x_var>	parameter;
+	map<string, x_var>	parameter;
+	
 protected:
 	x_var			VAR		(string str_key)			{
 		double _sign=+1;

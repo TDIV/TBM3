@@ -6,6 +6,6 @@
 #ifndef __TBMMM_H__
 #define __TBMMM_H__
 
-#include "../src/tbmmm.h"
+#include "../src/header.h"
 
 #endif

@@ -16,30 +16,6 @@
 //  Created by Yuan Yen Tai on 8/04/15.
 //
 
-//struct SiteOperationStructure{
-//	Atom		atomSite;
-//	string		operationStr;
-//	x_var		var;
-//	
-//	SiteOperationStructure(const Atom & at, string opt, x_var val){
-//		atomSite = at;
-//		operationStr = opt;
-//		var = val;
-//	}
-//};
-//
-//struct PairOperationStructure{
-//	AtomPair	atomPair;
-//	string		operationStr;
-//	x_var		var;
-//	
-//	PairOperationStructure(const AtomPair & ap, string opt, x_var val){
-//		atomPair = ap;
-//		operationStr = opt;
-//		var = val;
-//	}
-//};
-
 
 struct SiteOperationUnit{
 	Atom		SiteI;
@@ -64,8 +40,6 @@ struct PairOperationUnit{
  to the input lattice structure.
  It can be used to construct the Hamiltonian when calling the super class in "tbm.cpp".
  -------------------------------------------------------------------*/
-
-
 class OrderParameter{
 protected:
 	x_var					empty_value_for_return;

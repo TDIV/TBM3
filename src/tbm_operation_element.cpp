@@ -25,6 +25,7 @@
 
 // -----------------------------------
 // Make a linear points between two different k-points.
+// -----------------------------------
 vector<r_mat> make_line(r_mat point_a, r_mat point_b, unsigned Nsteps=10){
 	vector<r_mat> ll;
 	for (double t=0; t<1; t+=1.0/Nsteps) {

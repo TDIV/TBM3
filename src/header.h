@@ -17,8 +17,8 @@
 //
 
 
-#ifndef _lat_h
-#define _lat_h
+#ifndef _header_h
+#define _header_h
 
 #include <vector>
 #include <deque>

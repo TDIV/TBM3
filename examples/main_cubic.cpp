@@ -21,7 +21,7 @@ public:
 		Lat.bondStringMap["-y"] = ".-1.";
 		Lat.bondStringMap["+z"] = "..+1";
 		Lat.bondStringMap["-z"] = "..-1";
-		
+
 		// Initialize the magnetic order
 		//while (site_iterate()) {
 		//	auto si = getSite();
@@ -86,7 +86,7 @@ public:
 			add_bond( "Fe:1d  Fe:1d  +x", +VAR("t") );
 			add_bond( "Fe:1d  Fe:1d  +y", +VAR("t") );
 			add_bond( "Fe:1d  Fe:1d  +z", +VAR("t") );
-			                         
+			                   
 			add_bond( "Fe:1u  Fe:1u  -x", +VAR("t") );
 			add_bond( "Fe:1u  Fe:1u  -y", +VAR("t") );
 			add_bond( "Fe:1u  Fe:1u  -z", +VAR("t") );
@@ -102,14 +102,15 @@ public:
 		setElectronCarrier	(" Fe:1 ");
 		initElectronDensity	(" Fe:1 ");
 		
+		Mu			= VAR("Mu",0).real();			// Setup chemical potential from input file.
+		Temperature = VAR("Temperature",0).real();// Setup Temperature from input file.
+
 		// Get the reciprocal lattice vector
 		auto	B = Lat.get_reciprocal();
 		auto	b1=B.row(0)*0.5;
 		auto	b2=B.row(1)*0.5;
 		auto	b3=B.row(2)*0.5;
-		Mu			= VAR("Mu",0).real();			// Setup chemical potential from input file.
-		Temperature = VAR("Temperature",0).real();// Setup Temperature from input file.
-
+		
 		// Set k-points for general purpose calculation
 		clear_k_point();
 		unsigned N1=VAR("Nb1").real(), N2=VAR("Nb2").real(), N3=VAR("Nb3").real();

@@ -19,10 +19,6 @@
 #ifndef _string_func_h
 #define _string_func_h
 
-#include <vector>
-#include <string>
-using namespace std;
-
 
 // The string replace function.
 void			replaceAll(std::string& str, const std::string& from, const std::string& to) {

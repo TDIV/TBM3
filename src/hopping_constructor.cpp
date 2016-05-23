@@ -10,13 +10,18 @@
  |-----------------------------------------------------------*/
 
 //
-//  wannier90_constructor.cpp
+//  hopping_constructor.cpp
 //  TBM^3
 //
 //  Created by Yuan Yen Tai on 5/20/16.
 //
 //
 
+// -----------------------------------------------------------
+// The HoppingBaseConstructor class is a pool that storage and read in
+// the Hopping parameters from a file.
+// The file takes the formate of the Wannier90 outputs.
+// -----------------------------------------------------------
 class HoppingBaseConstructor {
 protected:
 	string		name;
@@ -104,6 +109,10 @@ public:
 };
 
 
+// -----------------------------------------------------------
+// The HoppingOrderParameter class will further translate the
+// structure of HoppingBaseConstructor into a specific form of OrderParameter.
+// -----------------------------------------------------------
 class HoppingOrderParameter: public OrderParameter {
 private:
 	map<string, HoppingBaseConstructor>	hoppingBaseMap;
@@ -180,6 +189,10 @@ public:
 };
 
 
+// -----------------------------------------------------------
+// The matrix element of each hopping term.
+// It will be constructed from the HoppingModelConstructor class.
+// -----------------------------------------------------------
 class	HoppingMatrixElement{
 public:
 	int		I;
@@ -188,25 +201,27 @@ public:
 	r_mat	bondVector;
 	string	spaceDegreeLabel;
 	
-	HoppingMatrixElement(){ }
-	HoppingMatrixElement(int i, int j, x_var _val, r_mat & _bondVecor, string spaceDegree){
+	HoppingMatrixElement()	{ }
+	HoppingMatrixElement(int i, int j, x_var _val, r_mat & _bondVecor, string spaceDegree)	{
 		I=i;
 		J=j;
 		val=_val;
 		bondVector = _bondVecor;
 		spaceDegreeLabel = spaceDegree;
 	}
-	void set(int i, int j, x_var _val, r_mat & _bondVecor, string spaceDegree){
+	void set(int i, int j, x_var _val, r_mat & _bondVecor, string spaceDegree)				{
 		I=i;
 		J=j;
 		val=_val;
 		bondVector = _bondVecor;
 		spaceDegreeLabel = spaceDegree;
 	}
-	
 	
 };
 
+// ***********************************************************
+// The HoppingModelConstructor construct all the hopping terms into the Hamiltonian (Ham).
+// ***********************************************************
 class HoppingModelConstructor{
 private:
 	Lattice & latticeRef;
@@ -218,9 +233,8 @@ protected:
 public:
 	HoppingModelConstructor(Lattice & _Lat): latticeRef(_Lat), hoppingOrder(_Lat) { }
 	
-	void appendHoppingBase(string name, string filename) { hoppingOrder.appendHoppingBase(name, filename); }
-	
-	void initHoppingTerms() {
+	void appendHoppingBase(string name, string filename)		{ hoppingOrder.appendHoppingBase(name, filename); }
+	void initHoppingTerms()										{
 		hoppingOrder.constructHoppingOrder();
 		
 		for (unsigned ii = 0 ; ii < hoppingOrder.pairListSize() ; ii++) {
@@ -229,6 +243,7 @@ public:
 		}
 	}
 	
+	// Use this method inside Hamiltonian() of user defined model.
 	void constructHoppingHamiltonian(x_mat & Ham, r_mat k_space){
 		
 		for( int i = 0 ; i < hoppingMatrixElementList.size() ; i++ ){
@@ -270,7 +285,7 @@ private:
 		string orbital_J = optSegmentA_B[2];
 		
 		
-		//HoppingMatrixElement hopElem;
+		//Setting up hoppingMatrixElementList ;
 		// ------------------------------------------------------
 		// Normal space
 		// ------------------------------------------------------

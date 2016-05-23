@@ -14,7 +14,6 @@ public:
 
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
-		
 		appendHoppingBase("SFO-SFO", "SFO-SFO.w90");
 		initHoppingTerms();
 
