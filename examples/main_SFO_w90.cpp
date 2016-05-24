@@ -4,6 +4,7 @@
 
 using namespace lift;
 
+
 // Define the model
 class MyModel: public TBModel, public HoppingModelConstructor{
 public:
@@ -15,7 +16,6 @@ public:
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
 		appendHoppingBase("SFO-SFO", "SFO-SFO.w90");
-		
 		initHoppingTerms();
 	}
 	
@@ -34,8 +34,9 @@ public:
 		auto	b1=B.row(0)*0.5;
 		auto	b2=B.row(1)*0.5;
 		auto	b3=B.row(2)*0.5;
+		
 		Mu			= VAR("Mu",0).real();			// Setup chemical potential from input file.
-		Temperature = VAR("Temperature",0).real();// Setup Temperature from input file.
+		Temperature = VAR("Temperature",0).real();	// Setup Temperature from input file.
 
 		// Set k-points for general purpose calculation
 		clear_k_point();
@@ -46,8 +47,8 @@ public:
 			add_k_point( (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3 );
 		}
 		
-		if (VAR("isCalculateMu").real() == 1) { calcChemicalPotential(); }
-		if (VAR("isCalculateVar").real() == 1){ calcVariation(); }
+		if (VAR("isCalculateMu", 1).real() == 1) { calcChemicalPotential(); }
+		if (VAR("isCalculateVar", 0).real() == 1){ calcVariation(); }
 		if (VAR("isCalculateTotE", 0).real() == 1){ calcTotalEnergy(); }
 		
 		if (VAR("isCalculateLDOS").real() == 1) {

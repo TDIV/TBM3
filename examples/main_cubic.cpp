@@ -22,21 +22,21 @@ public:
 		Lat.bondStringMap["+z"] = "..+1";
 		Lat.bondStringMap["-z"] = "..-1";
 		
+		// Initialize the hopping order.
 		while( pair_iterate() ) {
 			auto pit = getPair();
-			hoppingOrder(pit, "Fe:Fe:+1.. hop.1.1") = 1;
-			hoppingOrder(pit, "Fe:Fe:-1.. hop.1.1") = 1;
-			hoppingOrder(pit, "Fe:Fe:.+1. hop.1.1") = 1;
-			hoppingOrder(pit, "Fe:Fe:.-1. hop.1.1") = 1;
-			hoppingOrder(pit, "Fe:Fe:..+1 hop.1.1") = 1;
-			hoppingOrder(pit, "Fe:Fe:..-1 hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:+x hop.1.1") = VAR("t", 1);
+			hoppingOrder(pit, "Fe:Fe:-x hop.1.1") = VAR("t", 1);
+			hoppingOrder(pit, "Fe:Fe:+y hop.1.1") = VAR("t", 1);
+			hoppingOrder(pit, "Fe:Fe:-y hop.1.1") = VAR("t", 1);
+			hoppingOrder(pit, "Fe:Fe:+z hop.1.1") = VAR("t", 1);
+			hoppingOrder(pit, "Fe:Fe:-z hop.1.1") = VAR("t", 1);
 		}
-		
+		initHoppingTerms();
 		hoppingOrder.save("hop");
 		
-		initHoppingTerms();
 
-		// Initialize the AFM order
+		// Initialize the AFM order.
 		while (site_iterate()) {
 			auto si = getSite();
 			int rx=-1, ry=-1, rz=-1;
@@ -65,15 +65,6 @@ public:
 		}
 		initOrder.save("");
 		
-		/*
-		OrderParameter pairOrder(Lat);
-		while (pair_iterate()) {
-			auto pit = getPair();
-			pairOrder(pit, "Fe:Fe:+1.. hop.1u.1u") = 2;
-			pairOrder(pit, "Fe:Fe:.+1. hop.1u.1u") = 2;
-		}
-		pairOrder.save("pair");
-		*/
 	}
 	
 	void Hamiltonian()		{

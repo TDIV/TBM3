@@ -216,6 +216,7 @@ public:
 	
 	string	filename;
 	
+	// **********************************************************************************
 	Lattice			()											{ _index_size=0; }
 	Lattice			(string _filename, H_SYMMETRY sym)			{ open(_filename, sym); }
 	~Lattice		()											{

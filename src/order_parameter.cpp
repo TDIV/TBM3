@@ -54,7 +54,7 @@ protected:
 	
 	
 	// The lattice structure will be used to guide the orderParameter
-	Lattice Lat;
+	Lattice & Lat;
 public:
 	unsigned	siteMapSize		()				const	{ return siteMap.size(); }
 	unsigned	siteListSize	()				const	{ return siteOpterationList.size(); }
@@ -73,11 +73,10 @@ public:
 	PairOperationUnit	getPairOperationAt(unsigned ii) {return pairOpterationList[ii];}
 	
 public:
-	OrderParameter	(Lattice _lat)					{
-		Lat = _lat;
+	OrderParameter	(Lattice & _lat):	Lat(_lat)				{
 		empty_value_for_return = 0;
 	}
-	OrderParameter	( const OrderParameter & order)	{
+	OrderParameter	( const OrderParameter & order): Lat(order.Lat)	{
 		*this = order;
 	}
 	~OrderParameter	()								{clear();}
@@ -162,8 +161,6 @@ public:
 			pairMap[skey] = pairOpterationList.size();
 			
 			pairOpterationList.push_back(PairOperationUnit(Ap, skey, 0));
-			//pairString.push_back(skey);
-			//var.push_back(0);
 			return pairOpterationList[pairMap[skey]].val;
 		} else {
 			return pairOpterationList[pairMap[skey]].val;

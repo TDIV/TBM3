@@ -42,13 +42,13 @@
 
 class TBModel{
 public:
-	TBModel	(Lattice _L):		Lat(_L),
-				initOrder			(Lat),	   
-				newOrder			(Lat),	    
-				initDenOrder		(Lat),	    
-				newDenOrder			(Lat) {
+	TBModel	(Lattice & _Lat):		Lat(_Lat),
+				initOrder			(_Lat),
+				newOrder			(_Lat),	    
+				initDenOrder		(_Lat),	    
+				newDenOrder			(_Lat) {
 
-		symmetry = _L.getSymmetry();
+		symmetry = Lat.getSymmetry();
 		Temperature = 0.0001;
 		Mu = 0;
 		alpha_Mu = 1;
@@ -190,7 +190,7 @@ protected:
 	// ############################################
 	//	Core part for the construction Hamiltonian and related operations
 	// ############################################
-	Lattice			Lat;			// Storage of the lattice structure
+	Lattice		&	Lat;			// Storage of the lattice structure
 	x_mat			Ham;			// The matrix for the Hamiltonian
 	vector<pair<r_mat, x_mat> >	KEigenVec;
 	r_mat			k_space;		// The k-space vector will be passed by other methods.

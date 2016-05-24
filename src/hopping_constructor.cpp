@@ -118,7 +118,7 @@ private:
 	map<string, HoppingBaseConstructor>	hoppingBaseMap;
 	
 public:
-	HoppingOrderParameter(Lattice & _Lat): OrderParameter(_Lat) {}
+	HoppingOrderParameter(Lattice & _lat): OrderParameter(_lat) {}
 	
 	unsigned getBaseMapSize(){ return hoppingBaseMap.size(); }
 	void	appendHoppingBase(string name, string filename){
