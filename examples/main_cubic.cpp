@@ -5,9 +5,9 @@
 using namespace lift;
 
 // Define the model
-class MyModel: public TBModel{
+class MyModel: public TBModel, public HoppingModelConstructor{
 public:
-	MyModel(Lattice lat):	TBModel(lat){
+	MyModel(Lattice lat):	TBModel(lat), HoppingModelConstructor(lat){
 		init_order();
 		render();
 	}
@@ -21,45 +21,59 @@ public:
 		Lat.bondStringMap["-y"] = ".-1.";
 		Lat.bondStringMap["+z"] = "..+1";
 		Lat.bondStringMap["-z"] = "..-1";
-
-		// Initialize the magnetic order
-		//while (site_iterate()) {
-		//	auto si = getSite();
-		//	int rx=-1, ry=-1, rz=-1;
-		//	if (int(si.pos[0])%2 ) rx=1;
-		//	if (int(si.pos[1])%2 ) ry=1;
-		//	if (int(si.pos[2])%2 ) rz=1;
-		//	
-		//	int mag_sign = rx*ry*rz;
-		//	
-		//	double theta=0, phi=0;
-		//	if (mag_sign > 0) {
-		//		theta	= 0;
-		//		phi		= 0;
-		//	} else if (mag_sign < 0) {
-		//		theta	= pi;
-		//		phi		= 0;
-		//	}
-		//	
-		//	double	Sx = sin(theta)*cos(phi);
-		//	double	Sy = sin(theta)*sin(phi);
-		//	double	Sz = cos(theta);
-		//	
-		//	initOrder(si, si.Name()+" Sx")	=Sx;
-		//	initOrder(si, si.Name()+" Sy")	=Sy;
-		//	initOrder(si, si.Name()+" Sz")	=Sz;
-		//}
-		//initOrder.save("");
 		
-		//OrderParameter pairOrder(Lat);
+		while( pair_iterate() ) {
+			auto pit = getPair();
+			hoppingOrder(pit, "Fe:Fe:+1.. hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:-1.. hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:.+1. hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:.-1. hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:..+1 hop.1.1") = 1;
+			hoppingOrder(pit, "Fe:Fe:..-1 hop.1.1") = 1;
+		}
+		
+		hoppingOrder.save("hop");
+		
+		initHoppingTerms();
 
-		//while (pair_iterate()) {
-		//	auto pit = getPair();
-		//	pairOrder(pit, "Fe:Fe:+1.. hop.1u.1u") = 2;
-		//	pairOrder(pit, "Fe:Fe:.+1. hop.1u.1u") = 2;
-		//}
-		//
-		//pairOrder.save("pair");
+		// Initialize the AFM order
+		while (site_iterate()) {
+			auto si = getSite();
+			int rx=-1, ry=-1, rz=-1;
+			if (int(si.pos[0])%2 ) rx=1;
+			if (int(si.pos[1])%2 ) ry=1;
+			if (int(si.pos[2])%2 ) rz=1;
+			
+			int mag_sign = rx*ry*rz;
+			
+			double theta=0, phi=0;
+			if (mag_sign > 0) {
+				theta	= 0;
+				phi		= 0;
+			} else if (mag_sign < 0) {
+				theta	= pi;
+				phi		= 0;
+			}
+			
+			double	Sx = sin(theta)*cos(phi);
+			double	Sy = sin(theta)*sin(phi);
+			double	Sz = cos(theta);
+			
+			initOrder(si, "Fe Sx")	=Sx;
+			initOrder(si, "Fe Sy")	=Sy;
+			initOrder(si, "Fe Sz")	=Sz;
+		}
+		initOrder.save("");
+		
+		/*
+		OrderParameter pairOrder(Lat);
+		while (pair_iterate()) {
+			auto pit = getPair();
+			pairOrder(pit, "Fe:Fe:+1.. hop.1u.1u") = 2;
+			pairOrder(pit, "Fe:Fe:.+1. hop.1u.1u") = 2;
+		}
+		pairOrder.save("pair");
+		*/
 	}
 	
 	void Hamiltonian()		{
@@ -67,33 +81,39 @@ public:
 		
 		OrderParameter order = initOrder;
 		double Jh = -VAR("Jh").real();
-		
+
 		//---site iteration---
 		while (site_iterate()) {
 			auto si = getSite();
 			add_hund_spin("Fe 1", Jh, order.getVars(si, "Sx Sy Sz"));
 		}
+
+		constructHoppingHamiltonian(Ham, k_space);
 		
 		//---pair iteration---
-		while (pair_iterate()) {
-			auto pit = getPair();
-			auto si = pit.AtomI;
-			auto sj = pit.AtomJ;
-			
-			add_bond( "Fe:1u  Fe:1u  +x", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  +y", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  +z", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  +x", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  +y", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  +z", +VAR("t") );
-			                   
-			add_bond( "Fe:1u  Fe:1u  -x", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  -y", +VAR("t") );
-			add_bond( "Fe:1u  Fe:1u  -z", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  -x", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  -y", +VAR("t") );
-			add_bond( "Fe:1d  Fe:1d  -z", +VAR("t") );
-		}
+		//while (pair_iterate()) {
+		//	auto pit = getPair();
+		//	cout<<pit.AtomI.atomIndex()<<" "<<pit.AtomJ.atomIndex()<<endl;
+		//	/*
+		//	auto si = pit.AtomI;
+		//	auto sj = pit.AtomJ;
+		//	*/
+		//	
+		//	add_bond( "Fe:1u  Fe:1u  +x", VAR("t") );
+		//	add_bond( "Fe:1u  Fe:1u  +y", VAR("t") );
+		//	add_bond( "Fe:1u  Fe:1u  +z", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  +x", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  +y", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  +z", VAR("t") );
+		//	                   
+		//	add_bond( "Fe:1u  Fe:1u  -x", VAR("t") );
+		//	add_bond( "Fe:1u  Fe:1u  -y", VAR("t") );
+		//	add_bond( "Fe:1u  Fe:1u  -z", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  -x", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  -y", VAR("t") );
+		//	add_bond( "Fe:1d  Fe:1d  -z", VAR("t") );
+		//}
+		
 		
 	}
 
@@ -119,18 +139,18 @@ public:
 		for (double i3=0; i3<N3; i3++) {
 			add_k_point( (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3 );
 		}
-		
+
 		if (VAR("isCalculateMu").real() == 1) { calcChemicalPotential(); }
 		if (VAR("isCalculateVar").real() == 1){ calcVariation(); }
 		if (VAR("isCalculateTotE", 0).real() == 1){ calcTotalEnergy(); }
-		
+
 		if (VAR("isCalculateLDOS").real() == 1) {
 			selectLDOSsite(0);
 			selectLDOSsite(1);
 			selectLDOSsite(2);
 			calcLDOS(0.01, 0.1);
 		}
-		
+
 		// Calculate the band structure through high symmetry points
 		if (VAR("isCalculateBand").real() == 1) {
 			add_ksymm_point( "", +0.0*b1 +0.0*b2 +0.0*b3);

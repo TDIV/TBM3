@@ -15,14 +15,13 @@ public:
 	void init_order()		{
 		cout<<"Initialize the calculation ..."<<endl<<endl;
 		appendHoppingBase("SFO-SFO", "SFO-SFO.w90");
+		
 		initHoppingTerms();
-
 	}
 	
 	void Hamiltonian()		{
 		add_Chemical_Potential();
 		constructHoppingHamiltonian(Ham, k_space);
-	
 	}
 
 	void render()			{

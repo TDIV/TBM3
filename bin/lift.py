@@ -42,10 +42,12 @@ def parse_bond_str	(bonding_basis, word):
 		elif s == '-':
 			signArray.append(-1)
 
-	#print bonding_basis[0][1]
-	bond_vec += signArray[0] * Nx * bonding_basis[0][1]
-	bond_vec += signArray[1] * Ny * bonding_basis[1][1]
-	bond_vec += signArray[2] * Nz * bonding_basis[2][1]
+	#print bonding_basis[0][1],
+	#print bonding_basis[1][1],
+	#print bonding_basis[2][1]
+	bond_vec = bond_vec + signArray[0] * Nx * bonding_basis[0][1]
+	bond_vec = bond_vec + signArray[1] * Ny * bonding_basis[1][1]
+	bond_vec = bond_vec + signArray[2] * Nz * bonding_basis[2][1]
 	#print bond_vec, word
 
 	return bond_vec
@@ -65,6 +67,7 @@ def parse_order( word ):
 	sp_ang = sval.split(',')
 	cval= float(sp_ang[0])+1j*float(sp_ang[1])
 	return (sub[0], cval)
+
 # -------------------------------------------------------------
 # The class for parsing the input parameters-------------------
 # -------------------------------------------------------------
@@ -138,7 +141,10 @@ class Cell:
 		self.den_list = {}
 		self.spin_list = {}
 
-		self.maxNeighbor = 1
+		self.maxNeighbor1 = 1
+		self.maxNeighbor2 = 1
+		self.maxNeighbor3 = 1
+		self.maxBondRadius = "non"
 
 	def load(self, filename, file_flag='c'):  # Initially read in the file structure
 
@@ -229,6 +235,18 @@ class Cell:
 		self.a2 = np.mat(self.a2)
 		self.a3 = np.mat(self.a3)
 
+		# Give the maximum iteration bondings.
+		if self.parser.parameter.has_key("NumNeighbor1") :
+			self.maxNeighbor1 = int(self.parser.parameter["NumNeighbor1"])
+		if self.parser.parameter.has_key("NumNeighbor2") :
+			self.maxNeighbor2 = int(self.parser.parameter["NumNeighbor2"])
+		if self.parser.parameter.has_key("NumNeighbor3") :
+			self.maxNeighbor3 = int(self.parser.parameter["NumNeighbor3"])
+
+		if self.parser.parameter.has_key("MaxBondRadius") :
+			self.maxBondRadius = self.parser.parameter["MaxBondRadius"]
+
+
 		self.generateBondings()
 
 		f.close()
@@ -250,9 +268,9 @@ class Cell:
 
 		self.save()
 	def generateBondings(self):
-		Nx = self.maxNeighbor
-		Ny = self.maxNeighbor
-		Nz = self.maxNeighbor
+		Nx = self.maxNeighbor1
+		Ny = self.maxNeighbor2
+		Nz = self.maxNeighbor3
 		if np.sum(abs(self.bonding_basis[0][1])) == 0 :
 			Nx = 0
 		if np.sum(abs(self.bonding_basis[1][1])) == 0 :
@@ -268,9 +286,10 @@ class Cell:
 			elif val < 0:
 				return "-"+str(abs(val))
 
+
 		for ix in xrange(-Nx,Nx+1):
 			for iy in xrange(-Ny,Ny+1):
-				for iz in xrange(-Nz,Ny+1):
+				for iz in xrange(-Nz,Nz+1):
 					bondStr = NumStr(ix)+NumStr(iy)+NumStr(iz)
 					self.bondings.append(bondStr)
 
@@ -342,18 +361,25 @@ class Cell:
 	def CreateNeighbor(self):  # Create the table of index relations to the neighbors
 		self.bond = []
 		for bd in self.bondings:
-			self.bond.append((bd, parse_bond_str(self.bonding_basis, bd)))
+			bvec = parse_bond_str(self.bonding_basis, bd)
+			if self.maxBondRadius == "non" or self.maxBondRadius == "-1":
+				self.bond.append((bd, bvec))
+			else:
+				maxRadius = float(self.maxBondRadius) + 0.001
+				distance = sqrt(bvec[0,0]*bvec[0,0] + bvec[0,1]*bvec[0,1] + bvec[0,2]*bvec[0,2])
+				if distance < maxRadius :
+					self.bond.append((bd, bvec))
 
-		N1 = 2
-		N2 = 2
-		N3 = 2
+		N1 = 4
+		N2 = 4
+		N3 = 4
 
 		if sqrt(self.a1*self.a1.transpose()) < 0.001: N1=0
 		if sqrt(self.a2*self.a2.transpose()) < 0.001: N2=0
 		if sqrt(self.a3*self.a3.transpose()) < 0.001: N3=0
 
 		# -------------------------------------------------------------------------
-		# Scan through superlattice to create a map[pos]=(UCIndex, Index, Label)
+		# Construct superlattice to create a map[pos]=(UCIndex, Index, Label)
 		# Periodicity of the super lattice is considered here
 		# -------------------------------------------------------------------------
 		cs_superlattice = cs.coord_search()

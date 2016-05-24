@@ -46,8 +46,7 @@ public:
 				initOrder			(Lat),	   
 				newOrder			(Lat),	    
 				initDenOrder		(Lat),	    
-				newDenOrder			(Lat),	    
-				hoppingOrder		(Lat){
+				newDenOrder			(Lat) {
 
 		symmetry = _L.getSymmetry();
 		Temperature = 0.0001;
@@ -544,9 +543,6 @@ protected:
 	OrderParameter	initDenOrder;	// The storage of electron density information.
 	OrderParameter	newDenOrder;	// The storage of new-electron density information.
 	double			newDenMix;		// The mix-weight for the new density.
-	
-	OrderParameter	hoppingOrder;	/* A special order that allow users to storage hopping terms
-									 as an static order parameter */
 	
 	virtual	void	init_order		()=0;
 	virtual void	Hamiltonian		()=0;							// The interface for user defined Hamiltonian.

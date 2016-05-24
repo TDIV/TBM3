@@ -120,6 +120,7 @@ private:
 public:
 	HoppingOrderParameter(Lattice & _Lat): OrderParameter(_Lat) {}
 	
+	unsigned getBaseMapSize(){ return hoppingBaseMap.size(); }
 	void	appendHoppingBase(string name, string filename){
 		hoppingBaseMap[name] = HoppingBaseConstructor(name, Lat, filename);
 	}
@@ -151,7 +152,7 @@ public:
 			
 			string	pairName = atomI.Name()+"-"+atomJ.Name();
 			
-			r_var	aSmallValue = 0.000000001;
+			r_var	aSmallValue = 0.000001;
 			
 			// Detect that if the pairName is inside the hoppingBaseMap.
 			if (hoppingBaseMap.find(pairName) != hoppingBaseMap.end()) {
@@ -235,10 +236,15 @@ public:
 	
 	void appendHoppingBase(string name, string filename)		{ hoppingOrder.appendHoppingBase(name, filename); }
 	void initHoppingTerms()										{
-		hoppingOrder.constructHoppingOrder();
+		hoppingMatrixElementList.clear();
+		
+		if (hoppingOrder.getBaseMapSize() > 0) hoppingOrder.constructHoppingOrder();
 		
 		for (unsigned ii = 0 ; ii < hoppingOrder.pairListSize() ; ii++) {
 			auto pairOperation = hoppingOrder.getPairOperationAt(ii);
+			
+			//cout<<pairOperation.pit.AtomI.atomIndex()<<" "<<pairOperation.pit.AtomJ.atomIndex()<<endl;
+			
 			appendHoppingMatrixElement(pairOperation);
 		}
 	}
@@ -267,7 +273,6 @@ private:
 	void appendHoppingMatrixElement(PairOperationUnit & pairOpt){
 		
 		AtomPair & ap = pairOpt.pit;
-		//cout<<ap.bond<<":"<<ap.bvec[0]<<" "<<ap.bvec[1]<<" "<<ap.bvec[2]<<endl;
 		
 		if (ap.AtomI.getSpinDegree() != ap.AtomJ.getSpinDegree() ) {
 			string ErrorMsg = "Error, the spin-degree should be the same for construct a general Hopping model.\n";
@@ -294,20 +299,20 @@ private:
 		if( latticeRef.getSymmetry() == NORMAL ) {
 			if(spinDegree == ""){	//
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I);
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J);
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J);
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "")
 												   );
 			}
 			else if(spinDegree == "s"){
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"u");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"u");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"u");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "u")
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"d");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"d");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"d");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "d")
 												   );
@@ -320,13 +325,13 @@ private:
 		if( latticeRef.getSymmetry() == NAMBU ) {
 			if(spinDegree == "s"){
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Au");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Au");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Au");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "Au")
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Bd");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Bd");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Bd");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ,-pairOpt.val, ap.bvec, "Bd") // negative value for particle-hole symmetry.
 												   );
@@ -339,38 +344,38 @@ private:
 		if( latticeRef.getSymmetry() == EXNAMBU ) {
 			if(spinDegree == ""){
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"A");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"A");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"A");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "A")
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"B");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"B");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"B");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ,-pairOpt.val, ap.bvec, "B") // negative value for particle-hole symmetry.
 												   );
 			}
 			if(spinDegree == "s"){
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Au");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Au");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Au");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "Au")
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Bu");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Bu");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Bu");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ,-pairOpt.val, ap.bvec, "Bu") // negative value for particle-hole symmetry.
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Ad");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Ad");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Ad");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ, pairOpt.val, ap.bvec, "Ad")
 												   );
 				
 				indexI = ap.AtomI.getOrbitalIndex(orbital_I+"Bd");
-				indexJ = ap.AtomI.getOrbitalIndex(orbital_J+"Bd");
+				indexJ = ap.AtomJ.getOrbitalIndex(orbital_J+"Bd");
 				hoppingMatrixElementList.push_back(
 												   HoppingMatrixElement(indexI, indexJ,-pairOpt.val, ap.bvec, "Bd") // negative value for particle-hole symmetry.
 												   );

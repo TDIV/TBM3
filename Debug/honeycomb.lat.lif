@@ -1,0 +1,47 @@
+#0 Parameters
+ Mu             = 2              
+ isCalculateMu  = 1              
+ isCalculateBand = 1              
+
+ T              = 1              
+
+ hop            = 1              
+
+ Nb1            = 10             
+ Nb2            = 10             
+ Nb3            = 1              
+
+ a              = 1.0            
+
+ NumNeighbor1   = 2              
+ NumNeighbor2   = 2              
+ NumNeighbor3   = 0              
+ MaxBondRadius  = 1.0            
+
+
+#1 Basis Vector
+ a1        1.5                 0.866025403784      0.0                
+ a2        1.5                -0.866025403784      0.0                
+ a3        0.0                 0.0                 1.0                
+
+#2 Sub Atoms
+ C    1s   0.0                 0.0                 0.0                
+ C    1s   1.0                 0.0                 0.0                
+
+#3 Cell Dim
+ 1    1    1   
+
+#4 Bonding basis
+ d1        1.0                 0.0                 0.0                
+ d2       -0.5                 0.866025403784      0.0                
+ d3        0                   0                   0                  
+
+#5 Bondings
+
+#7 Cell
+ 0         0         C-0       0.0                 0.0                 0.0                
+ 0         1         C-1       1.0                 0.0                 0.0                
+
+#8 Neighbors
+ 0        -1-1+0:1  +0+0+0:0  +0+1+0:1  +1+0+0:1  
+ 1        -1+0+0:0  +0-1+0:0  +0+0+0:1  +1+1+0:0  
