@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(my-tbm3-local)
+project(TBM3)
 
 add_definitions(-DADD_ -DHAVE_CUBLAS)
 
