@@ -985,13 +985,7 @@ protected:
 				Field2[si.atomIndex()] = Field2[si.atomIndex()] + Sj;
 			}
 		}
-		
-		// Field term for DM-interaction
-		/*
-		for ( ... ) {
-			...
-		}
-		*/
+	
 		
 		// To add up the Field term and translate to Force term and update the spin configuration.
 		while (site_iterate()) {
