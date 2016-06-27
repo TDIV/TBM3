@@ -38,6 +38,19 @@ public:
 
 	void run()			override {
 		
+		if( Lat.parameter.VAR("isCalculateVar", 0).real() == 1 ){
+			cout<<">> Calculating LLG spin dynamic."<<endl;
+			
+			double max_spin_diff = 1;
+			
+			while( max_spin_diff > 0.001 ){
+				KHamEvd(tbd);
+				tbd.calculate4DensityOrder();
+				max_spin_diff = TBOrderIteration::iterateOrder(tbd.order);
+				cout<<max_spin_diff<<endl;
+				cout<<endl;
+			}
+		}
 	}
 };
 

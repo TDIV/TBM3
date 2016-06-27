@@ -19,14 +19,45 @@ private:
 	TBDataSource & TBD;
 	
 	vector<boost::tuple<Atom, x_mat, r_var, string> >			HundCouplingList;
-	vector<boost::tuple<Atom, x_mat, x_mat, r_var, string> >	SuperExchangeList;
+	vector<boost::tuple<Atom, x_mat, r_var, string> >	SuperExchangeList;
 	vector<boost::tuple<Atom, x_mat, x_mat, x_mat, string> >	DMExchangeList;
 	
 public:
 	
 	TBOrderIteration(TBDataSource & _tbd): TBD(_tbd)		{ }
 	
-	void addSuperExchange	(string opt, string svar)		{ // svar === " @:cspin, Jse "
+	void addHundCoupling	(string opt, string svar)		{
+		replaceAll(opt, "\t", " ");
+		auto  parser = split(opt, " ");
+		if( parser.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		
+		auto atomI = TBD.Lat.getAtom();
+		
+		removeSpace(svar);
+		auto svarParser = split(svar, "*");
+		auto orderKey = svarParser[0];
+		auto forceKey = "@:"+parser[1]+":4den";
+		r_var Jh = 1.0;
+		if( svarParser.size() >= 2){
+			for( unsigned i=1 ; i<svarParser.size() ; i++){
+				Jh = Jh * TBD.parseSiteString(atomI, svarParser[i])[0].real();
+			}
+		}
+		
+		auto ordS = TBD.order.findOrder(atomI, orderKey);
+		if( !ordS.first )	return;
+		
+		auto forceS = TBD.order.findOrder(atomI, forceKey);
+		if( !forceS.first )	return;
+		
+		x_mat pspin(1,3);
+		pspin[0] = forceS.second[1];
+		pspin[1] = forceS.second[2];
+		pspin[2] = forceS.second[3];
+		
+		HundCouplingList.push_back(boost::make_tuple(atomI, pspin, Jh, orderKey));
+	}
+	void addSuperExchange	(string opt, string svar)		{ // svar === " @:cspin * Jse "
 		replaceAll(opt, "\t", " ");
 		auto  dummyParser = split(opt, " ");
 		if( dummyParser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
@@ -52,10 +83,12 @@ public:
 		if( !ordS_I.first )	return;
 		if( !ordS_J.first )	return;
 		
-		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Jsx, orderKey));
+		normalizeXVec(ordS_J.second);
+		
+		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_J.second, Jsx, orderKey));
 	}
-	void addDMExchange		(string opt, string svar)		{ // svar === " @:cspin, Jse "
-		//replaceAll(opt, "\t", " ");
+	void addDMExchange		(string opt, string svar)		{ // svar === " @:cspin * Jdm "
+		replaceAll(opt, "\t", " ");
 		auto  dummyParser = split(opt, " ");
 		if( dummyParser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
@@ -77,6 +110,9 @@ public:
 		auto ordS_J = TBD.order.findOrder(pair.atomJ, orderKey);
 		if( !ordS_I.first )	return;
 		if( !ordS_J.first )	return;
+		
+		normalizeXVec(ordS_I.second);
+		normalizeXVec(ordS_J.second);
 		
 		x_mat Dij(1,3);
 		r_mat bondIJ = pair.bondIJ();
@@ -102,7 +138,10 @@ public:
 		SuperExchangeList.clear();
 		DMExchangeList.clear();
 		
+		//TBD.calculate4DensityOrder();
+		
 		while( TBD.Lat.iterate() ){
+			for( auto & iter : TBD.Lat.hamParser.getOperationList("hundSpin"))	addHundCoupling(iter.first, iter.second);
 			for( auto & iter : TBD.Lat.hamParser.getOperationList("superEx"))	addSuperExchange(iter.first, iter.second);
 			for( auto & iter : TBD.Lat.hamParser.getOperationList("dmEx")	)	addDMExchange(iter.first, iter.second);
 		}
@@ -110,32 +149,60 @@ public:
 		
 	}
 	
-	void iterateOrder(OrderParameter & newOrder)			{
+	double iterateOrder(OrderParameter & newOrder)			{
 		
-		map<unsigned, pair<x_mat, string> > FieldJH, FieldSE, FieldDM;
+		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return; }
+		
+		map<unsigned, pair<x_mat, string> > Field;
+		
+		// Construct the Field-Term for variational method of HundCoupling.
+		for ( auto & elem :HundCouplingList)	{
+			auto atomI = elem.get<0>();
+			auto si = elem.get<1>();
+			auto Jh = elem.get<2>();
+			auto optKey = elem.get<3>();
+			
+			x_mat Si(1,3);
+			if (si.size() == 3 ) Si = Jh * si;
+			
+			if( Field.find(atomI.atomIndex) == Field.end() ) {
+				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - Si;
+			}
+			else{
+				if( Field[atomI.atomIndex].second != optKey ){
+					ErrorMessage("Error, ambiguous definition of the force order for:\n"
+								 +Field[atomI.atomIndex].second+" and "+optKey+".\n");
+				}
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - Si;
+			}
+		}
 		
 		// Construct the Field-Term for variational method of Super Exchange.
 		for ( auto & elem :SuperExchangeList)	{
 			auto atomI = elem.get<0>();
-			auto si = elem.get<1>();
-			auto sj = elem.get<2>();
-			auto Js = elem.get<3>();
-			auto optKey = elem.get<4>();
+			auto sj = elem.get<1>();
+			auto Js = elem.get<2>();
+			auto optKey = elem.get<3>();
 			
 			x_mat sumSj(1,3);
-			if (si.size() == 3 and sj.size() == 3) sumSj = Js * sj;
+			if (sj.size() == 3) sumSj = Js * sj;
 			
-			if( FieldSE.find(atomI.atomIndex) == FieldSE.end() ) {
-				FieldSE[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
-				FieldSE[atomI.atomIndex].first = FieldSE[atomI.atomIndex].first + sumSj;
+			if( Field.find(atomI.atomIndex) == Field.end() ) {
+				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - sumSj;
 			}
 			else{
-				FieldSE[atomI.atomIndex].first = FieldSE[atomI.atomIndex].first + sumSj;
+				if( Field[atomI.atomIndex].second != optKey ){
+					ErrorMessage("Error, ambiguous definition of the force order for:\n"
+								 +Field[atomI.atomIndex].second+" and "+optKey+".\n");
+				}
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - sumSj;
 			}
 		}
 		
 		// Construct the Field-Term for variational method of DM Exchange.
-		for ( auto & elem :DMExchangeList)	{
+		for ( auto & elem :DMExchangeList)		{
 			auto atomI = elem.get<0>();
 			auto si = elem.get<1>();
 			auto sj = elem.get<2>();
@@ -149,14 +216,58 @@ public:
 				sumDj[2] = - d[0]* sj[1] + d[1]* sj[0] ;
 			}                           
 			
-			if( FieldDM.find(atomI.atomIndex) == FieldDM.end() ) {
-				FieldDM[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
-				FieldDM[atomI.atomIndex].first = FieldDM[atomI.atomIndex].first + sumDj;
+			if( Field.find(atomI.atomIndex) == Field.end() ) {
+				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - sumDj;
 			}
 			else{
-				FieldSE[atomI.atomIndex].first = FieldSE[atomI.atomIndex].first + sumDj;
+				if( Field[atomI.atomIndex].second != optKey ){
+					ErrorMessage("Error, ambiguous definition of the force order for:\n"
+								 +Field[atomI.atomIndex].second+" and "+optKey+".\n");
+				}
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - sumDj;
 			}
 		}
+		
+		// The LLG variational method.
+		
+		double max_spin_diff = 0;
+		
+		double variational_dt	= TBD.Lat.parameter.VAR("var_dt", 0.1).real();
+		double LLGdamping		= TBD.Lat.parameter.VAR("LLGdamping", 2).real();
+		for( auto & fieldI : Field){
+			auto atomI	= TBD.Lat.getAtom(fieldI.first);
+			auto FI		= fieldI.second.first;
+			auto orderKeyI	= fieldI.second.second;
+			auto orderI = newOrder.findOrder(atomI, orderKeyI);
+			
+			
+			if( orderI.first) {
+				normalizeXVec(orderI.second);
+				auto Si = orderI.second;
+				
+				x_mat Force = curl(Si, FI);			// force
+				x_mat dampForce=curl( Force, Si);	// damping force
+				
+				x_mat Snew =Si	+	Force * variational_dt
+								+	dampForce * variational_dt * LLGdamping;
+				
+				normalizeXVec(Snew);
+				
+				x_mat Sdiff = Si - Snew;
+				double spin_diff = abs(cdot(Sdiff,Sdiff));
+				
+				if( spin_diff > max_spin_diff ) max_spin_diff = spin_diff;
+				//cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
+				
+				
+				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
+			}
+		}
+		newOrder.save();
+		
+		return max_spin_diff;
+		
 	}
 	
 private:

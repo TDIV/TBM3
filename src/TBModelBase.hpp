@@ -354,7 +354,13 @@ public:
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
 			cout<<">> Calculating the chemical potential, Mu."<<endl;
 			calculateChemicalPotential(true);
+			
+			KHamEvd(tbd);
 			cout<<endl;
+			cout<<"With spin:"<< Lat.parameter.STR("spin")<<endl;
+			cout<<"And space:"<< Lat.parameter.STR("space")<<endl;
+			cout<<"Total electron count: "<<calculateElectronFilling(tbd);
+			cout<<endl<<endl;
 		}
 		
 		if( Lat.parameter.VAR("isCalculateBand", 0).real() == 1 ){

@@ -97,7 +97,6 @@ public:
 	/*------------------------------------------------
 	 Using these methods to construct the "hamElementList".
 	 -------------------------------------------------*/
-	
 	void addHundSpin	(string opt, string svar)	{
 		/* Site operation: "Fe 1".	(operate for only a single orbital) */
 		
@@ -113,16 +112,29 @@ public:
 		if( atomI.atomName != parser[0]){ return; } // Name does not match.
 		if(!atomI.hasOrbital(parser[1])){ return; } // No such orbital.
 		
-		auto xvec = parseSiteVecString(atomI, svar);
-		x_mat sVec(1,3);
-		if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-		for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
+		//auto xvec = parseSiteVecString(atomI, svar);
+		//x_mat sVec(1,3);
+		//if( xvec.size() >= 1 ){ sVec = xvec[0]; }
+		//for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
 		
+		auto svarParser = split(svar, "*");
+		auto orderKey = svarParser[0];
+		r_var Jh = 1.0;
+		x_mat xvec = parseSiteString(atomI, svarParser[0]);
+		if( svarParser.size() >= 2){
+			for( unsigned i=1 ; i<svarParser.size() ; i++){
+				Jh = Jh * parseSiteString(atomI, svarParser[i])[0].real();
+			}
+		}
+		
+		normalizeXVec(xvec);
+		x_mat sVec = xvec * Jh;
 	
 		if( sVec.size() != 3 ){
 			ErrorMessage("Error, operation:\n"+opt+".\n Has been applied with a wrong spin-variable with size:"+IntToStr(sVec.size()));
 		}
-	
+		
+		//normalizeXVec( sVec );
 		
 		string orbital = parser[1];
 		r_var Sx = sVec[0].real();
@@ -784,7 +796,6 @@ public:
 		}
 	}
 	
-
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
@@ -885,16 +896,117 @@ public:
 		return 0;
 	}
 	
-	x_var		optStrToXVec(string opt, string strvec){
-		removeSpace(strvec);
-		auto svec = split(strvec, "*");
-		for( auto & sv : svec){
-			if(!IsFloatStr(sv)){
-			}
+	void		calculate4DensityOrder	()		{
+		if( Lat.parameter.STR("spin")!="on" ){
+			ErrorMessage("Error, the spin space suld be turned \'on\' for the 4-density calculation");
+		}
+		if( Lat.HSpace()==NAMBU ){
+			ErrorMessage("Error, NAMBU space is not applicable forthe 4-density calculation");
 		}
 		
-		return 0;
+		//OrderParameter	newOrder( order );
+			
+		while( Lat.iterate() ){
+			auto atomI = Lat.getAtom();
+			
+			map<string, x_mat> fourDensity;
+			
+			auto & indexLabel= atomI.allIndexList() ;
+			for( unsigned i=0 ; i<indexLabel.size() ; i++)
+			for( unsigned j=0 ; j<indexLabel.size() ; j++) {
+				auto & indexLabel_I = indexLabel[i];
+				auto & indexLabel_J = indexLabel[j];
+				
+				auto index_I = indexLabel_I.second;
+				auto index_J = indexLabel_J.second;
+				auto parser_I = split(indexLabel_I.first, ".");
+				auto parser_J = split(indexLabel_J.first, ".");
+				
+				bool theSame_AB_space = true;
+				if( Lat.HSpace() == EXNAMBU and parser_I[1][0] != parser_J[1][0]) theSame_AB_space = false;
+				
+				
+				if( parser_I[0] == parser_J[0] and theSame_AB_space){
+					
+					if( fourDensity.find(parser_I[0]) == fourDensity.end() ) {
+						fourDensity[parser_I[0]] = x_mat(1,4);
+					}
+					auto & r4den = fourDensity[parser_I[0]];
+					
+					if( parser_I[1] == "u" and parser_J[1] == "u"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += tmpDen;
+						r4den[3] += tmpDen;
+					}
+					if( parser_I[1] == "d" and parser_J[1] == "d"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += tmpDen;
+						r4den[3] -= tmpDen;
+					}
+					if( parser_I[1] == "u" and parser_J[1] == "d"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += tmpDen.real();
+						r4den[2] -= tmpDen.imag();
+					}
+					if( parser_I[1] == "d" and parser_J[1] == "u"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += tmpDen.real();
+						r4den[2] += tmpDen.imag();
+					}
+					
+					if( parser_I[1] == "Au" and parser_J[1] == "Au"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += tmpDen*0.5;
+						r4den[3] += tmpDen*0.5;
+					}
+					if( parser_I[1] == "Ad" and parser_J[1] == "Ad"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += tmpDen*0.5;
+						r4den[3] -= tmpDen*0.5;
+					}                     
+					if( parser_I[1] == "Au" and parser_J[1] == "Ad"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += tmpDen.real()*0.5;
+						r4den[2] -= tmpDen.imag()*0.5;
+					}                            
+					if( parser_I[1] == "Ad" and parser_J[1] == "Au"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += tmpDen.real()*0.5;
+						r4den[2] += tmpDen.imag()*0.5;
+					}                            
+					
+					if( parser_I[1] == "Bu" and parser_J[1] == "Bu"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += 1-tmpDen*0.5;
+						r4den[3] += 1-tmpDen*0.5;
+					}                       
+					if( parser_I[1] == "Bd" and parser_J[1] == "Bd"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[0] += 1-tmpDen*0.5;
+						r4den[3] -= 1-tmpDen*0.5;
+					}                       
+					if( parser_I[1] == "Bu" and parser_J[1] == "Bd"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += -tmpDen.real()*0.5;
+						r4den[2] -= -tmpDen.imag()*0.5;
+					}                             
+					if( parser_I[1] == "Bd" and parser_J[1] == "Bu"){
+						x_var tmpDen = getDensityMatrix(index_I, index_J);
+						r4den[1] += -tmpDen.real()*0.5;
+						r4den[2] += -tmpDen.imag()*0.5;
+					}
+					for( unsigned ii=0 ; ii<r4den.size() ; ii++)
+						if( abs(r4den[ii]) < 0.000001 ) r4den[ii] = 0;
+				}
+			}
+			
+			for( auto & iter: fourDensity){
+				order(atomI.atomName+" "+iter.first+":4den") = iter.second;
+			}
+		}
+		order.save();
 	}
+	
 	
 	x_mat			parseSiteString(Atom & at, string svar)			{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
@@ -971,6 +1083,7 @@ public:
 		
 		return xvec;
 	}
+
 
 private:
 	void clear			()						{

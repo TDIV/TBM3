@@ -19,42 +19,7 @@ namespace bgi = boost::geometry::index;
 
 enum H_SPACE { NORMAL, NAMBU, EXNAMBU };
 
-r_mat vec(r_var x, r_var y, r_var z){
-	r_mat bond(1,3);
-	bond[0] = x;
-	bond[1] = y;
-	bond[2] = z;
-	return bond;
-}
 
-x_mat xvec(x_var x){
-	x_mat bond(1,1);
-	bond[0] = x;
-	return bond;
-}
-x_mat xvec(x_var x, x_var y){
-	x_mat bond(1,2);
-	bond[0] = x;
-	bond[1] = y;
-	return bond;
-}
-x_mat xvec(x_var x, x_var y, x_var z){
-	x_mat bond(1,3);
-	bond[0] = x;
-	bond[1] = y;
-	bond[2] = z;
-	return bond;
-}
-
-string vecToStr(r_mat rvec){
-	string vstr = "";
-	for(unsigned i=0 ; i<rvec.size() ; i++){
-		if(rvec[i] >= 0){ vstr += "+"; }
-		else			{ vstr += "-"; }
-		vstr += DoubleToStr(abs(rvec[i]));
-	}
-	return vstr;
-}
 
 
 //----------------------
@@ -176,7 +141,7 @@ public:
 		else				{ return IntToStr(orbitalMap[orb]+1); }
 	}
 	
-	vector<pair<string, unsigned> >
+	vector<pair<string, unsigned> > &
 	allIndexList()						{
 		return indexList;
 	}

@@ -53,6 +53,7 @@ public:
 		for(unsigned ii=0 ; ii<Lat.latticeSize() ; ii++) optList.push_back(		rmap()		);
 	}
 	
+
 	x_mat &				operator()(string opt)					{
 		// xxx.order("Fe			cspin") = 1,2,3 (site only operation)
 		// xxx.order("Fe:O:+1+0+0	1:2:pairingS") = xxx (bond operation)
@@ -135,6 +136,7 @@ public:
 		
 		return empty_mat_for_return;
 	}
+	
 	pair<bool, x_mat>	findOrder(string atomName, string opt)	{
 		auto atomI = Lat.getAtom();
 		bool has_order =
@@ -148,7 +150,7 @@ public:
 		
 		return make_pair(has_order, xvec);
 	}
-	pair<bool, x_mat>	findOrder(Atom atomI, string opt)	{
+	pair<bool, x_mat>	findOrder(Atom atomI, string opt)		{
 		bool has_order = optList[atomI.atomIndex].find(opt) != optList[atomI.atomIndex].end();
 		
 		x_mat xvec(1,1);
@@ -159,7 +161,13 @@ public:
 		return make_pair(has_order, xvec);
 	}
 	
-	void load(string sub_filename = ""){
+	void			set(unsigned atomIndex, string opt, x_mat & newVal)	{
+		if( optList[atomIndex].find(opt) != optList[atomIndex].end() ){
+			optList[atomIndex][opt] = newVal;
+		}
+	}
+	
+	void	load(string sub_filename = ""){
 		init();
 		
 		string filename = Lat.FileName() + ".ord";
@@ -201,7 +209,7 @@ public:
 
 		infile.close();
 	}
-	void load(vector<pair<string, x_mat> > orderOptList){
+	void	load(vector<pair<string, x_mat> > orderOptList){
 		init();
 		
 		if ( orderOptList.size() > 0 ) {

@@ -63,6 +63,49 @@ double Coulomb_Screening(double r0, r_mat R){
 	return 0;
 }
 
+r_mat vec(r_var x, r_var y, r_var z){
+	r_mat bond(1,3);
+	bond[0] = x;
+	bond[1] = y;
+	bond[2] = z;
+	return bond;
+}
+
+x_mat xvec(x_var x){
+	x_mat bond(1,1);
+	bond[0] = x;
+	return bond;
+}
+x_mat xvec(x_var x, x_var y){
+	x_mat bond(1,2);
+	bond[0] = x;
+	bond[1] = y;
+	return bond;
+}
+x_mat xvec(x_var x, x_var y, x_var z){
+	x_mat bond(1,3);
+	bond[0] = x;
+	bond[1] = y;
+	bond[2] = z;
+	return bond;
+}
+
+void normalizeXVec(x_mat & xvec){
+	double length = sqrt(cdot(xvec,xvec).real());
+	if( length != 0 )
+		xvec = xvec * (1/length);
+}
+
+string vecToStr(r_mat rvec){
+	string vstr = "";
+	for(unsigned i=0 ; i<rvec.size() ; i++){
+		if(rvec[i] >= 0){ vstr += "+"; }
+		else			{ vstr += "-"; }
+		vstr += DoubleToStr(abs(rvec[i]));
+	}
+	return vstr;
+}
+
 #endif
 
 
