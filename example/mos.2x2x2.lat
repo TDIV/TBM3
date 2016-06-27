@@ -1,0 +1,88 @@
+#Parameters
+isCalculateMu	= 1
+isCalculateVar 	= 1
+isCalculateLDOS	= 0
+isCalculateBand	= 0
+isCalculateHam 	= 0
+bondRadius	= 3
+Mu			= 0
+Temperature	= 0.1
+Jh			=-1
+Jse			=-0.01
+vdt			= 0.1
+spin		= "on"
+space		= "normal"
+Nb			= 1,1,1
+OOhop		= 0.5
+
+#KPointPath
+G      0     0     0    
+X      1     0     0    
+M      1     1     0    
+O      1     1     1    
+G      0     0     0    
+
+#BondVector 0
+ 0.5             0               0              
+ 0               0.5             0              
+ 0               0               0.5            
+
+#BondVector 1
+ 1               0               0              
+ 0               1               0              
+ 0               0               1              
+
+#BasisVector
+ 2               0               0              
+ 0               2               0              
+ 0               0               2              
+
+#OrbitalProfile
+Bi        
+Fe        dx2-y2    dz2       
+O         px        
+O         py        
+O         pz        
+VC        
+
+#Atoms
+1     0.5             0.5             0.5            
+2     0               0               0              
+3     0.5             0               0              
+4     0               0.5             0              
+5     0               0               0.5            
+1     0.5             0.5             1.5            
+2     0               0               1              
+3     0.5             0               1              
+4     0               0.5             1              
+5     0               0               1.5            
+1     0.5             1.5             0.5            
+2     0               1               0              
+3     0.5             1               0              
+4     0               1.5             0              
+5     0               1               0.5            
+1     0.5             1.5             1.5            
+2     0               1               1              
+3     0.5             1               1              
+4     0               1.5             1              
+5     0               1               1.5            
+1     1.5             0.5             0.5            
+2     1               0               0              
+3     1.5             0               0              
+4     1               0.5             0              
+5     1               0               0.5            
+1     1.5             0.5             1.5            
+2     1               0               1              
+3     1.5             0               1              
+4     1               0.5             1              
+5     1               0               1.5            
+1     1.5             1.5             0.5            
+2     1               1               0              
+3     1.5             1               0              
+4     1               1.5             0              
+5     1               1               0.5            
+1     1.5             1.5             1.5            
+2     1               1               1              
+3     1.5             1               1              
+4     1               1.5             1              
+5     1               1               1.5            

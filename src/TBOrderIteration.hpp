@@ -258,7 +258,7 @@ public:
 				double spin_diff = abs(cdot(Sdiff,Sdiff));
 				
 				if( spin_diff > max_spin_diff ) max_spin_diff = spin_diff;
-				//cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
+				cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
 				
 				
 				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
