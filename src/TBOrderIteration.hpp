@@ -151,7 +151,7 @@ public:
 	
 	double iterateOrder(OrderParameter & newOrder)			{
 		
-		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return; }
+		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
 		map<unsigned, pair<x_mat, string> > Field;
 		
