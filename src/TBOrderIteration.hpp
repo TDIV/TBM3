@@ -15,15 +15,7 @@
 //
 
 class TBOrderIteration{
-private:
-	TBDataSource & TBD;
-	
-	vector<boost::tuple<Atom, x_mat, r_var, string> >			HundCouplingList;
-	vector<boost::tuple<Atom, x_mat, r_var, string> >	SuperExchangeList;
-	vector<boost::tuple<Atom, x_mat, x_mat, x_mat, string> >	DMExchangeList;
-	
 public:
-	
 	TBOrderIteration(TBDataSource & _tbd): TBD(_tbd)		{ }
 	
 	void addHundCoupling	(string opt, string svar)		{
@@ -83,9 +75,10 @@ public:
 		if( !ordS_I.first )	return;
 		if( !ordS_J.first )	return;
 		
+		normalizeXVec(ordS_I.second);
 		normalizeXVec(ordS_J.second);
 		
-		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_J.second, Jsx, orderKey));
+		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Jsx, orderKey));
 	}
 	void addDMExchange		(string opt, string svar)		{ // svar === " @:cspin * Jdm "
 		replaceAll(opt, "\t", " ");
@@ -127,12 +120,18 @@ public:
 			else if	( tmpXVec.size() == 3 ){ Dij = tmpXVec; }
 		}
 		
-		cout<<Dij<<endl;
-		
 		DMExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Dij, orderKey));
 	}
+private:
+	TBDataSource & TBD;
 	
-	void constructHamList()									{
+	vector<boost::tuple<Atom, x_mat, r_var, string> >			HundCouplingList;
+	vector<boost::tuple<Atom, x_mat, x_mat, r_var, string> >	SuperExchangeList;
+	vector<boost::tuple<Atom, x_mat, x_mat, x_mat, string> >	DMExchangeList;
+	
+public:
+	
+	void	constructHamList()								{
 		TBD.initOrder();
 		HundCouplingList.clear();
 		SuperExchangeList.clear();
@@ -141,21 +140,53 @@ public:
 		//TBD.calculate4DensityOrder();
 		
 		while( TBD.Lat.iterate() ){
+			
+			if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
 			for( auto & iter : TBD.Lat.hamParser.getOperationList("hundSpin"))	addHundCoupling(iter.first, iter.second);
+			
 			for( auto & iter : TBD.Lat.hamParser.getOperationList("superEx"))	addSuperExchange(iter.first, iter.second);
 			for( auto & iter : TBD.Lat.hamParser.getOperationList("dmEx")	)	addDMExchange(iter.first, iter.second);
 		}
-		
-		
 	}
 	
-	double iterateOrder(OrderParameter & newOrder)			{
+	void	calculateClassicalEnergy()						{
+		
+		x_var SE_Energy = 0, DM_Energy = 0;
+		// Construct the Field-Term for variational method of Super Exchange.
+		for ( auto & elem :SuperExchangeList)	{
+			auto si = elem.get<1>();
+			auto sj = elem.get<2>();
+			auto Js = elem.get<3>();
+
+			SE_Energy += cdot(si,sj) * Js;
+		}
+		
+		// Construct the Field-Term for variational method of DM Exchange.
+		for ( auto & elem :DMExchangeList)		{
+			auto si = elem.get<1>();
+			auto sj = elem.get<2>();
+			auto d = elem.get<3>();
+
+			
+			DM_Energy += cdot(d, curl(si, sj));
+		}
+		
+		TBD.energyMap["2.SE Eng"] = SE_Energy.real();
+		TBD.energyMap["3.DM Eng"] = DM_Energy.real();
+	}
+	
+	double	iterateOrder(OrderParameter & newOrder)			{
 		
 		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
+		
+		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+			TBD.calculate4DensityOrder();
+		
 		
 		map<unsigned, pair<x_mat, string> > Field;
 		
 		// Construct the Field-Term for variational method of HundCoupling.
+		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
 		for ( auto & elem :HundCouplingList)	{
 			auto atomI = elem.get<0>();
 			auto si = elem.get<1>();
@@ -181,9 +212,10 @@ public:
 		// Construct the Field-Term for variational method of Super Exchange.
 		for ( auto & elem :SuperExchangeList)	{
 			auto atomI = elem.get<0>();
-			auto sj = elem.get<1>();
-			auto Js = elem.get<2>();
-			auto optKey = elem.get<3>();
+			auto si = elem.get<1>();
+			auto sj = elem.get<2>();
+			auto Js = elem.get<3>();
+			auto optKey = elem.get<4>();
 			
 			x_mat sumSj(1,3);
 			if (sj.size() == 3) sumSj = Js * sj;
@@ -210,11 +242,14 @@ public:
 			auto optKey = elem.get<4>();
 			
 			x_mat sumDj(1,3);
-			if (si.size() == 3 and sj.size() == 3 and d.size() == 3){
+			if (sj.size() == 3 and d.size() == 3){
 				sumDj[0] = - d[1]* sj[2] + d[2]* sj[1] ;
 				sumDj[1] = - d[2]* sj[0] + d[0]* sj[2] ;
 				sumDj[2] = - d[0]* sj[1] + d[1]* sj[0] ;
-			}                           
+			}
+			
+			//if( vecToStr( atomI.pos ) == "+1+1+0")
+			//cout<<atomI.atomIndex<<" "<<d<<" "<<sj<<" "<<sumDj<<endl;
 			
 			if( Field.find(atomI.atomIndex) == Field.end() ) {
 				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
@@ -241,7 +276,6 @@ public:
 			auto orderKeyI	= fieldI.second.second;
 			auto orderI = newOrder.findOrder(atomI, orderKeyI);
 			
-			
 			if( orderI.first) {
 				normalizeXVec(orderI.second);
 				auto Si = orderI.second;
@@ -258,7 +292,7 @@ public:
 				double spin_diff = abs(cdot(Sdiff,Sdiff));
 				
 				if( spin_diff > max_spin_diff ) max_spin_diff = spin_diff;
-				cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
+				//cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
 				
 				
 				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
@@ -266,10 +300,13 @@ public:
 		}
 		newOrder.save();
 		
-		return max_spin_diff;
+		TBD.calculateEnergy();
+		calculateClassicalEnergy();
 		
+		
+		return max_spin_diff;
 	}
-	
+
 private:
 };
 

@@ -62,8 +62,11 @@ protected:
 	
 	void		constructHam	(TBDataSource & rtbd, bool withMu = true)					{
 		// Construct the Hamiltonian from the system-build structure: TBDataSource (tbd).
-		rtbd.constructTBMHam();
-		if( withMu ) rtbd.addChemicalPotential(rtbd.Lat.parameter.VAR("Mu").real());
+		
+		if( Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
+			rtbd.constructTBMHam();
+			if( withMu ) rtbd.addChemicalPotential(rtbd.Lat.parameter.VAR("Mu").real());
+		}
 		
 		// Construct the customized Hamiltonian.
 		Hamiltonian();
@@ -79,6 +82,12 @@ protected:
 		}
 	}
 	void	calculateBandStructure	(TBDataSource & rtbd, unsigned Nsteps=50)				{
+		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
+			cout<< "Warning, due to flag 'disable_quantum' turned on."
+				<< "The band structure calculation will be ignored."<<endl;
+			return;
+		}
+		
 		auto B = Lat.basisVector.getBVec();
 		auto & b1 = B[0]*0.5;
 		auto & b2 = B[1]*0.5;
@@ -126,7 +135,10 @@ protected:
 	 Diagonalize the full Hamiltonian and store the results in KEigenValVec.
 	 ------------------------------------------------------*/
 	void	KHamEvd					(TBDataSource & rtbd, bool withMu = true)				{
+		
 		constructHam(rtbd, withMu);
+		
+		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ) return;
 		
 		auto Nb = Lat.parameter.VEC("Nb");
 		
@@ -215,7 +227,9 @@ protected:
 		
 		return totalDen;
 	}
-	r_var	calculateChemicalPotential(bool printResult = false)							{
+	void	calculateChemicalPotential(bool printResult = false)							{
+
+		
 		KHamEvd(stbd, false);
 		double	destDen = countTotalElectron();
 		
@@ -349,30 +363,7 @@ public:
 		infile.close();
 	}
 	void render(){
-		cout<<endl<<"Starting..."<<endl<<endl;
-		
-		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
-			cout<<">> Calculating the chemical potential, Mu."<<endl;
-			calculateChemicalPotential(true);
-			
-			KHamEvd(tbd);
-			cout<<endl;
-			cout<<"With spin:"<< Lat.parameter.STR("spin")<<endl;
-			cout<<"And space:"<< Lat.parameter.STR("space")<<endl;
-			cout<<"Total electron count: "<<calculateElectronFilling(tbd);
-			cout<<endl<<endl;
-		}
-		
-		if( Lat.parameter.VAR("isCalculateBand", 0).real() == 1 ){
-			cout<<">> Calculating the Band structure."<<endl;
-			calculateBandStructure(tbd);
-			cout<<endl;
-		}
-
 		run();
-		
-		cout<<"Finished."<<endl<<endl;
-		
 	}
 };
 

@@ -81,15 +81,13 @@ public:
 	EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 	r_var					maxE,	minE;
 	
-	r_var					ClassicConstE;	// The storage of the classical constent.
+	map<string, double>		energyMap;
 
-	void initHam(){
+	void initHam	()		{
 		Ham = x_mat(Lat.indexSize(), Lat.indexSize());
-		ClassicConstE = 0;
 		initOrder();
 	}
-	
-	void initOrder(){
+	void initOrder	()		{
 		order.clear();
 		order.load();
 	}
@@ -1006,6 +1004,27 @@ public:
 		}
 		order.save();
 	}
+	void		calculateEnergy			()		{
+
+		double totalE=0;
+		auto Temperature = Lat.parameter.VAR("Temperature", 0.00001).real();
+		for ( auto & iter: KEigenValVec ){
+			auto kEig = iter.eigenValue;
+			for (unsigned i=0; i<kEig.size(); i++) {
+				double EigF = 1.0/(1+exp( kEig[i]/Temperature));
+				totalE+=EigF*kEig[i];
+			}
+		}
+		
+		totalE = totalE / KEigenValVec.size();
+		
+		if( KEigenValVec.size() > 0 ){
+			energyMap["1.Q Eng"] = totalE;
+		}
+		else {
+			energyMap["1.Q Eng"] = 0;
+		}
+	}
 	
 	
 	x_mat			parseSiteString(Atom & at, string svar)			{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
@@ -1090,7 +1109,6 @@ private:
 		Ham.zerolize();
 		KEigenValVec.clear();
 		hamElementList.clear();
-		ClassicConstE = 0;
 		maxE = -10000;
 		minE =  10000;
 	}
