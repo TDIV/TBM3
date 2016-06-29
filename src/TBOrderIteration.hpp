@@ -152,7 +152,7 @@ public:
 	void	calculateClassicalEnergy()						{
 		
 		x_var SE_Energy = 0, DM_Energy = 0;
-		// Construct the Field-Term for variational method of Super Exchange.
+		// Calculate Super Exchange energy.
 		for ( auto & elem :SuperExchangeList)	{
 			auto si = elem.get<1>();
 			auto sj = elem.get<2>();
@@ -161,13 +161,12 @@ public:
 			SE_Energy += cdot(si,sj) * Js;
 		}
 		
-		// Construct the Field-Term for variational method of DM Exchange.
+		// Calculate DM Exchange energy.
 		for ( auto & elem :DMExchangeList)		{
 			auto si = elem.get<1>();
 			auto sj = elem.get<2>();
 			auto d = elem.get<3>();
 
-			
 			DM_Energy += cdot(d, curl(si, sj));
 		}
 		
@@ -249,7 +248,7 @@ public:
 			}
 			
 			//if( vecToStr( atomI.pos ) == "+1+1+0")
-			//cout<<atomI.atomIndex<<" "<<d<<" "<<sj<<" "<<sumDj<<endl;
+			cout<<atomI.atomIndex<<" "<<d<<" "<<si<<" "<<sj<<" "<<sumDj<<endl;
 			
 			if( Field.find(atomI.atomIndex) == Field.end() ) {
 				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);

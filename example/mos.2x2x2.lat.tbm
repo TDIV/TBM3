@@ -1,3 +1,27 @@
+#Parameters
+isCalculateMu	= 1
+isCalculateVar 	= 1
+isCalculateLDOS	= 0
+isCalculateBand	= 1
+isCalculateHam 	= 0
+
+disable_quantum = 1
+
+bondRadius	= 3
+Mu			= 0
+Temperature	= 0.1
+
+Jh			=-0
+Jse			= 0.0
+Jdm			= 1.0
+
+var_dt		= 0.2
+spin		= "on"
+space		= "normal"
+Nb			= 2,2,2
+OOhop		= 0.3
+spin_diff	= 0.00001
+
 #CoreCharge
 VC	> 0
 Bi	> 3
@@ -8,7 +32,6 @@ O	> 0
 
 #Init
 Fe		cspin		> 0,0,1
-Fe		dspin		> 0,0,1
 Fe		den			> 2
 Mn		cspin		> 0,0,1
 Mn		den			> 0.7
@@ -39,9 +62,12 @@ superEx	> Fe:Fe:+0-1+0 > @:cspin * Jse
 superEx	> Fe:Fe:+0+0+1 > @:cspin * Jse
 superEx	> Fe:Fe:+0+0-1 > @:cspin * Jse
 
-%dmEx	> Fe:Fe:+0+0-1 > @:cspin * 2
-
-
+dmEx	> Fe:Fe:+1+0+0 > @:cspin * Jdm
+dmEx	> Fe:Fe:-1+0+0 > @:cspin * Jdm
+dmEx	> Fe:Fe:+0+1+0 > @:cspin * Jdm
+dmEx	> Fe:Fe:+0-1+0 > @:cspin * Jdm
+dmEx	> Fe:Fe:+0+0+1 > @:cspin * Jdm
+dmEx	> Fe:Fe:+0+0-1 > @:cspin * Jdm
 
 % Fe-O bond hopping terms
 orbital	> Fe 1 > 0
@@ -88,8 +114,8 @@ hopping > O:O:+0-1-1# 1:1 >  1 * OOhop
 %pairingS > Fe:Fe:+0-1+0 2:2 > @:2:2:pairS
 %pairingS > Fe:Fe:+0+0-1 2:2 > @:2:2:pairS
 
-%pairingS > Fe 1:1 > 2.5
-%pairingS > Fe 2:2 > 2.5
+pairingS > Fe 1:1 > 0.3
+pairingS > Fe 2:2 > 0.3
 %pairingU > Fe 1:1 > 1
 %pairingU > Fe 2:2 > 1
 %pairingT > Fe 1:1 > 1

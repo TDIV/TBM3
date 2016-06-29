@@ -71,18 +71,18 @@ r_mat vec(r_var x, r_var y, r_var z){
 	return bond;
 }
 
-x_mat xvec(x_var x){
+x_mat xvec(x_var x)						{
 	x_mat bond(1,1);
 	bond[0] = x;
 	return bond;
 }
-x_mat xvec(x_var x, x_var y){
+x_mat xvec(x_var x, x_var y)			{
 	x_mat bond(1,2);
 	bond[0] = x;
 	bond[1] = y;
 	return bond;
 }
-x_mat xvec(x_var x, x_var y, x_var z){
+x_mat xvec(x_var x, x_var y, x_var z)	{
 	x_mat bond(1,3);
 	bond[0] = x;
 	bond[1] = y;

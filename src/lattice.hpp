@@ -72,7 +72,7 @@ public:
 				auto lineParser = split(line, " ");
 				
 				if (lineParser.size() > 0){
-					if (lineParser[0] == parameter())			{flag = lineParser[0]; continue;}
+					//if (lineParser[0] == parameter())			{flag = lineParser[0]; continue;}
 					if (lineParser[0] == basisVector())			{flag = lineParser[0]; continue;}
 					if (lineParser[0] == orbitalProfile())		{flag = lineParser[0]; continue;}
 					if (lineParser[0] == atomParser())			{flag = lineParser[0]; continue;}
@@ -88,7 +88,6 @@ public:
 						continue;
 					}
 			
-					if (flag == parameter())		{ parameter.append(line);						continue;	}
 					if (flag == basisVector())		{ basisVector.append(line);						continue;	}
 					if (flag == orbitalProfile())	{ orbitalProfile.append(line);					continue;	}
 					if (flag == atomParser())		{ atomParser.append(line);						continue;	}
@@ -110,10 +109,12 @@ public:
 				deleteComment(line); // Clean the commented words
 				istringstream iss(line);
 				iss >> header;
+				if	( header == parameter())	{flag = header; continue;}
 				if	( header == coreCharge())	{flag = header;	continue;}
 				if	( header == initOrder())	{flag = header;	continue;}
 				if	( header == hamParser())	{flag = header;	continue;}
 				
+				if	( flag == parameter())		{ parameter.append(line);	continue;	}
 				if	( flag == coreCharge())		{ coreCharge.append(line);	continue; }
 				if	( flag == initOrder())		{ initOrder.append(line);	continue; }
 				if	( flag == hamParser())		{ hamParser.append(line);	continue; }

@@ -20,6 +20,17 @@
 #ifndef _header_h
 #define _header_h
 
+
+#include <vector>
+#include <deque>
+#include <map>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <stdlib.h>
+
 //#pragma once
 
 #if defined __GNUC__
@@ -41,17 +52,6 @@
 #elif defined _MSC_VER
 #   pragma warning(pop)
 #endif
-
-#include <vector>
-#include <deque>
-#include <map>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <cmath>
-#include <stdlib.h>
-
 
 
 #include "../Gramat/include/gramat.h"

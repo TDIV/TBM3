@@ -1026,7 +1026,6 @@ public:
 		}
 	}
 	
-	
 	x_mat			parseSiteString(Atom & at, string svar)			{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		

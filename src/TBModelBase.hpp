@@ -333,7 +333,6 @@ public:
 		
 		// Save the expanded file.
 		ofstream outfile(filename_expand);
-		outfile<<Lat.parameter.getFileString();
 		outfile<<Lat.kSymmPointParser.getFileString();
 		outfile<<Lat.bondVector.getFileString();
 		outfile<<Lat.basisVector.getFileString(N1,N2,N3);
