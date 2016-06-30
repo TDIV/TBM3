@@ -19,11 +19,11 @@
 #include <iostream>
 #include <random>
 
-class TBModel: public tbm::TBModelBase, public tbm::TBOrderIteration{
+class TBModel: public tbm::TBModelBase, public tbm::TBClassicalSpinBase{
 public:
 	TBModel(string filename):
 		tbm::TBModelBase(filename),
-		tbm::TBOrderIteration(tbd)
+		tbm::TBClassicalSpinBase(tbd)
 		{  }
 
 	void initOrder()	override {
@@ -48,54 +48,97 @@ public:
 				cout<< "Warning, due to flag 'disable_quantum' turned on."
 					<< "The chemical potential calculation will be ignored."<<endl<<endl;
 			} else {
-				calculateChemicalPotential(true);
+				TBModelBase::calculateChemicalPotential(true);
 				
 				TBModelBase::KHamEvd(tbd);
 				cout<<endl;
 				cout<<"With spin:"<< Lat.parameter.STR("spin")<<endl;
 				cout<<"And space:"<< Lat.parameter.STR("space")<<endl;
-				cout<<"Total electron count: "<<calculateElectronFilling(tbd);
+				cout<<"Total electron count: "<<TBModelBase::calculateElectronFilling(tbd);
 				cout<<endl<<endl;
 			}
 		}
 		
 		if( Lat.parameter.VAR("isCalculateVar", 0).real() == 1 ){
-			cout<<">> Calculating LLG spin dynamic."<<endl;
-			
-			double max_spin_diff = 1;
-			
-			// Initial iteration, regardless the convergence criteria.
-			for( unsigned i=0 ; i<4 ; i++){
-				
-				TBModelBase::KHamEvd(tbd);
-				TBOrderIteration::iterateOrder(tbd.order);
-			}
-			
-			// Full iteration, depends on the convergence criteria.
-			while( max_spin_diff > abs(Lat.parameter.VAR("spin_diff", 0).real()) ){
-				
-				TBModelBase::KHamEvd(tbd);
-				max_spin_diff = TBOrderIteration::iterateOrder(tbd.order);
-				cout<<"diff:"<< gmt::fformat(max_spin_diff,16)<<" ";
-				double TotalE = 0;
-				for( auto & iter: tbd.energyMap ){
-					cout<< gmt::fformat(iter.first+":", 10)<<" "<< gmt::fformat(iter.second, 10)<<" ";
-					TotalE += iter.second;
-				}
-				cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
-				cout<<endl;
-			}
-			cout<<endl;
+			calculateVar();
+			//calculateDenMeanField();
 		}
 		
 		if( Lat.parameter.VAR("isCalculateBand", 0).real() == 1 ){
-			cout<<">> Calculating the Band structure."<<endl;
+			cout<<endl<<">> Calculating the Band structure."<<endl;
 			calculateBandStructure(tbd);
 			cout<<endl;
 		}
 		
 		cout<<"Finished."<<endl<<endl;
+	}
+	
+	void calculateDenMeanField(){
+		cout<<endl<<"--Calculating electron density self-consistantly."<<endl;
 		
+		double den_diff = 1;
+		
+		while( den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())){
+			
+			KHamEvd(tbd);
+			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
+			cout<<" Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
+			double TotalE = 0;
+			for( auto & iter: tbd.energyMap ){
+				cout<< gmt::fformat(iter.first+" ", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				TotalE += iter.second;
+			}
+			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
+			cout<<endl;
+		}
+	}
+	void calculateSpinVar()		{
+		cout<<endl<<">> Calculating LLG spin dynamic."<<endl;
+		
+		double spin_diff = 1;
+		double den_diff = 1;
+		
+		//calculateDenMeanField();
+		
+		// Full iteration, depends on the convergence criteria.
+		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) ){
+			
+			KHamEvd(tbd);
+			auto diff = iterateSpinOrder(tbd.order);
+			spin_diff = diff.first;
+			den_diff = diff.second;
+			cout<<"Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
+			double TotalE = 0;
+			for( auto & iter: tbd.energyMap ){
+				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				TotalE += iter.second;
+			}
+			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
+			cout<<endl;
+		}
+	}
+	void calculateVar()			{
+		
+		double spin_diff = 1;
+		double den_diff = 1;
+		
+		while(	spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) or
+				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())			){
+			
+			calculateDenMeanField();
+			
+			
+			for( unsigned i=0 ; i<4 ; i++){
+				KHamEvd(tbd);
+				iterateSpinOrder(tbd.order);
+			}
+			calculateSpinVar();
+			
+			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
+			auto diff = iterateSpinOrder(tbd.order);
+			spin_diff = diff.first;
+		}
+
 	}
 };
 
@@ -151,18 +194,6 @@ int main(int argc, char *argv[]) {
 	
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

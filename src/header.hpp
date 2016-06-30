@@ -78,16 +78,13 @@ void ErrorMessage(string errorStr) {
 
 #include "string_func.hpp"
 #include "math_func.hpp"
-	
 #include "read_lat.hpp"
 #include "atom.hpp"
 #include "lattice.hpp"
 #include "order_parameter.hpp"
 #include "TBDataSource.hpp"
 #include "TBModelBase.hpp"
-#include "TBOrderIteration.hpp"
-//#include "tbm_operation_element.cpp"
-//#include "hopping_constructor.cpp"
+#include "TBClassicalSpinBase.hpp"
 
 }
 

@@ -165,6 +165,9 @@ public:
 			optList[atomIndex][opt] = newVal;
 		}
 	}
+	void	setNew(unsigned atomIndex, string opt, x_mat & newVal)	{
+		optList[atomIndex][opt] = newVal;
+	}
 	
 	void	load(string sub_filename = "")						{
 		init();

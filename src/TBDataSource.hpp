@@ -70,10 +70,11 @@ public:
 	/////////////////////////////////////////////////
 	//   The constructor                            /
 	/////////////////////////////////////////////////
-	TBDataSource(Lattice & _lat):Lat(_lat), order(_lat)	{	}
+	TBDataSource(Lattice & _lat):Lat(_lat), order(_lat), order_old(_lat)	{	}
 	
 	Lattice &				Lat;
 	OrderParameter			order;
+	OrderParameter			order_old;
 	
 	vector<MatrixElement>	hamElementList;	// A list to store all the matrix elements
 	x_mat					Ham;			// The body of the Hamiltonian (matrix).
@@ -794,6 +795,71 @@ public:
 		}
 	}
 	
+	void addScreenCoulomb(string opt, string svar)	{
+		replaceAll(opt, "\t", " ");
+		
+		auto parser = split(opt, " ");
+		if( parser.size() > 2)	{ ErrorMessage("Error, not a valid operation:\n screenCoulomb > "+opt); }
+		
+		double radius = Lat.parameter.VAR("bondRadius", 0).real();
+		
+		if( parser.size() == 2){
+			if( parser[1][0] != '~'){ ErrorMessage("Error, not a valid operation:\n screenCoulomb > "+opt); }
+			
+			parser[1][0] = ' ';
+			double tmpRadius = StrToDouble(parser[1]);
+			if( tmpRadius > radius){
+				 ErrorMessage("Error, in operation:\n screenCoulomb > "+opt+" > "+svar
+							  +"\n the given radius,~"+DoubleToStr(tmpRadius)+", "
+							  +"is oarger the 'bondRadius(="+DoubleToStr(radius)+")'.");
+			}
+			radius = tmpRadius;
+		}
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != parser[0]){ return; } // Name does not match.
+		
+		removeSpace(svar);
+		auto svarParser = split(svar, "*");
+		auto orderKey = svarParser[0];
+		r_var alpha = 1.0;
+		if( svarParser.size() == 2) alpha = parseSiteString(atomI, svarParser[1])[0].real();
+
+		auto rboxAtoms = Lat.getRBox(radius);
+		//cout<<alpha<<" "<<atomI.atomName<<" "<<rboxAtoms.second.size()<<endl;
+		
+		double sumScreenCoulomb = 0;
+		for( auto & atomJ: rboxAtoms.second ){
+			auto orderJ = order.findOrder(atomJ, orderKey);
+			
+			double Charge = -Lat.coreCharge.getCharge(atomJ.atomName);
+			if( orderJ.first ){ Charge += orderJ.second[0].real(); }
+			
+			r_mat vecIJ= atomJ.pos - atomI.pos;
+			double distIJ = sqrt(cdot(vecIJ,vecIJ));
+			
+			if( distIJ > 0)
+			sumScreenCoulomb += alpha * Charge * exp(-distIJ/radius) / distIJ;
+		}
+		
+		x_mat coulomb(1,1);
+		coulomb[0] = sumScreenCoulomb;
+		order.setNew(atomI.atomIndex, "@:coulomb", coulomb);
+		
+		auto & orbitalIndex_I = atomI.allIndexList();
+		for( auto & index_I: orbitalIndex_I){
+			
+			char ph_char_I = index_I.first[index_I.first.size()-2];
+			if( ph_char_I != 'B' ){
+				hamElementList.push_back(MatrixElement(index_I.second, index_I.second, sumScreenCoulomb,	vec(0,0,0))); continue;
+			}
+			else{
+				hamElementList.push_back(MatrixElement(index_I.second, index_I.second,-sumScreenCoulomb,	vec(0,0,0))); continue;
+			}
+		}
+		
+	}
+	
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
@@ -806,14 +872,15 @@ public:
 			
 			auto atomI = Lat.getAtom();
 			
-			for( auto & iter : Lat.hamParser.getOperationList("hundSpin")	)	addHundSpin(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("orbital")	)	addOrbitalEng(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("site")		)	addSiteCouple(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("siteHc")		)	addSiteCoupleHc(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("hopping")	)	addHoppingInt(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("hoppingHc")	)	addHoppingIntHc(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("bond")		)	addBondCouple(iter.first, iter.second	);
-			for( auto & iter : Lat.hamParser.getOperationList("bondHc")		)	addBondCoupleHc(iter.first, iter.second	);
+			for( auto & iter : Lat.hamParser.getOperationList("hundSpin")	)	{	addHundSpin(iter.first, iter.second		);	}
+			for( auto & iter : Lat.hamParser.getOperationList("orbital")	)	{	addOrbitalEng(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("site")		)	{	addSiteCouple(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("siteHc")		)	{	addSiteCoupleHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("hopping")	)	{	addHoppingInt(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("hoppingHc")	)	{	addHoppingIntHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("bond")		)	{	addBondCouple(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("bondHc")		)	{	addBondCoupleHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("screenCoulomb"))	{	addScreenCoulomb(iter.first, iter.second);	}
 			
 			
 			if( Lat.HSpace() != NORMAL){
@@ -1101,7 +1168,6 @@ public:
 		
 		return xvec;
 	}
-
 
 private:
 	void clear			()						{

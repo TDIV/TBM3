@@ -195,12 +195,15 @@ public:
 	AtomPair		getPair(string bondStr)					{
 		return getPair(vec(bondStr));
 	}
-	pair<Atom, vector<Atom> > getBox()						{
+	pair<Atom, vector<Atom> > getRBox(double radius = -1)	{
 		Atom atomI = getAtom();
 		r_mat pos = atomI.pos;
 		
 		vector<value> result_s;
-		r_var radius = abs(parameter.VAR("bondRadius", 1).real());
+		
+		if( radius < 0){
+			radius = abs(parameter.VAR("bondRadius", 1).real());
+		}
 		box query_box(point(pos[0] - radius, pos[1] - radius, pos[2] - radius),
 					  point(pos[0] + radius, pos[1] + radius, pos[2] + radius));
 		

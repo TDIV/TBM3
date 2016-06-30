@@ -14,9 +14,9 @@
 //  TBM^3
 //
 
-class TBOrderIteration{
+class TBClassicalSpinBase{
 public:
-	TBOrderIteration(TBDataSource & _tbd): TBD(_tbd)		{ }
+	TBClassicalSpinBase(TBDataSource & _tbd): TBD(_tbd)		{ }
 	
 	void addHundCoupling	(string opt, string svar)		{
 		replaceAll(opt, "\t", " ");
@@ -128,7 +128,7 @@ private:
 	vector<boost::tuple<Atom, x_mat, r_var, string> >			HundCouplingList;
 	vector<boost::tuple<Atom, x_mat, x_mat, r_var, string> >	SuperExchangeList;
 	vector<boost::tuple<Atom, x_mat, x_mat, x_mat, string> >	DMExchangeList;
-	
+	vector<boost::tuple<Atom, x_mat, x_mat, string> >			MagneticFieldList;
 public:
 	
 	void	constructHamList()								{
@@ -157,8 +157,6 @@ public:
 			auto si = elem.get<1>();
 			auto sj = elem.get<2>();
 			auto Js = elem.get<3>();
-
-			SE_Energy += cdot(si,sj) * Js;
 		}
 		
 		// Calculate DM Exchange energy.
@@ -174,9 +172,9 @@ public:
 		TBD.energyMap["3.DM Eng"] = DM_Energy.real();
 	}
 	
-	double	iterateOrder(OrderParameter & newOrder)			{
+	pair<double,double> iterateSpinOrder(OrderParameter & newOrder)		{
 		
-		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
+		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return make_pair(0,0); }
 		
 		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
 			TBD.calculate4DensityOrder();
@@ -247,9 +245,6 @@ public:
 				sumDj[2] = - d[0]* sj[1] + d[1]* sj[0] ;
 			}
 			
-			//if( vecToStr( atomI.pos ) == "+1+1+0")
-			cout<<atomI.atomIndex<<" "<<d<<" "<<si<<" "<<sj<<" "<<sumDj<<endl;
-			
 			if( Field.find(atomI.atomIndex) == Field.end() ) {
 				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
 				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - sumDj;
@@ -291,19 +286,28 @@ public:
 				double spin_diff = abs(cdot(Sdiff,Sdiff));
 				
 				if( spin_diff > max_spin_diff ) max_spin_diff = spin_diff;
-				//cout<<Si<<" "<<Snew<<" "<<spin_diff<<endl;
-				
 				
 				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
 			}
 		}
+		
+		
+		double max_den_diff = 0;
+		while( TBD.Lat.iterate() ){
+			auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
+			auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
+			if( parameter_old.first and parameter_new.first ){
+				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+				if( max_den_diff < den_diff ) max_den_diff = den_diff;
+			}
+		}
+		
 		newOrder.save();
 		
-		TBD.calculateEnergy();
 		calculateClassicalEnergy();
+		TBD.calculateEnergy();
 		
-		
-		return max_spin_diff;
+		return make_pair( max_spin_diff, max_den_diff);
 	}
 
 private:

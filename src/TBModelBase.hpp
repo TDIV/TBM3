@@ -51,7 +51,6 @@ protected:
 	TBDataSource & tbd;
 	TBDataSource & stbd;
 	
-	
 	vector<pair<string,r_mat> >	kSpaceHighSymmetryPoints;
 	
 	bool iterate(){ return Lat.iterate(); }
@@ -224,12 +223,12 @@ protected:
 			}
 		}
 		
+		rtbd.order.save();
 		
 		return totalDen;
 	}
 	void	calculateChemicalPotential(bool printResult = false)							{
 
-		
 		KHamEvd(stbd, false);
 		double	destDen = countTotalElectron();
 		
@@ -245,8 +244,8 @@ protected:
 		if( printResult )
 		cout<<" "<<fmt("Mu",printLen)
 			<<" "<<fmt("Dest e-den",printLen)
-			<<"   "<<fmt("True e-den",printLen)
-			<<"   "<<fmt("total_n_diff",printLen)<<endl;
+			<<" "<<fmt("True e-den",printLen)
+			<<" "<<fmt("total_n_diff",printLen)<<endl;
 		
 		do{
 			double totalDen = calculateElectronFilling(stbd, destMu);
@@ -266,12 +265,41 @@ protected:
 		
 		}while ( abs(n_diff) > abs(dest_den_diff) );
 		
-		stbd.order.save("");
-		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;
 	}
-	
+	double	iterateDenOrder			(OrderParameter & newOrder, double mix = 0.1)			{
+		
+		tbd.order_old = tbd.order;
+		calculateChemicalPotential(false);
+		
+		double ratio_a = 0;
+		double ratio_b = 1;
+		
+		if( mix > 0 and mix < 1){
+			ratio_a = 1-mix;
+			ratio_b = mix;
+		}
+		
+		double max_den_diff = 0;
+		while( iterate() ){
+			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
+			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
+			if( parameter_old.first and parameter_new.first ){
+				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+				if( max_den_diff < den_diff ) max_den_diff = den_diff;
+			}
+			
+			auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
+			
+			newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
+		}
+		tbd.calculateEnergy();
+		newOrder.save();
+		
+		return max_den_diff;
+	}
+
 public:
 	/* Expand the lattice into a larger size. */
 	void saveExpandedLattice(unsigned N1, unsigned N2, unsigned N3)							{
