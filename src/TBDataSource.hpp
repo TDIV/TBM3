@@ -111,11 +111,6 @@ public:
 		if( atomI.atomName != parser[0]){ return; } // Name does not match.
 		if(!atomI.hasOrbital(parser[1])){ return; } // No such orbital.
 		
-		//auto xvec = parseSiteVecString(atomI, svar);
-		//x_mat sVec(1,3);
-		//if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-		//for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-		
 		auto svarParser = split(svar, "*");
 		auto orderKey = svarParser[0];
 		r_var Jh = 1.0;
@@ -860,6 +855,76 @@ public:
 		
 	}
 	
+	void addFieldB		(string opt, string svar)		{ // svar === " @:cspin * Jse "
+		replaceAll(opt, "\t", " ");
+		auto  parser = split(opt, " ");
+		if( parser.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( parser.size() == 1){ return; }
+		
+		removeSpace(parser[0]);
+		auto dummyParser = split(opt, ":");
+		if( dummyParser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != parser[0])	return;
+		
+		
+		removeSpace(svar);
+		auto svarParser = split(svar, "*");
+		auto vectorB = parseSiteString(atomI, svarParser[0]);
+		r_var multiplyB = 1.0;
+		if( svarParser.size() == 2) multiplyB = parseSiteString(atomI, svarParser[1])[0].real();
+		
+		vectorB = vectorB * multiplyB;
+		
+		string orbital = parser[1];
+		r_var Sx = vectorB[0].real();
+		r_var Sy = vectorB[1].real();
+		r_var Sz = vectorB[2].real();
+		switch( Lat.HSpace() ){
+			case NORMAL: {
+				unsigned indexNu = atomI.index(orbital+"u");
+				unsigned indexNd = atomI.index(orbital+"d");
+				
+				hamElementList.push_back(MatrixElement(indexNu, indexNd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNu, indexNu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNd,-Sz			, vec(0,0,0)));
+				break;
+			}
+			case NAMBU: {
+				unsigned indexAu = atomI.index(orbital+"Au");
+				unsigned indexBd = atomI.index(orbital+"Bd");
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				if( Sx > 0.0001 or Sy > 0.0001){
+					ErrorMessage("Error, spin-flip operation:\n"+
+							 opt+
+							 ".\n Cannot be applied for a spin-depende Nambu space Hamiltonian.");
+				}
+				break;
+			}
+			case EXNAMBU: {
+				unsigned indexAu = atomI.index(orbital+"Au");
+				unsigned indexAd = atomI.index(orbital+"Ad");
+				unsigned indexBu = atomI.index(orbital+"Bu");
+				unsigned indexBd = atomI.index(orbital+"Bd");
+				
+				hamElementList.push_back(MatrixElement(indexAu, indexAd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
+				
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				break;
+			}
+		}
+	}
+	
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
@@ -881,6 +946,7 @@ public:
 			for( auto & iter : Lat.hamParser.getOperationList("bond")		)	{	addBondCouple(iter.first, iter.second	);	}
 			for( auto & iter : Lat.hamParser.getOperationList("bondHc")		)	{	addBondCoupleHc(iter.first, iter.second	);	}
 			for( auto & iter : Lat.hamParser.getOperationList("screenCoulomb"))	{	addScreenCoulomb(iter.first, iter.second);	}
+			for( auto & iter : Lat.hamParser.getOperationList("fieldB")	)		{	addFieldB(iter.first, iter.second		);	}
 			
 			
 			if( Lat.HSpace() != NORMAL){
