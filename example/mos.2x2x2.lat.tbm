@@ -12,24 +12,24 @@ space		= "normal"
 Nb			= 2,2,2
 var_dt		= 0.01
 spin_diff	= 0.00001
-den_diff	= 0.01
+den_diff	= 0.1
 den_mix		= 0.2
 bondRadius	= 6
 
 Mu			= 0
 Temperature	= 0.1
-Jh			=-1
+Jh			= 2
 Jse			= 0.0
 Jdm			= 0.0
 OOhop		= 0.3
 alpha		= 0.2
-B			=-0.1
+B			=-3.0
 
 #CoreCharge
 VC	> 0
-Bi	> 3
+Bi	> 2.7
 LS	> 2.7
-Fe	> 5
+Fe	> 4
 Mn	> 4
 O	> 0
 
@@ -58,10 +58,10 @@ O		den			> 2
 hundSpin  > Fe 1 > @:cspin * Jh 
 hundSpin  > Fe 2 > @:cspin * Jh 
 
-fieldB	> Fe   > [0,0,1] * B	% The B field to the classical spin
-fieldB	> Fe 1 > [0,0,1] * B	% The B field to the itinerant dx2-y2 electron
-fieldB	> Fe 2 > [0,0,1] * B	% The B field to the itinerant dz2 electron
-fieldB	> O  1 > [0,0,1] * B	% The B field to the oxygen p electron
+%fieldB	> Fe   > [1,0,0] * B	% The B field to the classical spin
+fieldB	> Fe 1 > [0,1,0] * B	% The B field to the itinerant dx2-y2 electron
+fieldB	> Fe 2 > [0,1,0] * B	% The B field to the itinerant dz2 electron
+fieldB	> O  1 > [0,1,0] * B	% The B field to the oxygen p electron
 
 superEx	> Fe:Fe:+1+0+0 > @:cspin * Jse
 superEx	> Fe:Fe:-1+0+0 > @:cspin * Jse

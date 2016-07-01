@@ -231,14 +231,14 @@ public:
 			
 			if( Field.find(atomI.atomIndex) == Field.end() ) {
 				Field[atomI.atomIndex] = make_pair(x_mat(1,3), optKey);
-				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - Si;
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first + Si;
 			}
 			else{
 				if( Field[atomI.atomIndex].second != optKey ){
 					ErrorMessage("Error, ambiguous definition of the force order for:\n"
 								 +Field[atomI.atomIndex].second+" and "+optKey+".\n");
 				}
-				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first - Si;
+				Field[atomI.atomIndex].first = Field[atomI.atomIndex].first + Si;
 			}
 		}
 		

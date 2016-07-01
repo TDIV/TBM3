@@ -131,9 +131,9 @@ public:
 		//normalizeXVec( sVec );
 		
 		string orbital = parser[1];
-		r_var Sx = sVec[0].real();
-		r_var Sy = sVec[1].real();
-		r_var Sz = sVec[2].real();
+		r_var Sx =-sVec[0].real();
+		r_var Sy =-sVec[1].real();
+		r_var Sz =-sVec[2].real();
 		switch( Lat.HSpace() ){
 			case NORMAL: {
 				unsigned indexNu = atomI.index(orbital+"u");
@@ -879,9 +879,9 @@ public:
 		vectorB = vectorB * multiplyB;
 		
 		string orbital = parser[1];
-		r_var Sx = vectorB[0].real();
-		r_var Sy = vectorB[1].real();
-		r_var Sz = vectorB[2].real();
+		r_var Sx =-vectorB[0].real();
+		r_var Sy =-vectorB[1].real();
+		r_var Sz =-vectorB[2].real();
 		switch( Lat.HSpace() ){
 			case NORMAL: {
 				unsigned indexNu = atomI.index(orbital+"u");
