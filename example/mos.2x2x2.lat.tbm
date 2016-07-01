@@ -5,22 +5,25 @@ isCalculateLDOS	= 0
 isCalculateBand	= 1
 isCalculateHam 	= 0
 
-disable_quantum = 1
+disable_quantum = 0
 
-bondRadius	= 3
-Mu			= 0
-Temperature	= 0.1
-
-Jh			=-0
-Jse			= 0.0
-Jdm			= 1.0
-
-var_dt		= 0.2
 spin		= "on"
 space		= "normal"
 Nb			= 2,2,2
-OOhop		= 0.3
+var_dt		= 0.01
 spin_diff	= 0.00001
+den_diff	= 0.01
+den_mix		= 0.2
+bondRadius	= 6
+
+Mu			= 0
+Temperature	= 0.1
+Jh			=-1
+Jse			= 0.0
+Jdm			= 0.0
+OOhop		= 0.3
+alpha		= 0.2
+B			=-0.1
 
 #CoreCharge
 VC	> 0
@@ -55,6 +58,11 @@ O		den			> 2
 hundSpin  > Fe 1 > @:cspin * Jh 
 hundSpin  > Fe 2 > @:cspin * Jh 
 
+fieldB	> Fe   > [0,0,1] * B	% The B field to the classical spin
+fieldB	> Fe 1 > [0,0,1] * B	% The B field to the itinerant dx2-y2 electron
+fieldB	> Fe 2 > [0,0,1] * B	% The B field to the itinerant dz2 electron
+fieldB	> O  1 > [0,0,1] * B	% The B field to the oxygen p electron
+
 superEx	> Fe:Fe:+1+0+0 > @:cspin * Jse
 superEx	> Fe:Fe:-1+0+0 > @:cspin * Jse
 superEx	> Fe:Fe:+0+1+0 > @:cspin * Jse
@@ -72,6 +80,10 @@ dmEx	> Fe:Fe:+0+0-1 > @:cspin * Jdm
 % Fe-O bond hopping terms
 orbital	> Fe 1 > 0
 orbital	> Fe 2 > 0
+
+%screenCoulomb > Fe ~2 > @:den * alpha
+%screenCoulomb > O  ~2 > @:den * alpha
+
 hoppingHc > Fe:O:+1+0+0# 1:px >  0.5  
 hoppingHc > Fe:O:+0+1+0# 1:py >  0.5  
 hoppingHc > Fe:O:+0+0+1# 1:pz > -1.0  
@@ -101,6 +113,13 @@ hopping > O:O:+0+1-1# 1:1 > -1 * OOhop
 hopping > O:O:+0-1+1# 1:1 > -1 * OOhop
 hopping > O:O:+0-1-1# 1:1 >  1 * OOhop
 
+pairingS > Fe 1:1 > 0.3
+pairingS > Fe 2:2 > 0.3
+%pairingU > Fe 1:1 > 1
+%pairingU > Fe 2:2 > 1
+%pairingT > Fe 1:1 > 1
+%pairingT > Fe 2:2 > 1
+
 %pairingS > Fe:Fe:+1+0+0 1:1 > @:1:1:pairS
 %pairingS > Fe:Fe:+0+1+0 1:1 > @:1:1:pairS
 %pairingS > Fe:Fe:+0+0+1 1:1 > @:1:1:pairS
@@ -113,11 +132,4 @@ hopping > O:O:+0-1-1# 1:1 >  1 * OOhop
 %pairingS > Fe:Fe:-1+0+0 2:2 > @:2:2:pairS
 %pairingS > Fe:Fe:+0-1+0 2:2 > @:2:2:pairS
 %pairingS > Fe:Fe:+0+0-1 2:2 > @:2:2:pairS
-
-pairingS > Fe 1:1 > 0.3
-pairingS > Fe 2:2 > 0.3
-%pairingU > Fe 1:1 > 1
-%pairingU > Fe 2:2 > 1
-%pairingT > Fe 1:1 > 1
-%pairingT > Fe 2:2 > 1
 
