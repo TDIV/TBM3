@@ -61,7 +61,6 @@ public:
 		
 		if( Lat.parameter.VAR("isCalculateVar", 0).real() == 1 ){
 			calculateVar();
-			//calculateDenMeanField();
 		}
 		
 		if( Lat.parameter.VAR("isCalculateBand", 0).real() == 1 ){
@@ -74,6 +73,9 @@ public:
 	}
 	
 	void calculateDenMeanField(){
+		
+		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return; }
+			
 		cout<<endl<<"--Calculating electron density self-consistantly."<<endl;
 		
 		double den_diff = 1;
@@ -85,7 +87,7 @@ public:
 			cout<<" Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
-				cout<< gmt::fformat(iter.first+" ", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
 				TotalE += iter.second;
 			}
 			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
@@ -97,8 +99,6 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		
-		//calculateDenMeanField();
 		
 		// Full iteration, depends on the convergence criteria.
 		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) ){
@@ -126,7 +126,6 @@ public:
 				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())			){
 			
 			calculateDenMeanField();
-			
 			
 			for( unsigned i=0 ; i<4 ; i++){
 				KHamEvd(tbd);

@@ -19,9 +19,6 @@ namespace bgi = boost::geometry::index;
 
 enum H_SPACE { NORMAL, NAMBU, EXNAMBU };
 
-
-
-
 //----------------------
 class Atom{
 private:
@@ -142,9 +139,7 @@ public:
 	}
 	
 	vector<pair<string, unsigned> > &
-	allIndexList()						{
-		return indexList;
-	}
+	allIndexList()						{ return indexList; }
 	
 	vector<pair<string, unsigned> >
 	orbitalIndexList(string orb)		{

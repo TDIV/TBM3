@@ -45,7 +45,6 @@
 // BEGIN INCLUDING 3RD PARTY HEADERS
 #include <boost/geometry/index/rtree.hpp>
 #include <boost/tuple/tuple.hpp>
-//#include <boost/python.hpp>
 
 #if defined __SUNPRO_CC
 #   pragma enable_warn

@@ -270,6 +270,8 @@ protected:
 	}
 	double	iterateDenOrder			(OrderParameter & newOrder, double mix = 0.1)			{
 		
+		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
+		
 		tbd.order_old = tbd.order;
 		calculateChemicalPotential(false);
 		

@@ -10,7 +10,7 @@
 |-----------------------------------------------------------*/
 
 //
-//  TBOrderIteration.hpp
+//  TBClassicalSpinBase.hpp
 //  TBM^3
 //
 
@@ -124,19 +124,16 @@ public:
 	}
 	void addFieldB			(string opt, string svar)		{ // svar === " @:cspin * Jse "
 		replaceAll(opt, "\t", " ");
-		auto  dummyParser = split(opt, " ");
-		if( dummyParser.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( dummyParser.size() == 2){ return; }
+		auto  optParser = split(opt, " ");
+		if( optParser.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( optParser.size() == 2){ return; }
 		
-		removeSpace(opt);
-		auto parser = split(opt, ":");
+		removeSpace(optParser[0]);
+		auto parser = split(optParser[0], ":");
 		if( parser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = TBD.Lat.getAtom();
-		if( atomI.atomName != parser[0])	return;
-		
-		auto ordS = TBD.order.findOrder(atomI, "@:cspin");
-		if( !ordS.first ) return;
+		if( atomI.atomName != optParser[0])	return;
 		
 		removeSpace(svar);
 		auto svarParser = split(svar, "*");
@@ -146,6 +143,8 @@ public:
 		
 		vectorB = vectorB * multiplyB;
 		
+		auto ordS = TBD.order.findOrder(atomI, "@:cspin");
+		if( !ordS.first ) return;
 		FieldBList.push_back(boost::make_tuple(atomI, ordS.second, vectorB));
 	}
 private:
@@ -154,7 +153,7 @@ private:
 	vector<boost::tuple<Atom, x_mat, r_var, string> >			HundCouplingList;
 	vector<boost::tuple<Atom, x_mat, x_mat, r_var, string> >	SuperExchangeList;
 	vector<boost::tuple<Atom, x_mat, x_mat, x_mat, string> >	DMExchangeList;
-	vector<boost::tuple<Atom, x_mat, x_mat> >							FieldBList;
+	vector<boost::tuple<Atom, x_mat, x_mat> >					FieldBList;
 public:
 	
 	void	constructHamList()								{
@@ -162,6 +161,7 @@ public:
 		HundCouplingList.clear();
 		SuperExchangeList.clear();
 		DMExchangeList.clear();
+		FieldBList.clear();
 		
 		//TBD.calculate4DensityOrder();
 		
@@ -184,6 +184,8 @@ public:
 			auto si = elem.get<1>();
 			auto sj = elem.get<2>();
 			auto Js = elem.get<3>();
+			
+			SE_Energy += Js * cdot(si,sj);
 		}
 		
 		// Calculate DM Exchange energy.
@@ -205,7 +207,7 @@ public:
 		
 		TBD.energyMap["2.SE Eng"] = SE_Energy.real();
 		TBD.energyMap["3.DM Eng"] = DM_Energy.real();
-		TBD.energyMap["4.FB Eng"] = DM_Energy.real();
+		TBD.energyMap["4.FB Eng"] = FB_Energy.real();
 	}
 	
 	pair<double,double> iterateSpinOrder(OrderParameter & newOrder)		{
@@ -344,12 +346,14 @@ public:
 		
 		
 		double max_den_diff = 0;
-		while( TBD.Lat.iterate() ){
-			auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
-			auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
-			if( parameter_old.first and parameter_new.first ){
-				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-				if( max_den_diff < den_diff ) max_den_diff = den_diff;
+		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
+			while( TBD.Lat.iterate() ){
+				auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
+				auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
+				if( parameter_old.first and parameter_new.first ){
+					auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+					if( max_den_diff < den_diff ) max_den_diff = den_diff;
+				}
 			}
 		}
 		
