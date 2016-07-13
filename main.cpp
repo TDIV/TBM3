@@ -24,7 +24,10 @@ public:
 	TBModel(string filename):
 		tbm::TBModelBase(filename),
 		tbm::TBClassicalSpinBase(tbd)
-		{  }
+		{
+			iteration_max = tbd.Lat.parameter.VAR("max_iter", 5000).real();
+			iteration_steps = 0;
+		}
 
 	void initOrder()	override {
 		tbd.order.clear();
@@ -72,6 +75,11 @@ public:
 		cout<<"Finished."<<endl<<endl;
 	}
 	
+	bool iterationStepIncr(){
+		iteration_steps += 1;
+		return iteration_steps <= iteration_max;
+	}
+	
 	void calculateDenMeanField(){
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return; }
@@ -80,11 +88,13 @@ public:
 		
 		double den_diff = 1;
 		
-		while( den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())){
+		while( den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real()) and iterationStepIncr() ){
 			
+			tbd.order.load();
+			tbd.order.save("previous");
 			KHamEvd(tbd);
 			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
-			cout<<" Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
+			cout<< gmt::fformat(iteration_steps, 5) <<" Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
 				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
@@ -101,13 +111,15 @@ public:
 		double den_diff = 1;
 		
 		// Full iteration, depends on the convergence criteria.
-		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) ){
+		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) and iterationStepIncr()){
 			
+			tbd.order.load();
+			tbd.order.save("previous");
 			KHamEvd(tbd);
 			auto diff = iterateSpinOrder(tbd.order);
 			spin_diff = diff.first;
 			den_diff = diff.second;
-			cout<<"Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
+			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
 				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
@@ -122,11 +134,16 @@ public:
 		double spin_diff = 1;
 		double den_diff = 1;
 		
-		while(	spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) or
-				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())			){
+		while(	(
+				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
+				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
+				)		and
+				iterationStepIncr()){
 			
 			calculateDenMeanField();
 			
+			tbd.order.load();
+			tbd.order.save("previous");
 			for( unsigned i=0 ; i<4 ; i++){
 				KHamEvd(tbd);
 				iterateSpinOrder(tbd.order);
@@ -137,8 +154,10 @@ public:
 			auto diff = iterateSpinOrder(tbd.order);
 			spin_diff = diff.first;
 		}
-
 	}
+private:
+	unsigned iteration_steps;
+	unsigned iteration_max;
 };
 
 int main(int argc, char *argv[]) {
