@@ -855,7 +855,7 @@ public:
 		
 	}
 	
-	void addFieldB		(string opt, string svar)		{ // svar === " @:cspin * Jse "
+	void addFieldB		(string opt, string svar)	{ // svar === " @:cspin * Jse "
 		replaceAll(opt, "\t", " ");
 		auto  parser = split(opt, " ");
 		if( parser.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
@@ -955,9 +955,7 @@ public:
 				for( auto & iter : Lat.hamParser.getOperationList("pairingD") ){ addPairingD	(iter.first, iter.second	); }
 				for( auto & iter : Lat.hamParser.getOperationList("pairingT") ){ addPairingT	(iter.first, iter.second	); }
 			}
-			
 		}
-
 	}
 	void addChemicalPotential(r_var mu)			{
 		

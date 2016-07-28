@@ -263,7 +263,7 @@ public:
 	H_SPACE			HSpace()			{return h_space;}
 	string			FileName()			{return filename;}
 	
-	vector<Atom>	getAtomList(){ return atomList; }
+	vector<Atom>	getAtomList()		{ return atomList; }
 	
 	bool			iterate()			{
 		atomIndex++;
@@ -277,7 +277,7 @@ public:
 	
 private:
 	
-	void createAtomList(){
+	void createAtomList()				{
 		Atom::totalIndexSize = 0;
 		index_size = 0;
 		
@@ -317,7 +317,7 @@ private:
 
 	}
 	
-	void updateExtendedAtomList(){
+	void updateExtendedAtomList()		{
 		
 		extendedAtomList.clear();
 		

@@ -303,6 +303,11 @@ protected:
 	}
 
 public:
+	/* Execute the calculations. */
+	void render				()																{
+		run();
+	}
+	
 	/* Expand the lattice into a larger size. */
 	void saveExpandedLattice(unsigned N1, unsigned N2, unsigned N3)							{
 		auto	parseFilename = split(Lat.FileName(),".");
@@ -391,8 +396,143 @@ public:
 		tbmOutfile.close();
 		infile.close();
 	}
-	void render(){
-		run();
+
+	/* Convert the lattice file formate to VESTA formate. */
+	void convertTo_VESTA	(vector<string> argsForOrder)									{
+		string filename = Lat.FileName()+".vesta";
+		ofstream outfile(filename);
+		outfile<<"#VESTA_FORMAT_VERSION 3.3.0"<<endl<<endl<<endl;
+		outfile<<"CRYSTAL"<<endl<<endl;
+		outfile<<"TITLE"<<endl;
+		outfile<<Lat.FileName()<<endl<<endl;
+		
+		// Convert the unitcell structure.
+		outfile<<"CELLP"<<endl;
+		auto AVec = Lat.basisVector.getAVec();
+		double len_a = sqrt(cdot(AVec[0], AVec[0]));
+		double len_b = sqrt(cdot(AVec[1], AVec[1]));
+		double len_c = sqrt(cdot(AVec[2], AVec[2]));
+		double ang_bc= acos( cdot(AVec[1], AVec[2])/(len_b*len_c) )*360/(2*pi);
+		double ang_ca= acos( cdot(AVec[2], AVec[0])/(len_c*len_a) )*360/(2*pi);
+		double ang_ab= acos( cdot(AVec[0], AVec[1])/(len_a*len_b) )*360/(2*pi);
+		outfile<<" "<<fformat(len_a, 10);
+		outfile<<" " <<fformat(len_b,10);
+		outfile<<" " <<fformat(len_c, 9);
+		outfile<<" " <<fformat(abs(ang_bc), 10);
+		outfile<<" " <<fformat(abs(ang_ca), 10);
+		outfile<<" " <<fformat(abs(ang_ab), 10);
+		outfile<<endl<<"  0.000000   0.000000   0.000000   0.000000   0.000000   0.000000"<<endl;
+		
+		// Convert the atom position.
+		outfile<<"STRUC"<<endl;
+		auto atomList = Lat.getAtomList();
+		for(auto & atom: atomList){
+			outfile	<<"  "<<fformat(atom.atomIndex+1,5)
+					<<" "<<fformat(atom.atomName,6)
+					<<" "<<fformat(atom.orbitalOriginIndex,2)
+					<<"  1.0000  ";
+			double pos_a = cdot(atom.pos, AVec[0])/(len_a*len_a);
+			double pos_b = cdot(atom.pos, AVec[1])/(len_b*len_b);
+			double pos_c = cdot(atom.pos, AVec[2])/(len_c*len_c);
+			outfile<<fformat(pos_a, 11);
+			outfile<<fformat(pos_b, 11);
+			outfile<<fformat(pos_c, 11);
+			outfile<<"  1a       1";
+			outfile<<endl;
+			outfile<<"                            0.000000   0.000000   0.000000  0.00"<<endl;
+		}
+		outfile<<"  0 0 0 0 0 0 0"<<endl;
+		
+		// Handle the arguments for plotting the order parameters.
+		// vec=@:cspin>1,2,3
+		// vec=@:1:4den>2,3,4
+		vector<boost::tuple<string, Atom, x_mat> > orderAtomVecRColor;
+		
+		for( unsigned i = 2 ; i<argsForOrder.size() ; i++ ){
+			string orderArg = argsForOrder[i];
+			cout<<" >> Handling order argument: ";
+			cout<<orderArg<<"."<<endl;
+			auto argParser = split(orderArg, "=");
+			if( argParser.size() <= 1 )		{
+				cout<<"Warning, \'"<<orderArg<<"\' is not an effective order argument. Ignored!"<<endl;
+				continue;
+			}
+			
+			vestaOrderHandler(argParser[0], argParser[1], orderAtomVecRColor);
+
+		}
+		
+		outfile<<"VECTR"<<endl;
+		for( unsigned ii=0 ; ii < orderAtomVecRColor.size() ; ii++ ){
+			
+			auto & ordElement = orderAtomVecRColor[ii];
+			auto arg = ordElement.get<0>();
+			auto vec = ordElement.get<2>();
+			auto atom = ordElement.get<1>();
+			
+			if( arg == "vec"){
+				outfile<<"   "<<fformat(ii+1,4);
+				for( unsigned i=0; i<vec.size() ; i++){
+					outfile<<fformat(vec[i].real());
+				}
+				outfile<<endl;
+				outfile<<"    "<<fformat(atom.atomIndex+1,3)<<" 0    0    0    0"<<endl;
+				outfile<<" 0 0 0 0 0"<<endl;
+			}
+		}
+		outfile<<" 0 0 0 0 0"<<endl;
+		
+		outfile<<"VECTT"<<endl;
+		for( unsigned ii=0 ; ii < orderAtomVecRColor.size() ; ii++ ){
+			
+			auto & ordElement = orderAtomVecRColor[ii];
+			auto arg = ordElement.get<0>();
+			auto vec = ordElement.get<2>();
+			
+			if( arg == "vec"){
+				outfile<<"   "<<fformat(ii+1,4)<<"0.200 255   0   0 0"<<endl;
+			}
+
+		}
+		outfile<<" 0 0 0 0 0"<<endl;
+		
+		cout<<endl;
+		                              
+		outfile.close();
+	}
+private:
+	void vestaOrderHandler( string ordArg, string ordNameArg, vector<boost::tuple<string, Atom, x_mat> > & orderAtomVec){
+		
+		auto ordNameParser = split(ordNameArg, "~");
+		string ordName = ordNameParser[0];
+		vector<int> ordVecIndex;
+		
+		if( ordNameParser.size() == 1 ){
+			ordVecIndex.push_back(1);
+			ordVecIndex.push_back(2);
+			ordVecIndex.push_back(3);
+		}
+		else if( ordNameParser.size() == 2 ){
+			for( auto indexStr: split(ordNameParser[1], ",")){
+				ordVecIndex.push_back(StrToInt(indexStr));
+			}
+		}
+		
+		tbd.order.load();
+		while(Lat.iterate()){
+			auto ordMat = tbd.order.findOrder(Lat.getAtom(), ordName);
+			if( ordMat.first ){
+				x_mat tmpOrd(1, ordVecIndex.size());
+				for(unsigned i=0 ; i<ordVecIndex.size() ; i++){
+					unsigned index = ordVecIndex[i];
+					if( index <= ordMat.second.size() )
+						tmpOrd[i] = ordMat.second[index-1];
+				}
+				//cout<<ordMat.second<<" "<<tmpOrd<<endl;
+				orderAtomVec.push_back(boost::make_tuple(ordArg, Lat.getAtom(), tmpOrd));
+			}
+		}
+	
 	}
 };
 
