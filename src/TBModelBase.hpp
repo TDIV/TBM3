@@ -470,7 +470,7 @@ public:
 			auto vec = ordElement.get<2>();
 			auto atom = ordElement.get<1>();
 			
-			if( arg == "vec"){
+			if( arg == "vec" || arg == "rvec" || arg == "gvec" || arg == "bvec" || arg == "rgbvec"){
 				outfile<<"   "<<fformat(ii+1,4);
 				for( unsigned i=0; i<vec.size() ; i++){
 					outfile<<fformat(vec[i].real());
@@ -489,8 +489,16 @@ public:
 			auto arg = ordElement.get<0>();
 			auto vec = ordElement.get<2>();
 			
-			if( arg == "vec"){
-				outfile<<"   "<<fformat(ii+1,4)<<"0.200 255   0   0 0"<<endl;
+			if( arg == "vec" )	{ outfile<<"   "<<fformat(ii+1,4)<<" 0.200   0   0   0 0"<<endl; }
+			if( arg == "rvec")	{ outfile<<"   "<<fformat(ii+1,4)<<" 0.200 255   0   0 0"<<endl; }
+			if( arg == "gvec")	{ outfile<<"   "<<fformat(ii+1,4)<<" 0.200   0 255   0 0"<<endl; }
+			if( arg == "bvec")	{ outfile<<"   "<<fformat(ii+1,4)<<" 0.200   0   0 255 0"<<endl; }
+			if( arg == "rgbvec"){
+				auto vecLen = sqrt(cdot(vec,vec).real());
+				unsigned colR = (unsigned) abs(255* vec[0].real() / vecLen);
+				unsigned colG = (unsigned) abs(255* vec[1].real() / vecLen);
+				unsigned colB = (unsigned) abs(255* vec[2].real() / vecLen);
+				outfile<<"   "<<fformat(ii+1,4)<<" 0.200 "<<colR<<" "<<colG<<" "<<colB<<" "<<" 0"<<endl;
 			}
 
 		}
@@ -499,6 +507,26 @@ public:
 		cout<<endl;
 		                              
 		outfile.close();
+	}
+	
+	void shiftXYZ			(double X, double Y, double Z)									{
+		
+		tbd.order.load();
+		Lat.shiftXYZ(X, Y, Z);
+		
+		// Save the expanded file.
+		ofstream outfile(Lat.FileName());
+		outfile<<Lat.kSymmPointParser.getFileString();
+		outfile<<Lat.bondVector.getFileString();
+		outfile<<Lat.basisVector.getFileString();
+		outfile<<Lat.orbitalProfile.getFileString();
+		outfile<<Lat.atomParser()<<endl;
+		while(Lat.iterate()){
+			outfile<<Lat.getAtom().posToStr()<<endl;
+		}
+		outfile.close();
+		
+		tbd.order.save();
 	}
 private:
 	void vestaOrderHandler( string ordArg, string ordNameArg, vector<boost::tuple<string, Atom, x_mat> > & orderAtomVec){

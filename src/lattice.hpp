@@ -275,6 +275,16 @@ public:
 		return true;
 	}
 	
+	void			shiftXYZ(double X, double Y, double Z)	{
+		r_mat shiftPos(1,3);
+		shiftPos[0] = X;
+		shiftPos[1] = Y;
+		shiftPos[2] = Z;
+		for( auto & atom: atomList ){
+			atom.pos = atom.pos + shiftPos;
+		}
+	}
+	
 private:
 	
 	void createAtomList()				{

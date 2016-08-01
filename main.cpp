@@ -212,6 +212,19 @@ int main(int argc, char *argv[]) {
 		model.convertTo_VESTA(operationList);
 	}
 	
+	else if	( operationList[1] == "-shift"){
+		//cout<<endl<<"Convert to the VESTA file formate:"<<filename<<".vesta"<<endl<<endl;
+		
+		vector<double> shiftXYZ;
+		for(unsigned i=2 ; i<operationList.size() ; i++){ shiftXYZ.push_back(tbm::StrToDouble(operationList[i])); }
+		
+		while( shiftXYZ.size() < 3 ){
+			shiftXYZ.push_back(0);
+		}
+		
+		model.shiftXYZ(shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
+	}
+	
 	else	{
 		tbm::ErrorMessage("Error, input operation not found:" +operationList[1]);
 	}
