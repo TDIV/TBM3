@@ -633,6 +633,7 @@ public:
 		outfile.close();
 	}
 	
+	/* Shift the cordinate of each atom. */
 	void shiftXYZ			(double X, double Y, double Z)									{
 		
 		tbd.order.load();
