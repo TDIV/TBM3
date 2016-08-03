@@ -72,8 +72,11 @@ public:
 			cout<<endl;
 		}
 		
-		cout<<endl<<">> Calculating LDOS."<<endl;
-		calculateLDOS(tbd);
+		if( Lat.parameter.VAR("isCalculateLDOS", 0).real() == 1 ){
+			cout<<endl<<">> Calculating LDOS."<<endl;
+			calculateLDOS(tbd);
+			cout<<endl;
+		}
 		
 	}
 	

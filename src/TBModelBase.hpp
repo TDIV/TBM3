@@ -37,7 +37,9 @@ public:
 		spinNormalTBD	(spinNormalLat),
 		tbd				(TBD),
 		stbd			(spinNormalTBD	)
-	{	}
+	{
+		kMeshSelection = "Nb";
+	}
 	
 protected:
 	Lattice	Lat;
@@ -133,13 +135,15 @@ protected:
 	/*-----------------------------------------------------
 	 Diagonalize the full Hamiltonian and store the results in KEigenValVec.
 	 ------------------------------------------------------*/
+	string	kMeshSelection;
 	void	KHamEvd					(TBDataSource & rtbd, bool withMu = true)				{
 		
 		constructHam(rtbd, withMu);
 		
 		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ) return;
 		
-		auto Nb = Lat.parameter.VEC("Nb");
+		auto Nb = Lat.parameter.VEC(kMeshSelection,
+									Lat.parameter.VEC("Nb"));
 		
 		if( Nb.size() == 1){
 			auto B = Lat.basisVector.getBVec();
@@ -286,7 +290,10 @@ protected:
 		vector<boost::tuple<Atom, OrbitalIndexLabel, LDOS > > atomLDOSList;
 		
 		
+		kMeshSelection = "ldos_Nb";
 		KHamEvd(rtbd);
+		kMeshSelection = "Nb";
+		
 		// Handling the LDOS label for the up coming calculation.
 		for( auto & elem: Lat.ldosList.LDOSSelector ){
 			
