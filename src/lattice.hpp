@@ -25,7 +25,7 @@ typedef bg::model::box<point> box;
 class Lattice{
 	unsigned index_size;
 public:
-	Lattice(){}
+	Lattice(){	}
 	Lattice(string _filename):atomIndex(-1),  filename(_filename){
 		open(filename);
 		createAtomList();
@@ -49,6 +49,7 @@ public:
 	InitOrder			initOrder;
 	HamiltonianParser	hamParser;
 	CoreCharge			coreCharge;
+	LDOSList			ldosList;
 	
 	void			open(string _filename)	{
 		parameter.clear();
@@ -110,11 +111,13 @@ public:
 				istringstream iss(line);
 				iss >> header;
 				if	( header == parameter())	{flag = header; continue;}
+				if	( header == ldosList())		{flag = header; continue;}
 				if	( header == coreCharge())	{flag = header;	continue;}
 				if	( header == initOrder())	{flag = header;	continue;}
 				if	( header == hamParser())	{flag = header;	continue;}
 				
-				if	( flag == parameter())		{ parameter.append(line);	continue;	}
+				if	( flag == parameter())		{ parameter.append(line);	continue; }
+				if	( flag == ldosList())		{ ldosList.append(line);	continue; }
 				if	( flag == coreCharge())		{ coreCharge.append(line);	continue; }
 				if	( flag == initOrder())		{ initOrder.append(line);	continue; }
 				if	( flag == hamParser())		{ hamParser.append(line);	continue; }
@@ -126,6 +129,22 @@ public:
 	size_t			latticeSize()			{ return atomList.size(); }
 	size_t			indexSize()				{ return index_size; }
 	
+	pair<bool,Atom>	getAtom(r_mat pos)						{
+		point p = point(pos[0], pos[1], pos[2]);
+		
+		vector<value>	result_s;
+		rtree.query(bgi::nearest(p, 1), std::back_inserter(result_s));
+		
+		unsigned exIndex = result_s[0].second;
+		Atom atom = extendedAtomList[exIndex];
+		
+		r_mat pos_diff = pos - atom.pos;
+		if( sqrt(cdot(pos_diff, pos_diff)) > 0.01 ) {
+			return make_pair(false, atom);
+		}
+		
+		return make_pair(true, atom);
+	}
 	Atom			getAtom(unsigned index)					{
 		if( index >= atomList.size() ){
 			string ErrorMsg = "Error, index out of range.";

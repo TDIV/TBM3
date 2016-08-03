@@ -423,6 +423,7 @@ public:
 	}
 };
 
+
 /*######################################################
  The following class will be read from xxx.lat.tbm file.
  It's full construction is located at Lat.open("xxx.lat");
@@ -446,6 +447,36 @@ public:
 	}
 	void	clear()				{
 		coreChargeMap.clear();
+	}
+};
+
+// Read in the #CoreCharge section
+class LDOSList :	public ParserBase{
+public:
+	vector<pair<r_mat, vector<string> > > LDOSSelector;	// Store the input from "xxx.lat.tbm".
+	
+	LDOSList(): ParserBase("#LDOSList"){ }
+	
+	void	append(string line)	{
+		auto parser = split(line, " ");
+		
+		if( parser.size() == 0)	return;
+		if( parser.size() < 3 ){
+			string errorStr = "Warning, the LDOS formate is not correct: \""+line+". Ignored!";
+			cout<<errorStr<<endl;
+			return;
+		}
+		
+		r_mat pos(1,3);
+		for(unsigned i=0 ; i<3 ; i++) pos[i] = StrToDouble(parser[i]);
+		
+		vector<string> level;
+		for(unsigned i=3 ; i<parser.size() ; i++) level.push_back(parser[i]);
+		
+		LDOSSelector.push_back(make_pair(pos, level));
+	}
+	void	clear()				{
+		LDOSSelector.clear();
 	}
 };
 
@@ -508,6 +539,9 @@ public:
 };
 
 
+/*######################################################
+ The following class will be read from ooo.w90 file.
+ ######################################################*/
 
 
 

@@ -81,6 +81,7 @@ void ErrorMessage(string errorStr) {
 #include "atom.hpp"
 #include "lattice.hpp"
 #include "order_parameter.hpp"
+#include "TBWannierHandler.hpp"
 #include "TBDataSource.hpp"
 #include "TBModelBase.hpp"
 #include "TBClassicalSpinBase.hpp"

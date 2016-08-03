@@ -180,7 +180,7 @@ protected:
 	/*-----------------------------------------------------
 	 Calculate total electron / chemical potential
 	 ------------------------------------------------------*/
-	double	countTotalElectron		()														{
+	double	countTotalElectron			()													{
 		double totalElectron = 0;
 		while(iterate()){
 			auto atomI = Lat.getAtom();
@@ -188,7 +188,7 @@ protected:
 		}
 		return totalElectron;
 	}
-	r_var	calculateElectronFilling(TBDataSource & rtbd, double Mu=0)						{
+	r_var	calculateElectronFilling	(TBDataSource & rtbd, double Mu=0)					{
 		
 		r_var totalDen = 0;
 		while( rtbd.Lat.iterate() ){
@@ -213,6 +213,8 @@ protected:
 			switch( rtbd.Lat.HSpace() ){
 				case NORMAL: if( rtbd.Lat.parameter.STR("spin") == "off")	atomDen = atomDen * 2;
 					break;
+				case NAMBU:
+					break;
 				case EXNAMBU: if( rtbd.Lat.parameter.STR("spin") == "on")	atomDen = atomDen / 2;
 					break;
 			}
@@ -227,7 +229,7 @@ protected:
 		
 		return totalDen;
 	}
-	void	calculateChemicalPotential(bool printResult = false)							{
+	void	calculateChemicalPotential	(bool printResult = false)							{
 
 		KHamEvd(stbd, false);
 		double	destDen = countTotalElectron();
@@ -267,6 +269,128 @@ protected:
 		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;
+	}
+	void	calculateLDOS				(TBDataSource & rtbd)								{
+		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
+			cout<< "Warning, due to flag 'disable_quantum' turned on."
+				<< "The LDOS calculation will be ignored."<<endl;
+			return;
+		}
+		
+		double stepE = abs(Lat.parameter.VAR("ldos_dE", 0.01).real());
+		double Gamma = abs(Lat.parameter.VAR("ldos_Gamma", 0.05).real());
+
+		// Define the LDOS calculation content (atomLDOSList).
+		typedef vector< boost::tuple<string, string, unsigned> > OrbitalIndexLabel;
+		typedef vector< pair<double, double> > LDOS;
+		vector<boost::tuple<Atom, OrbitalIndexLabel, LDOS > > atomLDOSList;
+		
+		
+		KHamEvd(rtbd);
+		// Handling the LDOS label for the up coming calculation.
+		for( auto & elem: Lat.ldosList.LDOSSelector ){
+			
+			auto isAtom = Lat.getAtom(elem.first);
+			auto & atom = isAtom.second;
+			if( isAtom.first ){
+				OrbitalIndexLabel	orbitalIndexLabel;
+				LDOS				ldos;
+				
+				if( elem.second.size() == 0 ){ // If size = 0, this will sum over all index for that site.
+					auto & indexList = atom.allIndexList();
+					for( auto & ilelem: indexList){
+						auto e = split(ilelem.first,".");
+						auto orbitalNum = atom.getOrbitalNumber(e[0]);
+						orbitalIndexLabel.push_back(boost::make_tuple(orbitalNum, e[1], ilelem.second));
+					}
+				}
+				else {
+				
+					for(auto & refStr: elem.second){
+						
+						if( IsIntStr(refStr) ){ // Input format of : 1 2 3
+							auto indexList = isAtom.second.orbitalIndexList(refStr);
+							for( auto & ilelem: indexList){
+								orbitalIndexLabel.push_back(boost::make_tuple(refStr, ilelem.first, ilelem.second));
+							}
+						}
+						else{		// Input format of : 1u
+							auto indexList = isAtom.second.spinIndexList(refStr);
+							char spin = refStr[refStr.size()-1];
+							refStr.pop_back();
+							for( auto & ilelem: indexList){
+								string ABLabel = ilelem.first;
+								if( ABLabel[ABLabel.size()-1] != spin) ABLabel.push_back(spin);
+								orbitalIndexLabel.push_back(boost::make_tuple(refStr, ABLabel, ilelem.second));
+							}
+						}
+					}
+				}
+				
+				for( double eng = rtbd.minE; eng <= rtbd.maxE+4*stepE ; eng += stepE ){
+					ldos.push_back(make_pair(eng, 0));
+				}
+				
+				atomLDOSList.push_back(boost::make_tuple(isAtom.second, orbitalIndexLabel, ldos));
+			}
+		}
+		
+		/* Store the band structure into 'xxx.lat.ldos' */
+		string	filename = Lat.FileName()+".ldos";
+		ofstream out(filename);
+		
+		out<<"import numpy as np"<<endl;
+		out<<"import matplotlib.pyplot as plt"<<endl<<endl;
+		
+		for( auto & elem: atomLDOSList ){
+			
+			out<<"# "<<elem.get<0>().atomName<<" "<<elem.get<0>().pos<<" >>> ";
+			for( auto & in: elem.get<1>()){
+				
+				out<<" "<<in.get<0>()<<"."<<in.get<1>();
+				
+				int sign = in.get<1>()[0] == 'B' ? -1 :  1;
+				
+				for( auto & ldosIter: elem.get<2>() ){
+					double w = ldosIter.first;
+					for (unsigned k=0; k<rtbd.KEigenValVec.size(); k++) {
+						auto & kEig = rtbd.KEigenValVec[k].eigenValue;
+						auto & kVec = rtbd.KEigenValVec[k].eigenVector;
+						
+						for ( int n=0; n<kEig.size(); n++) {
+							double e_w		= kEig[n]-sign * w;
+							double delta	= Gamma/(pi*(e_w*e_w + Gamma*Gamma));
+							
+							
+							x_var u_n		= kVec(in.get<2>(), n);
+							ldosIter.second += (conj(u_n)*u_n).real() * delta/tbd.KEigenValVec.size();
+						}
+					}
+				}
+			}
+			
+			out<<endl;
+			string atomIndexStr = IntToStr( elem.get<0>().atomIndex );
+			
+			out<<"x"<<atomIndexStr<<"=[";
+			for( auto & ldosIter: elem.get<2>() ){
+				out<<fformat(ldosIter.first, 12)<<",";
+			}
+			out<<"]";
+			out<<endl;
+			
+			out<<"y"<<atomIndexStr<<"=[";
+			for( auto & ldosIter: elem.get<2>() ){
+				out<<fformat(ldosIter.second, 12)<<",";
+			}
+			out<<"]"<<endl;
+			out<<"plt.plot(x"+atomIndexStr+", y"+atomIndexStr+", '-', linewidth=2)"<<endl;
+			out<<endl;
+		}
+		out<<"plt.show()"<<endl;
+		
+
+		out.close();
 	}
 	double	iterateDenOrder			(OrderParameter & newOrder, double mix = 0.1)			{
 		

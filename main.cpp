@@ -72,7 +72,9 @@ public:
 			cout<<endl;
 		}
 		
-		cout<<"Finished."<<endl<<endl;
+		cout<<endl<<">> Calculating LDOS."<<endl;
+		calculateLDOS(tbd);
+		
 	}
 	
 	bool iterationStepIncr(){

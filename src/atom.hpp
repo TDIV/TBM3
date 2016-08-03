@@ -207,7 +207,7 @@ public:
 		string indexKey = "";
 		switch( h_space){
 		case NORMAL:
-			subIndexList.push_back(make_pair("N", index(orbStr+"."+parser[1])));
+			subIndexList.push_back(make_pair(parser[1], index(orbStr+"."+parser[1])));
 			break;
 				
 		case NAMBU:
