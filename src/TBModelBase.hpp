@@ -50,8 +50,8 @@ private:
 	TBDataSource spinNormalTBD;
 	
 protected:
-	TBDataSource & tbd;
-	TBDataSource & stbd;
+	TBDataSource & tbd;		// A reference to object -> TBD
+	TBDataSource & stbd;	// A reference to object -> spinNormalTBD
 	
 	vector<pair<string,r_mat> >	kSpaceHighSymmetryPoints;
 	
@@ -361,6 +361,7 @@ protected:
 				for( auto & ldosIter: elem.get<2>() ){
 					double w = ldosIter.first;
 					for (unsigned k=0; k<rtbd.KEigenValVec.size(); k++) {
+						//auto & kpoint = rtbd.KEigenValVec[k].kPoint;
 						auto & kEig = rtbd.KEigenValVec[k].eigenValue;
 						auto & kVec = rtbd.KEigenValVec[k].eigenVector;
 						
@@ -399,7 +400,7 @@ protected:
 
 		out.close();
 	}
-	double	iterateDenOrder			(OrderParameter & newOrder, double mix = 0.1)			{
+	double	iterateDenOrder				(OrderParameter & newOrder, double mix = 0.1)			{
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 		
@@ -432,6 +433,8 @@ protected:
 		
 		return max_den_diff;
 	}
+	
+	void	calculateSpinSusceptibility	(TBDataSource & rtbd);
 
 public:
 	/* Execute the calculations. */
@@ -697,7 +700,7 @@ private:
 };
 
 
-
+#include "TBModelBaseTmp.hpp"
 
 
 

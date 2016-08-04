@@ -71,12 +71,20 @@ public:
 			calculateBandStructure(tbd);
 			cout<<endl;
 		}
-		
+	
 		if( Lat.parameter.VAR("isCalculateLDOS", 0).real() == 1 ){
 			cout<<endl<<">> Calculating LDOS."<<endl;
 			calculateLDOS(tbd);
 			cout<<endl;
 		}
+		
+		if( Lat.parameter.VAR("isCalculateSpinX", 0).real() == 1 ){
+			cout<<endl<<">> Calculating Spin susceptibility."<<endl;
+			//calculateSpinSusceptibility(tbd);
+			calculateSpinSusceptibility(stbd);
+			cout<<endl;
+		}
+	
 		
 	}
 	

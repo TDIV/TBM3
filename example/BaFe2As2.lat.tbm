@@ -1,0 +1,101 @@
+#Parameters
+isCalculateMu	= 1
+isCalculateVar 	= 0
+isCalculateLDOS	= 0
+isCalculateBand	= 1
+isCalculateSpinX= 0
+
+%disable_quantum = 1
+
+spin		= "on"
+space		= "normal"
+Nb			= 4,4,1
+var_dt		= 0.01
+spin_diff	= 0.0000001
+den_diff	= 0.0001
+den_mix		= 0.2
+bondRadius	= 6
+max_iter	= 100
+
+Mu			= 0
+Temperature	= 0.0001
+Jh			= 3
+Jse			= 0.2
+Jdm			= 0.0
+OOhop		= 1.0
+alpha		= 0.0
+B			= 0.0
+tdp			= 1.3
+
+t1			= 0.09
+t2			= 0.08
+t3			= 1.35
+t4			= -0.12
+t5			= -1
+t6			= 0.25
+
+%ldos_Nb		= 4,4,4
+%ldos_dE		= 0.01
+%ldos_Gamma  = 0.02
+
+#LDOSList
+0		0		0		1 2
+
+#CoreCharge
+Fe	> 2
+
+#Init
+
+%Fe:Fe:+1+0+0	1:1:pairS	> 1
+%Fe:Fe:+0+1+0	1:1:pairS	> 1
+%Fe:Fe:+0+0+1	1:1:pairS	> 1
+%Fe:Fe:-1+0+0	1:1:pairS	> 1
+%Fe:Fe:+0-1+0	1:1:pairS	> 1
+%Fe:Fe:+0+0-1	1:1:pairS	> 1
+%
+%Fe:Fe:+1+0+0	2:2:pairS	> 1
+%Fe:Fe:+0+1+0	2:2:pairS	> 1
+%Fe:Fe:+0+0+1	2:2:pairS	> 1
+%Fe:Fe:-1+0+0	2:2:pairS	> 1
+%Fe:Fe:+0-1+0	2:2:pairS	> 1
+%Fe:Fe:+0+0-1	2:2:pairS	> 1
+
+#Hamiltonian
+
+% Fe-O bond hopping terms
+orbital	> Fe 1 > 0
+orbital	> Fe 2 > 0
+
+hoppingHc > Fe:Fe:+1+0+0 1:1 >  t1
+hoppingHc > Fe:Fe:+1+0+0 2:2 >  t1
+hoppingHc > Fe:Fe:+0+1+0 1:1 >  t1
+hoppingHc > Fe:Fe:+0+1+0 2:2 >  t1
+
+hoppingHc > Fe:Fe:+1+1+0 1:1 >  t2
+hoppingHc > Fe:Fe:+1-1+0 2:2 >  t2
+
+hoppingHc > Fe:Fe:+1+1+0 2:2 >  t3
+hoppingHc > Fe:Fe:+1-1+0 1:1 >  t3
+
+hopping   > Fe:Fe:+1+1+0 1:2 >  t4
+hopping   > Fe:Fe:+1+1+0 2:1 >  t4
+hopping   > Fe:Fe:+1-1+0 1:2 >  t4
+hopping   > Fe:Fe:+1-1+0 2:1 >  t4
+hopping   > Fe:Fe:-1-1+0 1:2 >  t4
+hopping   > Fe:Fe:-1-1+0 2:1 >  t4
+hopping   > Fe:Fe:-1+1+0 1:2 >  t4
+hopping   > Fe:Fe:-1+1+0 2:1 >  t4
+
+hopping   > Fe:Fe:+1+0+0 1:2 >  t5
+hopping   > Fe:Fe:+1+0+0 2:1 >  t5
+hopping   > Fe:Fe:+0+1+0 1:2 >  t5
+hopping   > Fe:Fe:+0+1+0 2:1 >  t5
+hopping   > Fe:Fe:-1+0+0 1:2 >  t5
+hopping   > Fe:Fe:-1+0+0 2:1 >  t5
+hopping   > Fe:Fe:+0-1+0 1:2 >  t5
+hopping   > Fe:Fe:+0-1+0 2:1 >  t5
+
+hoppingHc > Fe:Fe:+2+0+0 1:1 >  t6
+hoppingHc > Fe:Fe:+0+2+0 1:1 >  t6
+hoppingHc > Fe:Fe:+2+0+0 2:2 >  t6
+hoppingHc > Fe:Fe:+0+2+0 2:2 >  t6

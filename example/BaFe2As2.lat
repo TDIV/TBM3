@@ -1,0 +1,21 @@
+#KPointPath
+G      0     0     0    
+X      1     0     0    
+M      1     1     0    
+G      0     0     0    
+
+#BondVector 0
+ 1.0             0               0              
+ 0               1.0             0              
+ 0               0               1.0            
+
+#BasisVector
+ 1               0               0              
+ 0               1               0              
+ 0               0               1              
+
+#OrbitalProfile
+Fe        dxz     dyz    
+
+#Atoms
+1     0             0             0            
