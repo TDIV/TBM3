@@ -349,6 +349,8 @@ protected:
 		out<<"import numpy as np"<<endl;
 		out<<"import matplotlib.pyplot as plt"<<endl<<endl;
 		
+		unsigned outputIndex = 0;
+		
 		for( auto & elem: atomLDOSList ){
 			
 			out<<"# "<<elem.get<0>().atomName<<" "<<elem.get<0>().pos<<" >>> ";
@@ -369,7 +371,6 @@ protected:
 							double e_w		= kEig[n]-sign * w;
 							double delta	= Gamma/(pi*(e_w*e_w + Gamma*Gamma));
 							
-							
 							x_var u_n		= kVec(in.get<2>(), n);
 							ldosIter.second += (conj(u_n)*u_n).real() * delta/tbd.KEigenValVec.size();
 						}
@@ -380,20 +381,21 @@ protected:
 			out<<endl;
 			string atomIndexStr = IntToStr( elem.get<0>().atomIndex );
 			
-			out<<"x"<<atomIndexStr<<"=[";
+			out<<"x"<<outputIndex<<"=np.array([";
 			for( auto & ldosIter: elem.get<2>() ){
 				out<<fformat(ldosIter.first, 12)<<",";
 			}
-			out<<"]";
+			out<<"])";
 			out<<endl;
 			
-			out<<"y"<<atomIndexStr<<"=[";
+			out<<"y"<<outputIndex<<"=np.array([";
 			for( auto & ldosIter: elem.get<2>() ){
 				out<<fformat(ldosIter.second, 12)<<",";
 			}
-			out<<"]"<<endl;
-			out<<"plt.plot(x"+atomIndexStr+", y"+atomIndexStr+", '-', linewidth=2)"<<endl;
+			out<<"])"<<endl;
+			out<<"plt.plot(x"<<outputIndex<<", y"<<outputIndex<<", '-', linewidth=2)"<<endl;
 			out<<endl;
+			outputIndex++;
 		}
 		out<<"plt.show()"<<endl;
 		
