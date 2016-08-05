@@ -60,67 +60,69 @@ public:
 		extendedAtomList.clear();
 		rtree.clear();
 		
+		string line;
+		string flag = "";
+		string sub_flag = "";
+		string header = "";
+			
         ifstream infile(_filename);
 		if ( infile.is_open() ) {
-			string flag = "";
-			string sub_flag = "";
-            string line;
-			
+
             while ( getline(infile, line) ) {
 				deleteComment(line); // Clean the commented words
                 istringstream iss(line);
+				sub_flag = "0";
+				iss >> header;
+				//cout<<header<<" "<<sub_flag<<endl;
 				
-				auto lineParser = split(line, " ");
+				//auto lineParser = split(line, " ");
 				
-				if (lineParser.size() > 0){
-					//if (lineParser[0] == parameter())			{flag = lineParser[0]; continue;}
-					if (lineParser[0] == basisVector())			{flag = lineParser[0]; continue;}
-					if (lineParser[0] == orbitalProfile())		{flag = lineParser[0]; continue;}
-					if (lineParser[0] == atomParser())			{flag = lineParser[0]; continue;}
-					if (lineParser[0] == kSymmPointParser())	{flag = lineParser[0]; continue;}
-					if (lineParser[0] == bondVector())		{
-						flag = lineParser[0];
-						if( lineParser.size() == 1){
-							sub_flag = "0";
-						}
-						if( lineParser.size() >= 2){
-							sub_flag = lineParser[1];
-						}
-						continue;
-					}
-			
-					if (flag == basisVector())		{ basisVector.append(line);						continue;	}
-					if (flag == orbitalProfile())	{ orbitalProfile.append(line);					continue;	}
-					if (flag == atomParser())		{ atomParser.append(line);						continue;	}
-					if (flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
-					if (flag == bondVector())		{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
+				if	( header == basisVector())		{flag = header; continue;}
+				if	( header == orbitalProfile())	{flag = header; continue;}
+				if	( header == atomParser())		{flag = header; continue;}
+				if	( header == kSymmPointParser())	{flag = header; continue;}
+				if	( header == bondVector())		{
+					flag = header;
+					iss>>sub_flag;
+					continue;
 				}
+			
+				if	( flag == basisVector())		{ basisVector.append(line);						continue;	}
+				if	( flag == orbitalProfile())		{ orbitalProfile.append(line);					continue;	}
+				if	( flag == atomParser())			{ atomParser.append(line);						continue;	}
+				if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
+				if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
 			}
 		}
 		infile.close();
 		
 		infile.open(_filename+".tbm");
 		if ( infile.is_open() ) {
-			string line;
-			
-			string flag = "";
-			string header = "";
 			
             while ( getline(infile, line) ) {
 				deleteComment(line); // Clean the commented words
 				istringstream iss(line);
+				sub_flag = "0";
 				iss >> header;
-				if	( header == parameter())	{flag = header; continue;}
-				if	( header == ldosList())		{flag = header; continue;}
-				if	( header == coreCharge())	{flag = header;	continue;}
-				if	( header == initOrder())	{flag = header;	continue;}
-				if	( header == hamParser())	{flag = header;	continue;}
+				if	( header == parameter())		{flag = header; continue;}
+				if	( header == ldosList())			{flag = header; continue;}
+				if	( header == coreCharge())		{flag = header;	continue;}
+				if	( header == initOrder())		{flag = header;	continue;}
+				if	( header == hamParser())		{flag = header;	continue;}
+				if	( header == kSymmPointParser())	{flag = header; continue;}
+				if	( header == bondVector())			{
+					flag = header;
+					iss>>sub_flag;
+					continue;
+				}
 				
-				if	( flag == parameter())		{ parameter.append(line);	continue; }
-				if	( flag == ldosList())		{ ldosList.append(line);	continue; }
-				if	( flag == coreCharge())		{ coreCharge.append(line);	continue; }
-				if	( flag == initOrder())		{ initOrder.append(line);	continue; }
-				if	( flag == hamParser())		{ hamParser.append(line);	continue; }
+				if	( flag == parameter())			{ parameter.append(line);	continue; }
+				if	( flag == ldosList())			{ ldosList.append(line);	continue; }
+				if	( flag == coreCharge())			{ coreCharge.append(line);	continue; }
+				if	( flag == initOrder())			{ initOrder.append(line);	continue; }
+				if	( flag == hamParser())			{ hamParser.append(line);	continue; }
+				if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
+				if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
 			}
 		}
 		infile.close();
@@ -240,6 +242,8 @@ public:
 		return make_pair(atomI, atomJList);
 	}
 	
+	vector<Atom>	getAtomList()		{ return atomList; }
+	
 	r_mat			vec(string line)	{
 		// line = "+1+0+1"		-> use Cartesian coordinate
 		// line = "+1+0+1#"		-> use BondVector 0
@@ -281,8 +285,6 @@ public:
 	}
 	H_SPACE			HSpace()			{return h_space;}
 	string			FileName()			{return filename;}
-	
-	vector<Atom>	getAtomList()		{ return atomList; }
 	
 	bool			iterate()			{
 		atomIndex++;
