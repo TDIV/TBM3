@@ -106,6 +106,7 @@ string vecToStr(r_mat rvec){
 	return vstr;
 }
 
+
 #endif
 
 

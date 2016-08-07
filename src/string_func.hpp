@@ -208,6 +208,46 @@ double			PMStr(string str){ // return +1 or -1 for a given +
 	return 0;
 }
 
+
+pair<bool,vector<double> > makeBoxFromStr(string pointA, string pointB){
+	replaceAll(pointA, "[", "");
+	replaceAll(pointA, "]", "");
+	replaceAll(pointB, "[", "");
+	replaceAll(pointB, "]", "");
+	cout<<endl;
+	vector<double> pA, pB;
+	for( auto ii: split(pointA, ",")){
+		pA.push_back(StrToDouble(ii));
+	}
+	
+	for( auto ii: split(pointB, ",")){
+		pB.push_back(StrToDouble(ii));
+	}
+	
+	vector<double> returnSixBoxValue;
+	if( pA.size() == 3 and pB.size() == 3){
+		double min_x = pA[0] < pB[0] ? pA[0] : pB[0];
+		double max_x = pA[0] > pB[0] ? pA[0] : pB[0];
+		
+		double min_y = pA[1] < pB[1] ? pA[1] : pB[1];
+		double max_y = pA[1] > pB[1] ? pA[1] : pB[1];
+		
+		double min_z = pA[2] < pB[2] ? pA[2] : pB[2];
+		double max_z = pA[2] > pB[2] ? pA[2] : pB[2];
+		
+		returnSixBoxValue.push_back(min_x);
+		returnSixBoxValue.push_back(min_y);
+		returnSixBoxValue.push_back(min_z);
+		returnSixBoxValue.push_back(max_x);
+		returnSixBoxValue.push_back(max_y);
+		returnSixBoxValue.push_back(max_z);
+		
+		return make_pair(true,returnSixBoxValue);
+	}
+	
+	return make_pair(false,returnSixBoxValue);
+}
+
 // This function will extract the atom informations, for:
 // 1. Number of orbitals.
 // 2. If the atom has spin degree of freedom.
@@ -227,6 +267,8 @@ vector<string>	analyze_atom_label(string label){
 	lab_list.push_back(L_spin);
 	return lab_list;
 }
+
+
 
 #endif
 

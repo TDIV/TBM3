@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	else if	( operationList[1] == "-shift"){
-		//cout<<endl<<"Convert to the VESTA file formate:"<<filename<<".vesta"<<endl<<endl;
+		cout<<endl<<"Shift the atom coordinate."<<endl<<endl;
 		
 		vector<double> shiftXYZ;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ shiftXYZ.push_back(tbm::StrToDouble(operationList[i])); }
@@ -236,6 +236,15 @@ int main(int argc, char *argv[]) {
 		}
 		
 		model.shiftXYZ(shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
+	}
+	
+	else if	( operationList[1] == "-changeAtom"){
+		cout<<endl<<"Change the atom name."<<endl<<endl;
+		
+		vector<string> changeAtomOptList;
+		for(unsigned i=2 ; i<operationList.size() ; i++){ changeAtomOptList.push_back(operationList[i]); }
+		
+		model.changeAtom(changeAtomOptList);
 	}
 	
 	else	{

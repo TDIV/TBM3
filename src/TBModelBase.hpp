@@ -271,8 +271,15 @@ protected:
 		
 		}while ( abs(n_diff) > abs(dest_den_diff) );
 		
+		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;
+		
+		if( tbd.Lat.parameter.STR("spin") == "on" )
+		{
+			tbd.calculate4DensityOrder();
+		}
+		
 	}
 	void	calculateLDOS				(TBDataSource & rtbd)								{
 		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
@@ -393,8 +400,13 @@ protected:
 				out<<fformat(ldosIter.second, 12)<<",";
 			}
 			out<<"])"<<endl;
-			out<<"plt.plot(x"<<outputIndex<<", y"<<outputIndex<<", '-', linewidth=2)"<<endl;
 			out<<endl;
+			outputIndex++;
+		}
+		
+		outputIndex = 0;
+		for( auto & elem: atomLDOSList ){
+			out<<"plt.plot(x"<<outputIndex<<", y"<<outputIndex<<", '-', linewidth=2)"<<endl;
 			outputIndex++;
 		}
 		out<<"plt.show()"<<endl;
@@ -402,7 +414,7 @@ protected:
 
 		out.close();
 	}
-	double	iterateDenOrder				(OrderParameter & newOrder, double mix = 0.1)			{
+	double	iterateDenOrder				(OrderParameter & newOrder, double mix = 0.1)		{
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 		
@@ -419,8 +431,10 @@ protected:
 		
 		double max_den_diff = 0;
 		while( iterate() ){
+			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
 			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
+			
 			if( parameter_old.first and parameter_new.first ){
 				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
 				if( max_den_diff < den_diff ) max_den_diff = den_diff;
@@ -664,6 +678,28 @@ public:
 		outfile.close();
 		
 		tbd.order.save();
+	}
+	
+	/* Change the atom name. */
+	void changeAtom(vector<string> optList)									{
+		
+		tbd.order.load();
+		Lat.changeAtomName(optList);
+		
+		// Save the expanded file.
+		ofstream outfile(Lat.FileName());
+		//outfile<<Lat.kSymmPointParser.getFileString();
+		//outfile<<Lat.bondVector.getFileString();
+		outfile<<Lat.basisVector.getFileString();
+		outfile<<Lat.orbitalProfile.getFileString();
+		outfile<<Lat.atomParser()<<endl;
+		while(Lat.iterate()){
+			outfile<<Lat.getAtom().posToStr()<<endl;
+		}
+		outfile.close();
+		
+		tbd.order.save();
+		
 	}
 private:
 	void vestaOrderHandler( string ordArg, string ordNameArg, vector<boost::tuple<string, Atom, x_mat> > & orderAtomVec){

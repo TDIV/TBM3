@@ -306,9 +306,48 @@ public:
 		}
 	}
 	
+	void			changeAtomName(vector<string> optList)	{
+		
+		if( optList.size() != 2 ){
+			ErrorMessage("Error, the arguments for '-changeAtom' are not correct.");
+			return;
+		}
+		
+		cout<<"Change inside the box: "		<< optList[0] <<endl;
+		cout<<"Property will be changed: "	<< optList[1] <<endl;
+		
+		auto parser0 = split(optList[0], ":");
+		auto isBox = makeBoxFromStr(parser0[0], parser0[1]);
+		
+		auto parser1 = split(optList[1], "=");
+		if( parser1.size() != 2 ){
+			ErrorMessage("Error, the arguments for '-changeAtom' are not correct.");
+			return;
+		}
+		unsigned atomProfile_old = abs( StrToInt( parser1[0] ) );
+		unsigned atomProfile_new = abs( StrToInt( parser1[1] ) );
+		
+		if(!(orbitalProfile.isValidAtomIndex(atomProfile_old-1) and
+			 orbitalProfile.isValidAtomIndex(atomProfile_new-1))){
+			ErrorMessage("Error, one of the selection atom index is not valid.");
+			return;
+		}
+		
+		if( isBox.first ){
+			auto & vbox = isBox.second;
+			
+			cout<<" List of changed profile "<<endl;
+			atomParser.changeProperty(vbox, atomProfile_old, atomProfile_new);
+			
+			createAtomList();
+		}
+		
+	}
+	
 private:
 	
 	void createAtomList()				{
+		atomList.clear();
 		Atom::totalIndexSize = 0;
 		index_size = 0;
 		

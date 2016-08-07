@@ -395,6 +395,11 @@ public:
 		return fileString;
 	}
 	
+	bool	isValidAtomIndex(unsigned orbitalIndex){
+		
+		return orbitalIndex >= 0 and orbitalIndex < orbitalList.size();
+	}
+	
 	void	clear(){
 		orbitalList.clear();
 	}
@@ -418,6 +423,29 @@ public:
 			atomInfoList.push_back(make_pair(index, pos));
 		}
 	}
+	
+	void	changeProperty(vector<double> box, unsigned from, unsigned to){
+		
+		unsigned totalAtomChanged = 0;
+		
+		for( auto & atomInfo: atomInfoList){
+			if( atomInfo.first == from ) {
+				
+				if(	atomInfo.second[0] >= box[0] and atomInfo.second[0] <= box[3]	and
+					atomInfo.second[1] >= box[1] and atomInfo.second[1] <= box[4]	and
+					atomInfo.second[2] >= box[2] and atomInfo.second[2] <= box[5]
+				   ){
+					atomInfo.first = to;
+					cout<<from<<" --> "<<atomInfo.first<<" "<<atomInfo.second<<endl;
+					totalAtomChanged++;
+				}
+			}
+		}
+		cout<<"Number of atoms changed: "<<totalAtomChanged<<endl;
+		
+		cout<<endl;
+	}
+	
 	void	clear(){
 		atomInfoList.clear();
 	}
