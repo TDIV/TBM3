@@ -45,12 +45,12 @@ public:
 		cout<<endl<<"Starting..."<<endl<<endl;
 		
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
-			cout<<">> Calculating the chemical potential, Mu."<<endl;
 			
 			if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
 				cout<< "Warning, due to flag 'disable_quantum' turned on."
 					<< "The chemical potential calculation will be ignored."<<endl<<endl;
 			} else {
+				cout<<">> Calculating the chemical potential, Mu."<<endl;
 				TBModelBase::calculateChemicalPotential(true);
 				
 				TBModelBase::KHamEvd(tbd);

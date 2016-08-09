@@ -274,12 +274,6 @@ protected:
 		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;
-		
-		if( tbd.Lat.parameter.STR("spin") == "on" )
-		{
-			tbd.calculate4DensityOrder();
-		}
-		
 	}
 	void	calculateLDOS				(TBDataSource & rtbd)								{
 		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
@@ -421,6 +415,10 @@ protected:
 		tbd.order_old = tbd.order;
 		calculateChemicalPotential(false);
 		
+		if( tbd.Lat.parameter.STR("spin") == "on" ) {
+			tbd.calculate4DensityOrder();
+		}
+		
 		double ratio_a = 0;
 		double ratio_b = 1;
 		
@@ -443,6 +441,11 @@ protected:
 			auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
 			
 			newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
+			
+			auto parameter_coulomb = stbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
+			if( parameter_coulomb.first ){
+				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
+			}
 		}
 		tbd.calculateEnergy();
 		newOrder.save();
@@ -518,8 +521,6 @@ public:
 		
 		// Save the expanded file.
 		ofstream outfile(filename_expand);
-		outfile<<Lat.kSymmPointParser.getFileString();
-		outfile<<Lat.bondVector.getFileString();
 		outfile<<Lat.basisVector.getFileString(N1,N2,N3);
 		outfile<<Lat.orbitalProfile.getFileString();
 		outfile<<Lat.atomParser()<<endl;

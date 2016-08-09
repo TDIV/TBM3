@@ -817,7 +817,7 @@ public:
 		removeSpace(svar);
 		auto svarParser = split(svar, "*");
 		auto orderKey = svarParser[0];
-		r_var alpha = 1.0;
+		r_var alpha = 0.0;
 		if( svarParser.size() == 2) alpha = parseSiteString(atomI, svarParser[1])[0].real();
 
 		auto rboxAtoms = Lat.getRBox(radius);
