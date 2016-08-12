@@ -152,7 +152,9 @@ protected:
 			
 			for (double i1=-N1; i1<N1; i1++){
 				auto kPoint = (i1/N1)*b1;
-				rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+				auto & kevv = rtbd.HamEvd(kPoint);
+				if( kevv.status == "Success" )
+					rtbd.KEigenValVec.push_back(kevv);
 			}
 		}
 		if( Nb.size() == 2){
@@ -163,7 +165,9 @@ protected:
 			for (double i1=-N1; i1<N1; i1++)
 			for (double i2=-N2; i2<N2; i2++){
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
-				rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+				auto & kevv = rtbd.HamEvd(kPoint);
+				if( kevv.status == "Success" )
+					rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
 			}
 		}
 		if( Nb.size() == 3){
@@ -176,7 +180,9 @@ protected:
 			for (double i2=-N2; i2<N2; i2++)
 			for (double i3=-N3; i3<N3; i3++) {
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3;
-				rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+				auto & kevv = rtbd.HamEvd(kPoint);
+				if( kevv.status == "Success" )
+					rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
 			}
 		}
 	}
@@ -270,7 +276,6 @@ protected:
 			}
 		
 		}while ( abs(n_diff) > abs(dest_den_diff) );
-		
 		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;

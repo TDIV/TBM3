@@ -106,15 +106,19 @@ public:
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
+			
+			/*-----------------------------------*/
 			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
+			/*-----------------------------------*/
+			
 			cout<< gmt::fformat(iteration_steps, 5) <<" Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
 				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
 				TotalE += iter.second;
 			}
-			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
-			cout<<endl;
+			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,8);
+			cout<<" Mu= "<<stbd.Lat.parameter.VAR("Mu").real()<<endl;;
 		}
 	}
 	void calculateSpinVar()		{
@@ -129,7 +133,11 @@ public:
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
+			
+			/*-----------------------------------*/
 			auto diff = iterateSpinOrder(tbd.order);
+			/*-----------------------------------*/
+			
 			spin_diff = diff.first;
 			den_diff = diff.second;
 			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
@@ -138,8 +146,8 @@ public:
 				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
 				TotalE += iter.second;
 			}
-			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,6);
-			cout<<endl;
+			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,8);
+			cout<<" Mu= "<<stbd.Lat.parameter.VAR("Mu").real()<<endl;;
 		}
 	}
 	void calculateVar()			{
@@ -166,6 +174,8 @@ public:
 			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
 			auto diff = iterateSpinOrder(tbd.order);
 			spin_diff = diff.first;
+			cout<<" Den_diff : "<< den_diff << endl;
+			cout<<" Spin_diff: "<< spin_diff << endl;
 		}
 	}
 private:
