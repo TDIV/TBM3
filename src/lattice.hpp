@@ -26,11 +26,17 @@ class Lattice{
 	unsigned index_size;
 public:
 	Lattice(){	}
-	Lattice(string _filename):atomIndex(-1),  filename(_filename){
+	
+	Lattice(string _filename, bool _needExpandAtomList = true):
+	atomIndex(-1),  filename(_filename), needExpandAtomList(_needExpandAtomList)
+	{
 		open(filename);
 		createAtomList();
 	}
-	Lattice(string _filename, string spin, string space):atomIndex(-1),  filename(_filename){
+	
+	Lattice(string _filename, string spin, string space, bool _needExpandAtomList = true):
+	atomIndex(-1),  filename(_filename), needExpandAtomList(_needExpandAtomList)
+	{
 		open(filename);
 		parameter.STR("spin") = spin;
 		parameter.STR("space") = space;
@@ -51,7 +57,7 @@ public:
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
-	void			open(string _filename)	{
+	void			open(string _filename, bool needExpandAtomList = true)	{
 		parameter.clear();
 		basisVector.clear();
 		orbitalProfile.clear();
@@ -383,7 +389,9 @@ private:
 		
 		index_size = Atom::totalIndexSize;
 		
-		updateExtendedAtomList();
+		if( needExpandAtomList ){
+			updateExtendedAtomList();
+		}
 
 	}
 	
@@ -449,6 +457,7 @@ private:
 	vector<Atom>	extendedAtomList;
 	
 	string	filename;
+	bool	needExpandAtomList;
 	H_SPACE	h_space;
 	
 };

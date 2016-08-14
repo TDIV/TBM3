@@ -30,9 +30,9 @@ vector<r_mat> make_line(r_mat point_a, r_mat point_b, unsigned Nsteps=10){
 class TBModelBase{
 	
 public:
-	TBModelBase(string filename):
-		Lat				(filename),
-		spinNormalLat	(filename, "on", "normal"),
+	TBModelBase(string filename, bool needExpandAtomList = true):
+		Lat				(filename, needExpandAtomList),
+		spinNormalLat	(filename, "on", "normal", needExpandAtomList),
 		TBD				(Lat),
 		spinNormalTBD	(spinNormalLat),
 		tbd				(TBD),
