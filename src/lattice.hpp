@@ -28,14 +28,18 @@ public:
 	Lattice(){	}
 	
 	Lattice(string _filename, bool _needExpandAtomList = true):
-	atomIndex(-1),  filename(_filename), needExpandAtomList(_needExpandAtomList)
+		atomIndex			(-1),
+		filename			(_filename),
+		needExpandAtomList	(_needExpandAtomList)
 	{
 		open(filename);
 		createAtomList();
 	}
 	
 	Lattice(string _filename, string spin, string space, bool _needExpandAtomList = true):
-	atomIndex(-1),  filename(_filename), needExpandAtomList(_needExpandAtomList)
+		atomIndex			(-1),
+		filename			(_filename),
+		needExpandAtomList	(_needExpandAtomList)
 	{
 		open(filename);
 		parameter.STR("spin") = spin;
