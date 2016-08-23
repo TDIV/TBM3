@@ -196,35 +196,52 @@ int main(int argc, char *argv[]) {
 	}
 	
 	string filename = operationList[0];
-	TBModel model(filename);
 	
-	/* -------------------------------------------
-	 Performing several operations of the program.
-	 ---------------------------------------------*/
+	// -----------------------------------------------------------------
+	/* --Performing several operations of the program.--*/
+	// -----------------------------------------------------------------
+	// Run the job!
+	// -----------------------------------------------------------------
 	if		( operationList[1] == "-run")	{
+		TBModel model(filename);
 		model.render();
 	}
 	
+	// -----------------------------------------------------------------
+	// Expand the lattice.
+	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-expand"){
 		cout<<endl<<"Expanding the lattice of '"<<filename<<"' to a larget one :";
 		vector<unsigned> N;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ N.push_back(tbm::StrToInt(operationList[i])); }
 		
+		TBModel model(filename);
 		if( N.size() == 1){ model.saveExpandedLattice(N[0], 1, 1); }
 		if( N.size() == 2){ model.saveExpandedLattice(N[0], N[1], 1); }
 		if( N.size() == 3){ model.saveExpandedLattice(N[0], N[1], N[2]); }
 	}
 	
+	// -----------------------------------------------------------------
+	// Initialize the order parameter.
+	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-init")	{
 		cout<<endl<<"Initialize the order parameter into:"<<filename<<".ord"<<endl<<endl;
+		TBModel model(filename);
 		model.initOrder();
 	}
 	
+	// -----------------------------------------------------------------
+	// Generate vesta file formate.
+	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-ovesta"){
 		cout<<endl<<"Convert to the VESTA file formate:"<<filename<<".vesta"<<endl<<endl;
+		TBModel model(filename);
 		model.convertTo_VESTA(operationList);
 	}
 	
+	// -----------------------------------------------------------------
+	// Shift all atoms with a given vector.
+	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-shift"){
 		cout<<endl<<"Shift the atom coordinate."<<endl<<endl;
 		
@@ -235,15 +252,20 @@ int main(int argc, char *argv[]) {
 			shiftXYZ.push_back(0);
 		}
 		
+		TBModel model(filename);
 		model.shiftXYZ(shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
 	}
 	
+	// -----------------------------------------------------------------
+	// Change the atom name by some selection rule.
+	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-changeAtom"){
 		cout<<endl<<"Change the atom name."<<endl<<endl;
 		
 		vector<string> changeAtomOptList;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ changeAtomOptList.push_back(operationList[i]); }
 		
+		TBModel model(filename);
 		model.changeAtom(changeAtomOptList);
 	}
 	
