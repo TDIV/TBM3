@@ -182,7 +182,7 @@ protected:
 	}
 	
 	/*-----------------------------------------------------
-	 Calculate total electron / chemical potential
+	 Calculate total electron
 	 ------------------------------------------------------*/
 	double	countTotalElectron			()													{
 		double totalElectron = 0;
@@ -428,6 +428,10 @@ protected:
 		}
 		
 		double max_den_diff = 0;
+		
+		// Calculate the coulomb energy = -\sum_i Coulomb_i * Den_i
+		double coulombEnergy = 0;
+		
 		while( iterate() ){
 			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
@@ -446,7 +450,13 @@ protected:
 			if( parameter_coulomb.first ){
 				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
 			}
+			
+			if( parameter_new.first and parameter_coulomb.first ){
+				coulombEnergy -= parameter_new.second[0].real() * parameter_coulomb.second[0].real();
+			}
 		}
+		
+		tbd.energyMap["2.Coul Eng"] = coulombEnergy;
 		tbd.calculateEnergy();
 		newOrder.save();
 		

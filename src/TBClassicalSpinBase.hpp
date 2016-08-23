@@ -203,19 +203,34 @@ public:
 			
 			FB_Energy += cdot(Bi,si).real();
 		}
-	
 		
-		TBD.energyMap["2.SE Eng"] = SE_Energy.real();
-		TBD.energyMap["3.DM Eng"] = DM_Energy.real();
-		TBD.energyMap["4.FB Eng"] = FB_Energy.real();
+		
+		// Calculate the coulomb energy = -\sum_i Coulomb_i * Den_i
+		double coulombEnergy = 0;
+		
+		while( TBD.Lat.iterate() ){
+			
+			auto parameter_den		= TBD.order.findOrder(TBD.Lat.getAtom(),	"@:den");
+			auto parameter_coulomb	= TBD.order.findOrder(TBD.Lat.getAtom(),	"@:coulomb");
+			
+			if( parameter_den.first and parameter_coulomb.first ){
+				coulombEnergy -= parameter_den.second[0].real() * parameter_coulomb.second[0].real();
+			}
+		}
+		
+		TBD.energyMap["2.Coul Eng"] = coulombEnergy;
+		TBD.energyMap["3.SE Eng"] = SE_Energy.real();
+		TBD.energyMap["4.DM Eng"] = DM_Energy.real();
+		TBD.energyMap["5.FB Eng"] = FB_Energy.real();
 	}
 	
 	pair<double,double> iterateSpinOrder(OrderParameter & newOrder)		{
 		
 		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return make_pair(0,0); }
 		
-		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
 			TBD.calculate4DensityOrder();
+		}
 		
 		
 		map<unsigned, pair<x_mat, string> > Field;

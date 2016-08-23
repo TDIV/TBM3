@@ -1025,7 +1025,7 @@ public:
 		return 0;
 	}
 	
-	void		calculate4DensityOrder	()		{
+	void		calculate4DensityOrder	()							{
 		if( Lat.parameter.STR("spin")!="on" ){
 			ErrorMessage("Error, the spin space suld be turned \'on\' for the 4-density calculation");
 		}
@@ -1039,6 +1039,7 @@ public:
 			auto atomI = Lat.getAtom();
 			
 			map<string, x_mat> fourDensity;
+			x_mat	totalDen(1,1);
 			
 			auto & indexLabel= atomI.allIndexList() ;
 			for( unsigned i=0 ; i<indexLabel.size() ; i++)
@@ -1066,11 +1067,13 @@ public:
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen;
 						r4den[3] += tmpDen;
+						totalDen[0] += tmpDen;
 					}
 					if( parser_I[1] == "d" and parser_J[1] == "d"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen;
 						r4den[3] -= tmpDen;
+						totalDen[0] += tmpDen;
 					}
 					if( parser_I[1] == "u" and parser_J[1] == "d"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
@@ -1087,11 +1090,13 @@ public:
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen*0.5;
 						r4den[3] += tmpDen*0.5;
+						totalDen[0] += tmpDen*0.5;
 					}
 					if( parser_I[1] == "Ad" and parser_J[1] == "Ad"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen*0.5;
 						r4den[3] -= tmpDen*0.5;
+						totalDen[0] += tmpDen*0.5;
 					}                     
 					if( parser_I[1] == "Au" and parser_J[1] == "Ad"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
@@ -1108,11 +1113,13 @@ public:
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += 1-tmpDen*0.5;
 						r4den[3] += 1-tmpDen*0.5;
+						totalDen[0] += 1-tmpDen*0.5;
 					}                       
 					if( parser_I[1] == "Bd" and parser_J[1] == "Bd"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += 1-tmpDen*0.5;
 						r4den[3] -= 1-tmpDen*0.5;
+						totalDen[0] += 1-tmpDen*0.5;
 					}                       
 					if( parser_I[1] == "Bu" and parser_J[1] == "Bd"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
@@ -1129,13 +1136,15 @@ public:
 				}
 			}
 			
+			order(atomI.atomName+" den") = totalDen;
+			
 			for( auto & iter: fourDensity){
 				order(atomI.atomName+" "+iter.first+":4den") = iter.second;
 			}
 		}
 		order.save();
 	}
-	void		calculateEnergy			()		{
+	void		calculateEnergy			()							{
 
 		double totalE=0;
 		auto Temperature = Lat.parameter.VAR("Temperature", 0.00001).real();
