@@ -315,8 +315,8 @@ public:
 		
 		double max_spin_diff = 0;
 		
-		double variational_dt	= TBD.Lat.parameter.VAR("var_dt", 0.1).real();
-		double LLGdamping		= TBD.Lat.parameter.VAR("LLGdamping", 2).real();
+		double variational_dt	= TBD.Lat.parameter.VAR("var_dt", 0.01).real();
+		double LLGdamping		= TBD.Lat.parameter.VAR("LLGdamping", 0.2).real();
 		for( auto & fieldI : Field){
 			auto atomI	= TBD.Lat.getAtom(fieldI.first);
 			auto FI		= fieldI.second.first;

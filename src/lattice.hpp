@@ -33,7 +33,7 @@ public:
 		needExpandAtomList	(_needExpandAtomList)
 	{
 		open(filename);
-		createAtomList();
+		//createAtomList();
 	}
 	
 	Lattice(string _filename, string spin, string space, bool _needExpandAtomList = true):
@@ -44,7 +44,7 @@ public:
 		open(filename);
 		parameter.STR("spin") = spin;
 		parameter.STR("space") = space;
-		createAtomList();
+		//createAtomList();
 	}
 
 	// Read from xxx.lat
@@ -354,9 +354,7 @@ public:
 		
 	}
 	
-private:
-	
-	void createAtomList()				{
+	void createAtomList(bool needExpandedAtomList = true)				{
 		atomList.clear();
 		Atom::totalIndexSize = 0;
 		index_size = 0;
@@ -393,12 +391,18 @@ private:
 		
 		index_size = Atom::totalIndexSize;
 		
+<<<<<<< HEAD
 		if( needExpandAtomList ){
 			updateExtendedAtomList();
 		}
+=======
+		if( needExpandedAtomList )
+			updateExtendedAtomList();
+>>>>>>> Performance and structure update.
 
 	}
 	
+private:
 	void updateExtendedAtomList()		{
 		
 		extendedAtomList.clear();
@@ -464,6 +468,8 @@ private:
 	bool	needExpandAtomList;
 	H_SPACE	h_space;
 	
+public:
+	bool			needExtendedAtomList;
 };
 
 

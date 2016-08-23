@@ -197,8 +197,11 @@ int main(int argc, char *argv[]) {
 	
 	string filename = operationList[0];
 	
+<<<<<<< HEAD
 	
 	
+=======
+>>>>>>> Performance and structure update.
 	// -----------------------------------------------------------------
 	/* --Performing several operations of the program.--*/
 	// -----------------------------------------------------------------
@@ -219,6 +222,7 @@ int main(int argc, char *argv[]) {
 		vector<unsigned> N;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ N.push_back(tbm::StrToInt(operationList[i])); }
 		
+		TBModel model(filename);
 		if( N.size() == 1){ model.saveExpandedLattice(N[0], 1, 1); }
 		if( N.size() == 2){ model.saveExpandedLattice(N[0], N[1], 1); }
 		if( N.size() == 3){ model.saveExpandedLattice(N[0], N[1], N[2]); }
@@ -229,8 +233,12 @@ int main(int argc, char *argv[]) {
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-init")	{
 		cout<<endl<<"Initialize the order parameter into:"<<filename<<".ord"<<endl<<endl;
+<<<<<<< HEAD
 		
 		TBModel model(filename, false);
+=======
+		TBModel model(filename);
+>>>>>>> Performance and structure update.
 		model.initOrder();
 	}
 	
@@ -239,8 +247,12 @@ int main(int argc, char *argv[]) {
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-ovesta"){
 		cout<<endl<<"Convert to the VESTA file formate:"<<filename<<".vesta"<<endl<<endl;
+<<<<<<< HEAD
 		
 		TBModel model(filename, false);
+=======
+		TBModel model(filename);
+>>>>>>> Performance and structure update.
 		model.convertTo_VESTA(operationList);
 	}
 	
@@ -257,7 +269,11 @@ int main(int argc, char *argv[]) {
 			shiftXYZ.push_back(0);
 		}
 		
+<<<<<<< HEAD
 		TBModel model(filename, false);
+=======
+		TBModel model(filename);
+>>>>>>> Performance and structure update.
 		model.shiftXYZ(shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
 	}
 	
@@ -270,7 +286,11 @@ int main(int argc, char *argv[]) {
 		vector<string> changeAtomOptList;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ changeAtomOptList.push_back(operationList[i]); }
 		
+<<<<<<< HEAD
 		TBModel model(filename, false);
+=======
+		TBModel model(filename);
+>>>>>>> Performance and structure update.
 		model.changeAtom(changeAtomOptList);
 	}
 	
