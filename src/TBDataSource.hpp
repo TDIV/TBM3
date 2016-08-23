@@ -37,7 +37,6 @@ public:
 };
 
 struct	EigVec{
-	string	status;
 	r_mat	kPoint;
 	r_mat	eigenValue;
 	x_mat	eigenVector;
@@ -996,11 +995,7 @@ public:
 		}
 		
 		tmpEigValVec.kPoint = kp;
-		tmpEigValVec.status = Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
-		
-		//if( tmpEigValVec.status != "Success" ){
-		//	cout<<"at:"<<kp<<" "<<status<<endl;
-		//}
+		Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
 		if ( maxE < tmpEigValVec.eigenValue[Lat.indexSize()-1]	){ maxE = tmpEigValVec.eigenValue[Lat.indexSize()-1]; }
 		if ( minE > tmpEigValVec.eigenValue[0]					){ minE = tmpEigValVec.eigenValue[0]; }
 		return tmpEigValVec;
