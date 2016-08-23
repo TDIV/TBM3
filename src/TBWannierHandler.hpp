@@ -14,13 +14,6 @@
 //  TBM^3
 //
 
-class WannierLattice{
-public:
-	WannierLattice(){ }
-	WannierLattice(string filename){
-	}
-};
-
 class TBWannierHandler{
 public:
 	TBWannierHandler(){		}
