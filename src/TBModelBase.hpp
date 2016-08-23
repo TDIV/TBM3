@@ -477,6 +477,7 @@ public:
 	/* Expand the lattice into a larger size. */
 	void saveExpandedLattice(unsigned N1, unsigned N2, unsigned N3)							{
 		
+		cout<<"B"<<endl;
 		Lat.createAtomList();
 		
 		auto	parseFilename = split(Lat.FileName(),".");
@@ -547,6 +548,8 @@ public:
 		
 		// Expand the order parameter.
 		Lattice expLat(filename_expand);
+		expLat.createAtomList();
+		
 		OrderParameter expOrder(expLat);
 		expOrder.setOptList(expandedOptList);
 		expOrder.save();
