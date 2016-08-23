@@ -28,7 +28,6 @@ public:
 	Lattice(){	}
 	Lattice(string _filename):atomIndex(-1),  filename(_filename){
 		open(filename);
-		//createAtomList();
 	}
 	Lattice(string _filename, string spin, string space):atomIndex(-1),  filename(_filename){
 		open(filename);
@@ -381,13 +380,14 @@ public:
 		
 		index_size = Atom::totalIndexSize;
 		
-		if( needExpandedAtomList )
-			updateExtendedAtomList();
+		if( needExpandedAtomList ){
+			updateExpandedAtomList();
+		}
 
 	}
 	
 private:
-	void updateExtendedAtomList()		{
+	void updateExpandedAtomList()		{
 		
 		extendedAtomList.clear();
 		
@@ -451,8 +451,6 @@ private:
 	string	filename;
 	H_SPACE	h_space;
 	
-public:
-	bool			needExtendedAtomList;
 };
 
 
