@@ -646,7 +646,7 @@ public:
 			if( arg == "vec" || arg == "rvec" || arg == "gvec" || arg == "bvec" || arg == "rgbvec"){
 				outfile<<"   "<<fformat(ii+1,4);
 				for( unsigned i=0; i<vec.size() ; i++){
-					outfile<<fformat(vec[i].real());
+					outfile<<fformat(vec[i].real())<<" ";
 				}
 				outfile<<endl;
 				outfile<<"    "<<fformat(atom.atomIndex+1,3)<<" 0    0    0    0"<<endl;
