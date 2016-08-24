@@ -111,8 +111,10 @@ public:
 			cout<< gmt::fformat(iteration_steps, 5) <<"  Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
-				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
-				TotalE += iter.second;
+				if( abs(iter.second) > 0.0000001 ){
+					cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+					TotalE += iter.second;
+				}
 			}
 			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,10)<<" ";
 			cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
@@ -124,12 +126,18 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
+		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 50).real() );
+		unsigned spin_iteration = 0;
 		
 		// Full iteration, depends on the convergence criteria.
-		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real()) and iterationStepIncr()){
+		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
+			  and iterationStepIncr() and spin_iteration < spin_iteration_max)
+		{
+			spin_iteration +=1 ;
 			
 			tbd.order.load();
 			tbd.order.save("previous");
+			
 			KHamEvd(tbd);
 			auto diff = iterateSpinOrder(tbd.order);
 			spin_diff = diff.first;

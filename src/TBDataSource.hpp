@@ -1136,7 +1136,7 @@ public:
 				}
 			}
 			
-			order(atomI.atomName+" den") = totalDen;
+			//order(atomI.atomName+" den") = totalDen;
 			
 			for( auto & iter: fourDensity){
 				order(atomI.atomName+" "+iter.first+":4den") = iter.second;
