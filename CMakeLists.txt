@@ -62,7 +62,7 @@ include_directories(SYSTEM ~/opt/TBM3/include)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 
-add_executable(run main.cpp)
+add_executable(run src/main.cpp)
 target_link_libraries(run ${LIBS} ${EXTRA_LIBS} stdc++)
 
 
