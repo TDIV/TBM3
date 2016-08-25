@@ -1,0 +1,10 @@
+
+CC = g++
+BOOST_INCLUDE= /home/tai/opt/boost/include
+CUDA_DIR    = /usr/local/cuda-7.5
+MAGMA_DIR   = /home/tai/opt/magma
+
+OSFLAG      = -L/usr/lib/lapack/\
+            -L/usr/lib/atlas-base/lib \
+            -std=c++11 -O3  -DADD_ -fopenmp -DMAGMA_SETAFFINITY -DHAVE_CUBLAS -DMIN_CUDA_ARCH=300 \
+            -llapack -lf77blas -lcblas -latlas -lcublas -lcudart -lstdc++ -lm -lgfortran -lifcore
