@@ -116,7 +116,7 @@ public:
 					TotalE += iter.second;
 				}
 			}
-			cout<< gmt::fformat("Total:", 6) << gmt::fformat(TotalE,10)<<" ";
+			cout<< gmt::fformat("Total:", 7) << gmt::fformat(TotalE,10)<<" ";
 			cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
 			cout<<endl;
 		}
@@ -126,8 +126,9 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 50).real() );
+		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 20).real() );
 		unsigned spin_iteration = 0;
+		bool	 justStarted = true;
 		
 		// Full iteration, depends on the convergence criteria.
 		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
@@ -143,6 +144,15 @@ public:
 			spin_diff = diff.first;
 			den_diff = diff.second;
 			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
+			
+			if( justStarted ){
+				justStarted = false;
+				if		( spin_diff > 0.01 )	{ spin_iteration_max = 1; }
+				else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
+				else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
+				else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
+			}
+			
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
 				if( abs(iter.second) > 0.0000001 ){
