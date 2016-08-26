@@ -21,8 +21,8 @@
 
 class TBModel: public tbm::TBModelBase, public tbm::TBClassicalSpinBase{
 public:
-	TBModel(string filename, bool needExpandAtomList = true):
-		tbm::TBModelBase(filename, needExpandAtomList),
+	TBModel(string filename):
+		tbm::TBModelBase(filename),
 		tbm::TBClassicalSpinBase(tbd)
 		{
 			iteration_max = tbd.Lat.parameter.VAR("max_iter", 5000).real();
@@ -220,11 +220,14 @@ int main(int argc, char *argv[]) {
 	
 	string filename = operationList[0];
 	
+<<<<<<< HEAD:src/main.cpp
 <<<<<<< HEAD
 	
 	
 =======
 >>>>>>> Performance and structure update.
+=======
+>>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856:src/main.cpp
 	// -----------------------------------------------------------------
 	/* --Performing several operations of the program.--*/
 	// -----------------------------------------------------------------
@@ -239,8 +242,6 @@ int main(int argc, char *argv[]) {
 	// Expand the lattice.
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-expand"){
-		TBModel model(filename);
-		
 		cout<<endl<<"Expanding the lattice of '"<<filename<<"' to a larget one :";
 		vector<unsigned> N;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ N.push_back(tbm::StrToInt(operationList[i])); }
@@ -256,12 +257,16 @@ int main(int argc, char *argv[]) {
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-init")	{
 		cout<<endl<<"Initialize the order parameter into:"<<filename<<".ord"<<endl<<endl;
+<<<<<<< HEAD:src/main.cpp
 <<<<<<< HEAD
 		
 		TBModel model(filename, false);
 =======
 		TBModel model(filename);
 >>>>>>> Performance and structure update.
+=======
+		TBModel model(filename);
+>>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856:src/main.cpp
 		model.initOrder();
 	}
 	
@@ -270,12 +275,16 @@ int main(int argc, char *argv[]) {
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-ovesta"){
 		cout<<endl<<"Convert to the VESTA file formate:"<<filename<<".vesta"<<endl<<endl;
+<<<<<<< HEAD:src/main.cpp
 <<<<<<< HEAD
 		
 		TBModel model(filename, false);
 =======
 		TBModel model(filename);
 >>>>>>> Performance and structure update.
+=======
+		TBModel model(filename);
+>>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856:src/main.cpp
 		model.convertTo_VESTA(operationList);
 	}
 	
@@ -292,11 +301,15 @@ int main(int argc, char *argv[]) {
 			shiftXYZ.push_back(0);
 		}
 		
+<<<<<<< HEAD:src/main.cpp
 <<<<<<< HEAD
 		TBModel model(filename, false);
 =======
 		TBModel model(filename);
 >>>>>>> Performance and structure update.
+=======
+		TBModel model(filename);
+>>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856:src/main.cpp
 		model.shiftXYZ(shiftXYZ[0], shiftXYZ[1], shiftXYZ[2]);
 	}
 	
@@ -309,17 +322,18 @@ int main(int argc, char *argv[]) {
 		vector<string> changeAtomOptList;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ changeAtomOptList.push_back(operationList[i]); }
 		
+<<<<<<< HEAD:src/main.cpp
 <<<<<<< HEAD
 		TBModel model(filename, false);
 =======
 		TBModel model(filename);
 >>>>>>> Performance and structure update.
+=======
+		TBModel model(filename);
+>>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856:src/main.cpp
 		model.changeAtom(changeAtomOptList);
 	}
 	
-	// -----------------------------------------------------------------
-	// Wrong arguments handler.
-	// -----------------------------------------------------------------
 	else	{
 		tbm::ErrorMessage("Error, input operation not found:" +operationList[1]);
 	}
