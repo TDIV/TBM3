@@ -19,6 +19,7 @@
 #include <iostream>
 #include <random>
 
+
 class TBModel: public tbm::TBModelBase, public tbm::TBClassicalSpinBase{
 public:
 	TBModel(string filename):
