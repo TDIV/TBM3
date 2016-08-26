@@ -1,5 +1,3 @@
-![starscream](https://raw.githubusercontent.com/TDIV/TBM3/master/icon/icon.png)
-
 TBM3 (Tight Binding Model for Materials at Mesoscale) is a C++ based numerical tool package and framework that designed for construct ‘any’ kind of lattice structure with multi-orbital and spin degree of freedom to solve the basic nano-scale electronic structure. It is to designed to construct a highly flexible and reusable framework for anyone to easily solve the multi-scale quantum mechnical model and extract useful physical quantities.
 
 ## Features
