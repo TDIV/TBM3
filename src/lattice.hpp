@@ -380,25 +380,9 @@ public:
 		
 		index_size = Atom::totalIndexSize;
 		
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-		if( needExpandAtomList ){
-			updateExtendedAtomList();
-=======
-		if( needExpandedAtomList ){
-			updateExpandedAtomList();
->>>>>>> 5f9d1fd3725e3cc2fe40db675634a8785a04f856
-		}
-=======
-		if( needExpandedAtomList )
-			updateExtendedAtomList();
->>>>>>> Performance and structure update.
-=======
 		if( needExpandedAtomList ){
 			updateExpandedAtomList();
 		}
->>>>>>> Fix a tiny bug for "-expand" operation.
 
 	}
 	
