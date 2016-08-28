@@ -30,19 +30,19 @@ public:
 			iteration_steps = 0;
 		}
 
-	void initOrder()	override {
+	void initOrder()	override{
 		Lat.createAtomList(false);
 		tbd.order.clear();
 		tbd.order.load(Lat.initOrder.orderOperationList);
 		tbd.order.save();
 	}
 
-	void Hamiltonian()	override {
+	void Hamiltonian()	override{
 		
 		constructHamList();
 	}
 
-	void run()			override {
+	void run()			override{
 		
 		cout<<endl<<"Starting..."<<endl<<endl;
 		
@@ -90,7 +90,7 @@ public:
 		
 	}
 	
-	bool iterationStepIncr(){
+	bool iterationStepIncr()	{
 		iteration_steps += 1;
 		return iteration_steps <= iteration_max;
 	}

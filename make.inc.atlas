@@ -1,6 +1,6 @@
 
 CC = g++
-BOOST_INCLUDE= /home/tai/opt/boost/include
+BOOST_DIR	= /home/tai/opt/boost/include
 CUDA_DIR    = /usr/local/cuda-7.5
 MAGMA_DIR   = /home/tai/opt/magma
 

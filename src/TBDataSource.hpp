@@ -37,6 +37,7 @@ public:
 };
 
 struct	EigVec{
+	string	message;
 	r_mat	kPoint;
 	r_mat	eigenValue;
 	x_mat	eigenVector;
@@ -995,7 +996,9 @@ public:
 		}
 		
 		tmpEigValVec.kPoint = kp;
-		Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
+		
+		tmpEigValVec.message = Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
+		
 		if ( maxE < tmpEigValVec.eigenValue[Lat.indexSize()-1]	){ maxE = tmpEigValVec.eigenValue[Lat.indexSize()-1]; }
 		if ( minE > tmpEigValVec.eigenValue[0]					){ minE = tmpEigValVec.eigenValue[0]; }
 		return tmpEigValVec;
