@@ -1,9 +1,18 @@
+#----------------------------------------------------------|
+# Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,          |
+#                    Jian-Xin Zhu                          |
+#                                                          |
+# Los Alamos National Laboratory, T-4 Group                |
+#                                                          |
+#----------------------------------------------------------|
 
 CC = g++
+
 BOOST_DIR	= /home/tai/opt/boost/include
 CUDA_DIR    = /usr/local/cuda-7.5
 MAGMA_DIR   = /home/tai/opt/magma
 
+# Linux+Atlas library preference 
 OSFLAG      = -L/usr/lib/lapack/\
             -L/usr/lib/atlas-base/lib \
             -std=c++11 -O3  -DADD_ -fopenmp -DMAGMA_SETAFFINITY -DHAVE_CUBLAS -DMIN_CUDA_ARCH=300 \

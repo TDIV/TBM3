@@ -97,6 +97,8 @@ tbm-run BaFe2As2.lat
 
 It will automatically calculate the chemical potential for the given electron charge (2 electrons per Fe site), and output the band structure 'BaFe2As2.lat.ban' under the same folder.
 
+More examples can be found under the `example/` folder.
+
 ## Requirements
 - A NVIDIA GPU.
 - CUDA library.
@@ -107,7 +109,14 @@ We are working on to provide more possible options for different hardward select
 
 ## Installation
 
-Some installation instructions.
+1. Install the [CUDA](https://developer.nvidia.com/cuda-downloads) library.
+2. Install the [MAGMA](http://icl.cs.utk.edu/magma/) library.
+3. Install the [BOOST](http://www.boost.org) library.
+4. Download and unzip this repository.
+5. Choose and copy one of the `make.inc.xxxxx` to `make.inc` under the same folder.
+6. Modify `make.inc` according to the library path (CUDA, MAGMA, BOOST).
+7. Type `make` to compile. If compile sucessfully, an executable `tbm-run` will be generated under the folder `bin/`
+8. Add the `bin/` folder to your system path.
 
 ## License
 

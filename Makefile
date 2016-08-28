@@ -1,3 +1,10 @@
+#----------------------------------------------------------|
+# Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,          |
+#                    Jian-Xin Zhu                          |
+#                                                          |
+# Los Alamos National Laboratory, T-4 Group                |
+#                                                          |
+#----------------------------------------------------------|
 
 include make.inc
 
