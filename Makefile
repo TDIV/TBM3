@@ -16,6 +16,7 @@ CFLAGS = 	-I$(IDIR)\
 			-L$(MAGMA_DIR)/lib -lmagma\
 			-I$(CUDA_DIR)/include\
 			-L$(CUDA_DIR)/lib\
+			-L$(CUDA_DIR)/lib64\
 			$(OSFLAG)
 
 tbm-run: src/main.cpp

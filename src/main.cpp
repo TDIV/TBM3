@@ -148,7 +148,7 @@ public:
 			
 			if( justStarted ){
 				justStarted = false;
-				if		( spin_diff > 0.01 )	{ spin_iteration_max = 1; }
+				if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
 				else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
 				else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
 				else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
@@ -170,6 +170,7 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
+		bool	justStarted = true;
 		
 		while(	(
 				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
@@ -181,9 +182,13 @@ public:
 			
 			tbd.order.load();
 			tbd.order.save("previous");
-			for( unsigned i=0 ; i<4 ; i++){
-				KHamEvd(tbd);
-				iterateSpinOrder(tbd.order);
+			
+			if( justStarted ){
+				justStarted = false;
+				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 30).real()) ; i++){
+					KHamEvd(tbd);
+					iterateSpinOrder(tbd.order);
+				}
 			}
 			calculateSpinVar();
 			

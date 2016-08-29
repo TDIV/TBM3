@@ -60,15 +60,15 @@ namespace tbm{
 using namespace std;
 using namespace gmt;
 	
-	//typedef		dvar	r_var;
-	//typedef		dmat	r_mat;
-	//typedef		zvar	x_var;
-	//typedef		zmat	x_mat;
+	//typedef		svar	r_var;
+	//typedef		smat	r_mat;
+	//typedef		cvar	x_var;
+	//typedef		cmat	x_mat;
 
-	typedef		svar	r_var;
-	typedef		smat	r_mat;
-	typedef		cvar	x_var;
-	typedef		cmat	x_mat;
+	typedef		dvar	r_var;
+	typedef		dmat	r_mat;
+	typedef		zvar	x_var;
+	typedef		zmat	x_mat;
 	
 void ErrorMessage(string errorStr) {
 	cout<<errorStr<<endl<<endl;

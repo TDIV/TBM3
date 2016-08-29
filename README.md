@@ -8,6 +8,7 @@ TBM3 (Tight Binding Model for Materials at Mesoscale) is a C++ based numerical t
 - Simple and minimal input format for the setting of a quantum mechanical model.
 - Simple file formate for the storage of order parameters.
 
+
 ## Simple Example
 
 First thing is to construct the lattice file. Here is an example for a single site Fe atom with two orbitals (dxz & dyz) for the iron based compound (BaFe2As2). Here we name the lattice input file as `BaFe2As2.lat`.
@@ -126,3 +127,10 @@ TBM3 is licensed under the GNU General Public License.
 
 - Dr. Yuan-Yen Tai: [Personal web](http://dr-tai.net), [Linked In](https://www.linkedin.com/in/yuan-yen-tai-5652ab112)
 
+## Under construction
+- Superconductivity self-consistence iteration in real- and k- space.
+- Blabs compile options for CPU, GPU-MAGMA, GPU-OpenCL and other methods.
+- Charge/Spin susceptibility calculation.
+- Transport calculation.
+- Quantum MD simulation.
+- Real space self-consistence for strongly correlated Hubbard interaction.
