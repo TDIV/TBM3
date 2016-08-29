@@ -129,7 +129,7 @@ TBM3 is licensed under the GNU General Public License.
 
 ## Under construction
 - Superconductivity self-consistence iteration in real- and k- space.
-- Blabs compile options for CPU, GPU-MAGMA, GPU-OpenCL and other methods.
+- Compile options for Blabs for CPU, GPU-OpenCL and multi-thread-CPU.
 - Charge/Spin susceptibility calculation.
 - Transport calculation.
 - Quantum MD simulation.
