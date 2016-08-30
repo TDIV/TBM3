@@ -1,6 +1,18 @@
+#KPointPath
+G      0     0     0    
+X      1     0     0    
+M      1     1     0    
+G      0     0     0    
+
+#BondVector 0
+ 1.0             0               0              
+ 0               1.0             0              
+ 0               0               1.0            
+
+
 #Parameters
 isCalculateMu	= 1
-isCalculateLDOS	= 1
+isCalculateLDOS	= 0
 isCalculateBand	= 1
 isCalculateVar 	= 0
 isCalculateSpinX= 0

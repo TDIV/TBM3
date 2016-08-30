@@ -1,7 +1,7 @@
 #Parameters
 isCalculateMu	= 1
-isCalculateVar 	= 0
-isCalculateLDOS	= 0
+isCalculateVar 	= 1
+isCalculateLDOS	= 1
 isCalculateBand	= 1
 
 %disable_quantum = 1
@@ -19,16 +19,16 @@ max_iter	= 100
 Mu			= 0
 Temperature	= 0.0001
 Jh			= 3
-Jse			= 0.2
+Jse			= 0.0
 Jdm			= 0.0
-OOhop		= 1.0
+OOhop		= 0.5
 alpha		= 0.0
 B			= 0.0
-tdp			= 1.3
+tdp			= 1
 
-%ldos_Nb		= 4,4,4
-%ldos_dE		= 0.01
-%ldos_Gamma  = 0.02
+ldos_Nb		= 4,4,4
+ldos_dE		= 0.01
+ldos_Gamma  = 0.02
 
 #LDOSList
 0		0		0		1 2
@@ -66,9 +66,8 @@ Bi		den			> 1
 
 #Hamiltonian
 
-screenCoulomb > Fe ~2 > @:den * alpha
-screenCoulomb > O  ~2 > @:den * alpha
-%screenCoulomb > Bi ~2 > @:den * alpha
+screenCoulomb > Fe ~2.5 > @:den * alpha
+screenCoulomb > O  ~2.5 > @:den * alpha
 
 hundSpin  > Fe 1 > @:cspin * Jh 
 hundSpin  > Fe 2 > @:cspin * Jh 
@@ -76,7 +75,6 @@ hundSpin  > Fe 2 > @:cspin * Jh
 % Fe-O bond hopping terms
 orbital	> Fe 1 > 0
 orbital	> Fe 2 > 0
-%orbital	> Fe 3 > 3
 
 hoppingHc > Fe:O:+1+0+0# 1:px >  0.5  		* tdp
 hoppingHc > Fe:O:+0+1+0# 1:py >  0.5  		* tdp
@@ -92,13 +90,6 @@ hoppingHc > Fe:O:-1+0+0# 2:px >  0.866025	* tdp
 hoppingHc > Fe:O:+0-1+0# 2:py > -0.866025	* tdp
 hoppingHc > Fe:O:+0+0-1# 2:pz > -0.0		* tpd
 
-%hoppingHc > Fe:O:+1+0+0# 3:px > 3
-%hoppingHc > Fe:O:+0+1+0# 3:py > 3
-%hoppingHc > Fe:O:+0+0+1# 3:pz > 3
-%hoppingHc > Fe:O:-1+0+0# 3:px >-3
-%hoppingHc > Fe:O:+0-1+0# 3:py >-3
-%hoppingHc > Fe:O:+0+0-1# 3:pz >-3
-
 % O-O bond hopping terms
 orbital > O 1	> 0
 hopping > O:O:+1+1+0# 1:1 >  1 * OOhop
@@ -113,16 +104,6 @@ hopping > O:O:+0+1+1# 1:1 >  1 * OOhop
 hopping > O:O:+0+1-1# 1:1 > -1 * OOhop
 hopping > O:O:+0-1+1# 1:1 > -1 * OOhop
 hopping > O:O:+0-1-1# 1:1 >  1 * OOhop
-
-%orbital > Bi 1	> 3
-%orbital > Bi 2	> 3
-%orbital > Bi 3	> 3
-%hoppingHc > O:Bi:+0+1+1# px:px >  2  
-%hoppingHc > O:Bi:+1+0+1# py:py >  2  
-%hoppingHc > O:Bi:+1+1+0# pz:pz >  2  
-%hoppingHc > O:Bi:+0-1-1# px:px >  2  
-%hoppingHc > O:Bi:-1+0-1# py:py >  2  
-%hoppingHc > O:Bi:-1-1+0# pz:pz >  2  
 
 
 %fieldB	> Fe   > [0,0,1] * B	% The B field to the classical spin
