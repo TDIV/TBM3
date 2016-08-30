@@ -1,0 +1,97 @@
+#KPointPath
+X      1     0     0    
+G      0     0     0    
+X      1     0     0    
+
+#BondVector 0
+ 1.0             0               0              
+ 0               1.0             0              
+ 0               0               1.0            
+
+
+#Parameters
+isCalculateMu	= 1
+isCalculateLDOS	= 0
+isCalculateBand	= 1
+isCalculateVar 	= 0
+isCalculateSpinX= 0
+
+max_iter	= 10000
+spin		= "on"
+space		= "normal"
+Nb			= 10,1,1
+bondRadius	= 3
+
+Mu			= 0
+Temperature	= 0.0001
+
+t1			= 0.09
+t2			= 0.08
+t3			= 1.35
+t4			= -0.12
+t5			= -1
+t6			= 0.25
+
+t_AOH		= 0.6
+
+ldos_Nb	= 30,30,1
+ldos_dE	= 0.005
+ldos_Gamma = 0.06
+
+#LDOSList
+0		0		0		1 2
+
+#CoreCharge
+Fe	> 2
+
+#Init
+
+#Hamiltonian
+
+% Fe-O bond hopping terms
+orbital	> Fe 1 > 0
+orbital	> Fe 2 > 0
+
+hoppingHc > Fe:Fe:+1+0+0 1:1 >  t1
+hoppingHc > Fe:Fe:+1+0+0 2:2 >  t1
+hoppingHc > Fe:Fe:+0+1+0 1:1 >  t1
+hoppingHc > Fe:Fe:+0+1+0 2:2 >  t1
+
+hoppingHc > Fe:Fe:+1+1+0 1:1 >  t2
+hoppingHc > Fe:Fe:+1-1+0 2:2 >  t2
+
+hoppingHc > Fe:Fe:+1+1+0 2:2 >  t3
+hoppingHc > Fe:Fe:+1-1+0 1:1 >  t3
+
+hopping   > Fe:Fe:+1+1+0 1:2 >  t4
+hopping   > Fe:Fe:+1+1+0 2:1 >  t4
+hopping   > Fe:Fe:+1-1+0 1:2 >  t4
+hopping   > Fe:Fe:+1-1+0 2:1 >  t4
+hopping   > Fe:Fe:-1-1+0 1:2 >  t4
+hopping   > Fe:Fe:-1-1+0 2:1 >  t4
+hopping   > Fe:Fe:-1+1+0 1:2 >  t4
+hopping   > Fe:Fe:-1+1+0 2:1 >  t4
+
+hopping   > Fe:Fe:+1+0+0 1:2 >  t5
+hopping   > Fe:Fe:+1+0+0 2:1 >  t5
+hopping   > Fe:Fe:+0+1+0 1:2 >  t5
+hopping   > Fe:Fe:+0+1+0 2:1 >  t5
+hopping   > Fe:Fe:-1+0+0 1:2 >  t5
+hopping   > Fe:Fe:-1+0+0 2:1 >  t5
+hopping   > Fe:Fe:+0-1+0 1:2 >  t5
+hopping   > Fe:Fe:+0-1+0 2:1 >  t5
+
+bondHc   > Fe:Fe:+1+0+0 1u:2u >  (0, 1)* t_AOH
+bondHc   > Fe:Fe:+0+1+0 1u:2u >  (0,-1)* t_AOH
+bondHc   > Fe:Fe:-1+0+0 1u:2u >  (0, 1)* t_AOH
+bondHc   > Fe:Fe:+0-1+0 1u:2u >  (0,-1)* t_AOH
+
+bondHc   > Fe:Fe:+1+0+0 1d:2d >  (0,-1)* t_AOH
+bondHc   > Fe:Fe:+0+1+0 1d:2d >  (0, 1)* t_AOH
+bondHc   > Fe:Fe:-1+0+0 1d:2d >  (0,-1)* t_AOH
+bondHc   > Fe:Fe:+0-1+0 1d:2d >  (0, 1)* t_AOH
+
+hoppingHc > Fe:Fe:+2+0+0 1:1 >  t6
+hoppingHc > Fe:Fe:+0+2+0 1:1 >  t6
+hoppingHc > Fe:Fe:+2+0+0 2:2 >  t6
+hoppingHc > Fe:Fe:+0+2+0 2:2 >  t6

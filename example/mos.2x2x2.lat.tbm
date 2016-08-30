@@ -1,7 +1,7 @@
 #Parameters
 isCalculateMu	= 1
-isCalculateVar 	= 1
-isCalculateLDOS	= 1
+isCalculateVar 	= 0
+isCalculateLDOS	= 0
 isCalculateBand	= 1
 
 %disable_quantum = 1

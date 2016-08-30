@@ -455,7 +455,7 @@ public:
 		x_mat sVec(1,3);
 		if( xvec.size() >= 1 ){ sVec = xvec[0]; }
 		for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-		r_var val = sVec[0].real();
+		x_var val = sVec[0];
 		
 		auto spinIndexList_i = pair.atomI.spinIndexList(secondSec[0]);
 		auto spinIndexList_j = pair.atomJ.spinIndexList(secondSec[1]);
@@ -472,15 +472,20 @@ public:
 		}
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & label_i = spinIndexList_i[ii].first;
-			//auto & label_j = spinIndexList_j[ii].first;
+			auto & tmpChar = spinIndexList_i[ii].first[0];
+			
 			auto & index_i = spinIndexList_i[ii].second;
 			auto & index_j = spinIndexList_j[ii].second;
 			
-			if( label_i == "N" or label_i == "A")
+			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
-			if( label_i == "B")
+			}
+			if(tmpChar == 'A'){
+				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
+			}
+			if(tmpChar == 'B'){
 				hamElementList.push_back(MatrixElement(index_i, index_j,-val, pair.bondIJ()));
+			}
 		}
 	}
 	void addBondCoupleHc(string opt, string svar)	{
@@ -532,18 +537,22 @@ public:
 		}
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & label_i = spinIndexList_i[ii].first;
-			//auto & label_j = spinIndexList_j[ii].first;
+			auto & tmpChar = spinIndexList_i[ii].first[0];
+			
 			auto & index_i = spinIndexList_i[ii].second;
 			auto & index_j = spinIndexList_j[ii].second;
-			auto bondIJ = pair.bondIJ();
-			if( label_i == "N" or label_i == "A"){
-				hamElementList.push_back(MatrixElement(index_i, index_j, val, bondIJ));
-				hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), 0-bondIJ));
+			
+			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
+				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
+				hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), 0-pair.bondIJ()));
 			}
-			if( label_i == "B"){
-				hamElementList.push_back(MatrixElement(index_i, index_j,-val, bondIJ));
-				hamElementList.push_back(MatrixElement(index_j, index_i,conj(-val), bondIJ));
+			if(tmpChar == 'A'){
+				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
+				hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), 0-pair.bondIJ()));
+			}
+			if(tmpChar == 'B'){
+				hamElementList.push_back(MatrixElement(index_i, index_j,-val, pair.bondIJ()));
+				hamElementList.push_back(MatrixElement(index_j, index_i, conj(-val),0-pair.bondIJ()));
 			}
 		}
 	}
@@ -1209,6 +1218,7 @@ public:
 	x_mat			parseBondString(AtomPair & ap, string svar)		{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		
+		
 		x_mat xvar;
 		
 		replaceAll(svar, "@", vecToStr(ap.bondIJ()) );
@@ -1221,6 +1231,11 @@ public:
 			replaceAll(svar, "]", "");
 			xvar = StrToXVec(svar);
 		}
+		else if( svar[0] == '(' and svar[svar.size()-1] == ')'){ // Complex type
+			x_mat tmp(1,1);
+			tmp[0] = StrToComplex(svar);
+			xvar = tmp;
+		}
 		else if( IsFloatStr(svar)){ // a number
 			x_mat tmp(1,1);
 			tmp[0] = StrToComplex(svar);
@@ -1232,6 +1247,7 @@ public:
 			xvar = tmp;
 		}
 		
+		
 		return xvar;
 	}
 	vector<x_mat>	parseBondVecString(AtomPair & ap, string svec)	{ // +1+0+0:1:1:pairS * Jh * ...
@@ -1241,6 +1257,7 @@ public:
 		
 		vector<x_mat> xvec;
 		for( auto & elem: varList) xvec.push_back(parseBondString(ap, elem));
+		
 		
 		return xvec;
 	}

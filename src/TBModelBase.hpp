@@ -308,6 +308,19 @@ protected:
 		KHamEvd(rtbd);
 		kMeshSelection = "Nb";
 		
+		r_mat ldos_E(1,2);
+		ldos_E[0] = rtbd.minE;
+		ldos_E[1] = rtbd.maxE;
+		ldos_E = Lat.parameter.VEC("ldos_E", ldos_E);
+		
+		if( ldos_E[0] > ldos_E[1]){
+			auto tmpE = ldos_E[1];
+			ldos_E[1] = ldos_E[0];
+			ldos_E[0] = tmpE;
+		}
+		
+		cout<<ldos_E<<endl;
+		
 		// Handling the LDOS label for the up coming calculation.
 		for( auto & elem: Lat.ldosList.LDOSSelector ){
 			
@@ -348,7 +361,7 @@ protected:
 					}
 				}
 				
-				for( double eng = rtbd.minE; eng <= rtbd.maxE+4*stepE ; eng += stepE ){
+				for( double eng = ldos_E[0]; eng <= ldos_E[1]+4*stepE ; eng += stepE ){
 					ldos.push_back(make_pair(eng, 0));
 				}
 				

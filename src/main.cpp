@@ -106,8 +106,10 @@ public:
 		cout<<endl<<"--Calculating electron density self-consistantly."<<endl;
 		
 		double den_diff = 1;
+		double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
+		den_diff_bound = 0.01;
 		
-		while( den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real()) and iterationStepIncr() ){
+		while( den_diff > den_diff_bound and iterationStepIncr() ){
 			
 			tbd.order.load();
 			tbd.order.save("previous");
@@ -153,7 +155,10 @@ public:
 			if( justStarted ){
 				justStarted = false;
 				if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
-				else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 2; }
+				
+				//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
+				//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
+				//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
 				//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
 			}
 			
@@ -188,7 +193,7 @@ public:
 			
 			if( justStarted ){
 				justStarted = false;
-				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 40).real()) ; i++){
+				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 4).real()) ; i++){
 					KHamEvd(tbd);
 					iterateSpinOrder(tbd.order);
 				}

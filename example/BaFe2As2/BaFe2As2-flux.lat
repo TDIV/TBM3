@@ -1,0 +1,10 @@
+#BasisVector
+ 1               0               0              
+ 0               1               0              
+ 0               0               1              
+
+#OrbitalProfile
+Fe        dxz     dyz    
+
+#Atoms
+1     0             0             0            
