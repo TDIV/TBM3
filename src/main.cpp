@@ -44,7 +44,11 @@ public:
 
 	void run()			override{
 		
+		// Set the cuda device for calculation.
+		cudaSetDevice((int)Lat.parameter.VAR("cudaSetDevice", 0).real());
+		
 		cout<<endl<<"Starting..."<<endl<<endl;
+		
 		
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
 			
@@ -127,7 +131,7 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 20).real() );
+		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
 		unsigned spin_iteration = 0;
 		bool	 justStarted = true;
 		
@@ -148,10 +152,9 @@ public:
 			
 			if( justStarted ){
 				justStarted = false;
-				if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
-				else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
-				else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
-				else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
+				if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
+				else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 2; }
+				//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
 			}
 			
 			double TotalE = 0;
@@ -185,7 +188,7 @@ public:
 			
 			if( justStarted ){
 				justStarted = false;
-				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 30).real()) ; i++){
+				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 40).real()) ; i++){
 					KHamEvd(tbd);
 					iterateSpinOrder(tbd.order);
 				}

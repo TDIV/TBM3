@@ -115,6 +115,13 @@ protected:
 						make_pair(label, partOfHighSymmetryLine[ii])
 					);
 				}
+				
+				if ( j== kSpaceHighSymmetryPoints.size() -1 ){
+					string label = kSpaceHighSymmetryPoints[j].first;
+					highSymmetryLine.push_back(
+						make_pair(label, kSpaceHighSymmetryPoints[j].second)
+					);
+				}
 			}
 		}
 		
