@@ -106,6 +106,18 @@ string vecToStr(r_mat rvec){
 	return vstr;
 }
 
+vector<r_mat> getUnitVectors(vector<r_mat> AVec){
+	vector<r_mat> retVec;
+	for( auto & vec: AVec){
+		double vec_len = sqrt(cdot(vec,vec));
+		vec = vec * (1/vec_len);
+		retVec.push_back(vec);
+	}
+	return retVec;
+}
+
+r_mat cross(){
+}
 
 #endif
 

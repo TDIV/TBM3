@@ -608,6 +608,7 @@ public:
 		// Convert the unitcell structure.
 		outfile<<"CELLP"<<endl;
 		auto AVec = Lat.basisVector.getAVec();
+		
 		double len_a = sqrt(cdot(AVec[0], AVec[0]));
 		double len_b = sqrt(cdot(AVec[1], AVec[1]));
 		double len_c = sqrt(cdot(AVec[2], AVec[2]));
@@ -623,6 +624,10 @@ public:
 		outfile<<endl<<"  0.000000   0.000000   0.000000   0.000000   0.000000   0.000000"<<endl;
 		
 		// Convert the atom position.
+		double V123 = cdot(curl(AVec[0], AVec[1]), AVec[2]);
+		double V213 = cdot(curl(AVec[1], AVec[0]), AVec[2]);
+		double V312 = cdot(curl(AVec[2], AVec[0]), AVec[1]);
+		
 		outfile<<"STRUC"<<endl;
 		auto atomList = Lat.getAtomList();
 		for(auto & atom: atomList){
@@ -630,12 +635,13 @@ public:
 					<<" "<<fformat(atom.atomName,6)
 					<<" "<<fformat(atom.orbitalOriginIndex,2)
 					<<"  1.0000  ";
-			double pos_a = cdot(atom.pos, AVec[0])/(len_a*len_a);
-			double pos_b = cdot(atom.pos, AVec[1])/(len_b*len_b);
-			double pos_c = cdot(atom.pos, AVec[2])/(len_c*len_c);
-			outfile<<fformat(pos_a, 11);
-			outfile<<fformat(pos_b, 11);
-			outfile<<fformat(pos_c, 11);
+			
+			double pos_a = cdot(curl(atom.pos, AVec[1]), AVec[2])*(1.0/V123);
+			double pos_b = cdot(curl(atom.pos, AVec[0]), AVec[2])*(1.0/V213);
+			double pos_c = cdot(curl(atom.pos, AVec[0]), AVec[1])*(1.0/V312);
+			outfile<<fformat(pos_a, 11)<<" ";
+			outfile<<fformat(pos_b, 11)<<" ";
+			outfile<<fformat(pos_c, 11)<<" ";
 			outfile<<"  1a       1";
 			outfile<<endl;
 			outfile<<"                            0.000000   0.000000   0.000000  0.00"<<endl;

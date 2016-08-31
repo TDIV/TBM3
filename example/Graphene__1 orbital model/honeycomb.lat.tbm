@@ -1,7 +1,7 @@
 #KPointPath
 G      0     0     0    
-M      1   0     0    
-K      1.6666666666666665   0.33333333333333337     0    
+M      1  	0     0    
+K      1.333     0.666     0    
 G      0     0     0    
 
 #BondVector 0
@@ -44,5 +44,5 @@ C	> 1
 
 hoppingHc > C:C:+1+0+0# 1:1 >  t1
 hoppingHc > C:C:+0+1+0# 1:1 >  t1
-hoppingHc > C:C:+0+0+1# 1:1 >  t1
+hoppingHc > C:C:-1-1+0# 1:1 >  t1
 
