@@ -114,7 +114,7 @@ public:
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
-			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
+			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.001).real());
 			cout<< gmt::fformat(iteration_steps, 5) <<"  Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
@@ -133,13 +133,14 @@ public:
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
 		unsigned spin_iteration = 0;
-		bool	 justStarted = true;
+		//unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
+		//bool	 justStarted = true;
 		
-		// Full iteration, depends on the convergence criteria.
+		//while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
+		//	  and iterationStepIncr() and spin_iteration < spin_iteration_max)
 		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
-			  and iterationStepIncr() and spin_iteration < spin_iteration_max)
+			  and iterationStepIncr())
 		{
 			spin_iteration +=1 ;
 			
@@ -152,15 +153,15 @@ public:
 			den_diff = diff.second;
 			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
 			
-			if( justStarted ){
-				justStarted = false;
-				if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
-				
-				//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
-				//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
-				//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
-				//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
-			}
+			//if( justStarted ){
+			//	justStarted = false;
+			//	if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
+			//	
+			//	//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
+			//	//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
+			//	//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
+			//	//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
+			//}
 			
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
@@ -193,7 +194,7 @@ public:
 			
 			if( justStarted ){
 				justStarted = false;
-				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 4).real()) ; i++){
+				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 20).real()) ; i++){
 					KHamEvd(tbd);
 					iterateSpinOrder(tbd.order);
 				}

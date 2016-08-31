@@ -7,7 +7,12 @@ G      0     0     0
 #BondVector 0
  1.0                 0.0                 0.0                
 -0.5                 0.866025403784      0.0                
- 0                   0                   0                  
+-0.5                -0.866025403784      0.0                  
+
+#BondVector 1
+ 0.5		0.8660254		0.0
+-1			0.0				0.0
+ 0.5		-0.8660254		0.0
 
 #Parameters
 isCalculateMu	= 1
@@ -20,7 +25,7 @@ max_iter	= 10000
 spin		= "on"
 space		= "normal"
 Nb			= 4,4,1
-bondRadius	= 2
+bondRadius	= 3
 
 Mu			= 0
 Temperature	= 0.0001
@@ -36,13 +41,31 @@ t2			= 0.0
 0		0		0		1 2
 
 #CoreCharge
-C	> 1
+C1	> 1
+C2	> 1
 
 #Init
 
 #Hamiltonian
 
-hoppingHc > C:C:+1+0+0# 1:1 >  t1
-hoppingHc > C:C:+0+1+0# 1:1 >  t1
-hoppingHc > C:C:-1-1+0# 1:1 >  t1
+hopping > C1:C2:+1+0+0# 1:1 >  t1
+hopping > C1:C2:+0+1+0# 1:1 >  t1
+hopping > C1:C2:+0+0+1# 1:1 >  t1
+hopping > C2:C1:+1+0+0# 1:1 >  t1
+hopping > C2:C1:+0+1+0# 1:1 >  t1
+hopping > C2:C1:+0+0+1# 1:1 >  t1
+
+bond > C1:C1:+1+0-1# 1u:1u >  (0, 1)*t2
+bond > C1:C1:-1+1+0# 1u:1u >  (0, 1)*t2
+bond > C1:C1:+0-1+1# 1u:1u >  (0, 1)*t2
+bond > C2:C2:+1+0-1# 1u:1u >  (0,-1)*t2
+bond > C2:C2:-1+1+0# 1u:1u >  (0,-1)*t2
+bond > C2:C2:+0-1+1# 1u:1u >  (0,-1)*t2
+
+bond > C1:C1:+1+0-1# 1d:1d >  (0,-1)*t2
+bond > C1:C1:-1+1+0# 1d:1d >  (0,-1)*t2
+bond > C1:C1:+0-1+1# 1d:1d >  (0,-1)*t2
+bond > C2:C2:+1+0-1# 1d:1d >  (0, 1)*t2
+bond > C2:C2:-1+1+0# 1d:1d >  (0, 1)*t2
+bond > C2:C2:+0-1+1# 1d:1d >  (0, 1)*t2
 
