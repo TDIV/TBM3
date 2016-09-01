@@ -724,8 +724,8 @@ public:
 		
 		// Save the expanded file.
 		ofstream outfile(Lat.FileName());
-		outfile<<Lat.kSymmPointParser.getFileString();
-		outfile<<Lat.bondVector.getFileString();
+		//outfile<<Lat.kSymmPointParser.getFileString();
+		//outfile<<Lat.bondVector.getFileString();
 		outfile<<Lat.basisVector.getFileString();
 		outfile<<Lat.orbitalProfile.getFileString();
 		outfile<<Lat.atomParser()<<endl;

@@ -1,7 +1,19 @@
 #KPointPath
-G      0		0		0    
-M      1  		0		0    
-G      0		0		0    
+G      0     0     0    
+X      1  	 0     0    
+M      1  	 1     0    
+Y      0  	 1     0    
+G      0     0     0    
+
+#BondVector 0
+ 1.0                 0.0                 0.0                
+-0.5                 0.866025403784      0.0                
+-0.5                -0.866025403784      0.0                  
+
+#BondVector 1
+ 0.5		0.8660254		0.0
+-1			0.0				0.0
+ 0.5		-0.8660254		0.0
 
 #Parameters
 isCalculateMu	= 1
@@ -13,14 +25,14 @@ isCalculateSpinX= 0
 max_iter	= 10000
 spin		= "on"
 space		= "normal"
-Nb			= 20,1,1
+Nb			= 4,4,1
 bondRadius	= 3
 
 Mu			= 0
 Temperature	= 0.0001
 
 t1			= 1
-t2			= 0.2
+t2			= 0.0
 
 #LDOSList
 0		0		0		1 2
@@ -31,17 +43,8 @@ C2	> 1
 
 #Init
 
-#BondVector 0
- 1.0                 0.0                 0.0                
--0.5                 0.866025403784      0.0                
--0.5                -0.866025403784      0.0                  
-
-#BondVector 1
- 0.5		 0.8660254		0.0
--1			 0.0			0.0
- 0.5		-0.8660254		0.0
-
 #Hamiltonian
+
 hoppingHc > C1:C2:+1+0+0# 1:1 >  t1
 hoppingHc > C1:C2:+0+1+0# 1:1 >  t1
 hoppingHc > C1:C2:+0+0+1# 1:1 >  t1
