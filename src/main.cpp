@@ -134,13 +134,13 @@ public:
 		double spin_diff = 1;
 		double den_diff = 1;
 		unsigned spin_iteration = 0;
-		//unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
-		//bool	 justStarted = true;
+		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
+		bool	 justStarted = true;
 		
 		//while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
-		//	  and iterationStepIncr() and spin_iteration < spin_iteration_max)
+		//	  and iterationStepIncr())
 		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
-			  and iterationStepIncr())
+			  and iterationStepIncr() and spin_iteration < spin_iteration_max)
 		{
 			spin_iteration +=1 ;
 			
@@ -153,15 +153,15 @@ public:
 			den_diff = diff.second;
 			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
 			
-			//if( justStarted ){
-			//	justStarted = false;
-			//	if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
-			//	
-			//	//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
-			//	//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
-			//	//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
-			//	//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
-			//}
+			if( justStarted ){
+				justStarted = false;
+				if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
+				
+				//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
+				//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
+				//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
+				//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
+			}
 			
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
