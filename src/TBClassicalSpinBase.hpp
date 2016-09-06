@@ -224,9 +224,9 @@ public:
 		TBD.energyMap["5.FB Eng"] = FB_Energy.real();
 	}
 	
-	pair<double,double> iterateSpinOrder(OrderParameter & newOrder)		{
+	double iterateSpinOrder(OrderParameter & newOrder)		{
 		
-		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return make_pair(0,0); }
+		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
 		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
 			TBD.calculate4DensityOrder();
@@ -360,24 +360,23 @@ public:
 		}
 		
 		
-		double max_den_diff = 0;
-		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
-			while( TBD.Lat.iterate() ){
-				auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
-				auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
-				if( parameter_old.first and parameter_new.first ){
-					auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-					if( max_den_diff < den_diff ) max_den_diff = den_diff;
-				}
-			}
-		}
+		//if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
+		//	while( TBD.Lat.iterate() ){
+		//		auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
+		//		auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
+		//		if( parameter_old.first and parameter_new.first ){
+		//			auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+		//			if( max_den_diff < den_diff ) max_den_diff = den_diff;
+		//		}
+		//	}
+		//}
 		
 		newOrder.save();
 		
 		calculateClassicalEnergy();
 		TBD.calculateEnergy();
 		
-		return make_pair( max_spin_diff, max_den_diff);
+		return max_spin_diff;
 	}
 
 private:

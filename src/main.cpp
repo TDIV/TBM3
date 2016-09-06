@@ -99,22 +99,20 @@ public:
 		return iteration_steps <= iteration_max;
 	}
 	
-	void calculateDenMeanField(){
+	double calculateDenMeanField(){
 		
-		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return; }
+		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 			
-		cout<<endl<<"--Calculating electron density self-consistantly."<<endl;
-		
 		double den_diff = 1;
 		double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
-		den_diff_bound = 0.01;
+		den_diff_bound = 0.1;
 		
 		while( den_diff > den_diff_bound and iterationStepIncr() ){
 			
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
-			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.001).real());
+			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
 			cout<< gmt::fformat(iteration_steps, 5) <<"  Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
@@ -127,83 +125,50 @@ public:
 			cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
 			cout<<endl;
 		}
+		return den_diff;
 	}
-	void calculateSpinVar()		{
-		cout<<endl<<">> Calculating LLG spin dynamic."<<endl;
+	double calculateSpinVar()		{
 		
-		double spin_diff = 1;
-		double den_diff = 1;
-		unsigned spin_iteration = 0;
-		unsigned spin_iteration_max = abs( Lat.parameter.VAR("spin_iter", 1).real() );
-		bool	 justStarted = true;
+		tbd.order.load();
+		tbd.order.save("previous");
 		
-		//while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
-		//	  and iterationStepIncr())
-		while( spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())
-			  and iterationStepIncr() and spin_iteration < spin_iteration_max)
-		{
-			spin_iteration +=1 ;
-			
-			tbd.order.load();
-			tbd.order.save("previous");
-			
-			KHamEvd(tbd);
-			auto diff = iterateSpinOrder(tbd.order);
-			spin_diff = diff.first;
-			den_diff = diff.second;
-			cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(spin_diff,16)<<" ";
-			
-			if( justStarted ){
-				justStarted = false;
-				if		( spin_diff > 0.001 )	{ spin_iteration_max = 1; }
-				
-				//if		( spin_diff > 0.002 )	{ spin_iteration_max = 1; }
-				//else if	( spin_diff > 0.001 )	{ spin_iteration_max = 2; }
-				//else if	( spin_diff > 0.0001 )	{ spin_iteration_max = 5; }
-				//else if	( spin_diff > 0.00001 )	{ spin_iteration_max = 10;}
+		KHamEvd(tbd);
+		auto diff = iterateSpinOrder(tbd.order);
+		
+		cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(diff,16)<<" ";
+		
+		double TotalE = 0;
+		for( auto & iter: tbd.energyMap ){
+			if( abs(iter.second) > 0.0000001 ){
+				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				TotalE += iter.second;
 			}
-			
-			double TotalE = 0;
-			for( auto & iter: tbd.energyMap ){
-				if( abs(iter.second) > 0.0000001 ){
-					cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
-					TotalE += iter.second;
-				}
-			}
-			cout<< gmt::fformat("Total:", 6)<<" "<< gmt::fformat(TotalE,10)<<" ";
-			cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
-			cout<<endl;
 		}
+		cout<< gmt::fformat("Total:", 6)<<" "<< gmt::fformat(TotalE,10)<<" ";
+		cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
+		cout<<endl;
+		return diff;
 	}
 	void calculateVar()			{
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		bool	justStarted = true;
 		
+		// Warm up for the iteration.
+		//den_diff = calculateDenMeanField();
+		//for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 20).real()) ; i++){
+		//	spin_diff = calculateSpinVar();
+		//}
+		
+		// Self-consistent loop.
 		while(	(
 				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
 				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
 				)		and
 				iterationStepIncr()){
 			
-			calculateDenMeanField();
-			
-			tbd.order.load();
-			tbd.order.save("previous");
-			
-			if( justStarted ){
-				justStarted = false;
-				for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 20).real()) ; i++){
-					KHamEvd(tbd);
-					iterateSpinOrder(tbd.order);
-				}
-			}
-			calculateSpinVar();
-			
-			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
-			auto diff = iterateSpinOrder(tbd.order);
-			spin_diff = diff.first;
+			den_diff	= calculateDenMeanField();
+			spin_diff	= calculateSpinVar();
 		}
 	}
 private:

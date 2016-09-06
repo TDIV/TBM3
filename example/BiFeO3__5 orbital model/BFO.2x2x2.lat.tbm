@@ -1,7 +1,19 @@
+#KPointPath
+G      0     0     0    
+X      1     0     0    
+M      1     1     0    
+O      1     1     1    
+G      0     0     0    
+
+#BondVector 0
+ 0.5             0               0              
+ 0               0.5             0              
+ 0               0               0.5            
+
 #Parameters
 isCalculateMu	= 1
 isCalculateVar 	= 1
-isCalculateLDOS	= 1
+isCalculateLDOS	= 0
 isCalculateBand	= 1
 
 %disable_quantum = 1
@@ -10,7 +22,7 @@ spin		= "on"
 space		= "normal"
 Nb			= 2,2,2
 var_dt		= 0.01
-spin_diff	= 0.0000001
+spin_diff	= 0.00001
 den_diff	= 0.0001
 den_mix		= 0.2
 bondRadius	= 6
@@ -21,10 +33,10 @@ Temperature	= 0.0001
 Jh			= 3
 Jse			= 0.0
 Jdm			= 0.0
-OOhop		= 0.5
 alpha		= 0.0
 B			= 0.0
 tdp			= 1
+tpp			= 0.5
 
 ldos_Nb		= 4,4,4
 ldos_dE		= 0.01
@@ -92,18 +104,18 @@ hoppingHc > Fe:O:+0+0-1# 2:pz > -0.0		* tpd
 
 % O-O bond hopping terms
 orbital > O 1	> 0
-hopping > O:O:+1+1+0# 1:1 >  1 * OOhop
-hopping > O:O:+1-1+0# 1:1 > -1 * OOhop
-hopping > O:O:-1+1+0# 1:1 > -1 * OOhop
-hopping > O:O:-1-1+0# 1:1 >  1 * OOhop
-hopping > O:O:+1+0+1# 1:1 >  1 * OOhop
-hopping > O:O:+1+0-1# 1:1 > -1 * OOhop
-hopping > O:O:-1+0+1# 1:1 > -1 * OOhop
-hopping > O:O:-1+0-1# 1:1 >  1 * OOhop
-hopping > O:O:+0+1+1# 1:1 >  1 * OOhop
-hopping > O:O:+0+1-1# 1:1 > -1 * OOhop
-hopping > O:O:+0-1+1# 1:1 > -1 * OOhop
-hopping > O:O:+0-1-1# 1:1 >  1 * OOhop
+hopping > O:O:+1+1+0# 1:1 >  1 * tpp
+hopping > O:O:+1-1+0# 1:1 > -1 * tpp
+hopping > O:O:-1+1+0# 1:1 > -1 * tpp
+hopping > O:O:-1-1+0# 1:1 >  1 * tpp
+hopping > O:O:+1+0+1# 1:1 >  1 * tpp
+hopping > O:O:+1+0-1# 1:1 > -1 * tpp
+hopping > O:O:-1+0+1# 1:1 > -1 * tpp
+hopping > O:O:-1+0-1# 1:1 >  1 * tpp
+hopping > O:O:+0+1+1# 1:1 >  1 * tpp
+hopping > O:O:+0+1-1# 1:1 > -1 * tpp
+hopping > O:O:+0-1+1# 1:1 > -1 * tpp
+hopping > O:O:+0-1-1# 1:1 >  1 * tpp
 
 
 %fieldB	> Fe   > [0,0,1] * B	% The B field to the classical spin
