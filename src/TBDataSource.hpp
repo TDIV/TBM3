@@ -72,6 +72,9 @@ public:
 	//   The constructor                            /
 	/////////////////////////////////////////////////
 	TBDataSource(Lattice & _lat):Lat(_lat), order(_lat), order_old(_lat)	{	}
+	~TBDataSource(){
+		KEigenValVec.clear();
+	}
 	
 	Lattice &				Lat;
 	OrderParameter			order;
@@ -86,6 +89,7 @@ public:
 	map<string, double>		energyMap;
 
 	void initHam	()		{
+		if( Ham.size() > 0 )
 		Ham = x_mat(Lat.indexSize(), Lat.indexSize());
 		initOrder();
 	}
@@ -831,8 +835,8 @@ public:
 		if( svarParser.size() == 2) alpha = parseSiteString(atomI, svarParser[1])[0].real();
 
 		auto rboxAtoms = Lat.getRBox(radius);
-		//cout<<alpha<<" "<<atomI.atomName<<" "<<rboxAtoms.second.size()<<endl;
 		
+		// Sum ove the coulomb term with the given charges (Z_i + Den_i).
 		double sumScreenCoulomb = 0;
 		for( auto & atomJ: rboxAtoms.second ){
 			auto orderJ = order.findOrder(atomJ, orderKey);
@@ -939,7 +943,12 @@ public:
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
 	void constructTBMHam	()					{
-		clear();
+		
+		Ham.zerolize();
+		hamElementList.clear();
+		maxE = -10000;
+		minE =  10000;
+		
 		initHam();
 
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
@@ -1262,40 +1271,7 @@ public:
 		return xvec;
 	}
 
-private:
-	void clear			()						{
-		Ham.zerolize();
-		KEigenValVec.clear();
-		hamElementList.clear();
-		maxE = -10000;
-		minE =  10000;
-	}
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

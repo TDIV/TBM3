@@ -11,24 +11,23 @@ G      0     0     0
  0               0               0.5            
 
 #Parameters
-isCalculateMu	= 1
-isCalculateVar 	= 1
+isCalculateMu	= 0
+isCalculateVar 	= 0
 isCalculateLDOS	= 0
 isCalculateBand	= 1
 
-%disable_quantum = 1
 
 spin		= "on"
 space		= "normal"
 Nb			= 2,2,2
 var_dt		= 0.01
-spin_diff	= 0.00001
-den_diff	= 0.0001
+spin_diff	= 0.000001
+den_diff	= 0.001
 den_mix		= 0.2
 bondRadius	= 6
 max_iter	= 100
 
-Mu			= 0
+Mu			= 2.39594
 Temperature	= 0.0001
 Jh			= 3
 Jse			= 0.0

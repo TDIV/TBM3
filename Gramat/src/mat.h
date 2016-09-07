@@ -243,9 +243,6 @@ namespace gmt {
 	#include "mat_multiply.h"
 	#include "mat_function.h"
 	#include "mat_operator.h"
-
-
-	
 	
 } // End of "gramat" namespace
 

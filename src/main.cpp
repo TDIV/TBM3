@@ -99,7 +99,7 @@ public:
 		return iteration_steps <= iteration_max;
 	}
 	
-	double calculateDenMeanField(){
+	double	calculateDenMeanField()	{
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 			
@@ -127,7 +127,7 @@ public:
 		}
 		return den_diff;
 	}
-	double calculateSpinVar()		{
+	double	calculateSpinVar()		{
 		
 		tbd.order.load();
 		tbd.order.save("previous");
@@ -149,16 +149,10 @@ public:
 		cout<<endl;
 		return diff;
 	}
-	void calculateVar()			{
+	void	calculateVar()			{
 		
 		double spin_diff = 1;
 		double den_diff = 1;
-		
-		// Warm up for the iteration.
-		//den_diff = calculateDenMeanField();
-		//for( unsigned i=0 ; i<abs(Lat.parameter.VAR("spin_starting_iter", 20).real()) ; i++){
-		//	spin_diff = calculateSpinVar();
-		//}
 		
 		// Self-consistent loop.
 		while(	(
@@ -166,7 +160,7 @@ public:
 				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
 				)		and
 				iterationStepIncr()){
-			
+		
 			den_diff	= calculateDenMeanField();
 			spin_diff	= calculateSpinVar();
 		}

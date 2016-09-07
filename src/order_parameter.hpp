@@ -45,6 +45,9 @@ public:
 	OrderParameter(const OrderParameter & order): Lat(order.Lat){
 		*this = order;
 	}
+	~OrderParameter(){
+		optList.clear();
+	}
 	
 	void	init(){
 		empty_mat_for_return = x_mat(1,1);

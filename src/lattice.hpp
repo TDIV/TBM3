@@ -35,6 +35,11 @@ public:
 		parameter.STR("space") = space;
 		//createAtomList();
 	}
+	~Lattice(){
+		rtree.clear();
+		atomList.clear();
+		extendedAtomList.clear();
+	}
 
 	// Read from xxx.lat
 	Parameter			parameter;

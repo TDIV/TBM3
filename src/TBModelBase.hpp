@@ -149,11 +149,13 @@ protected:
 		
 		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ) return;
 		
-		auto Nb = Lat.parameter.VEC(kMeshSelection,
-									Lat.parameter.VEC("Nb"));
+		auto Nb = Lat.parameter.VEC(kMeshSelection, Lat.parameter.VEC("Nb"));
+		auto B = Lat.basisVector.getBVec();
 		
+			
+		rtbd.KEigenValVec.clear();
+			
 		if( Nb.size() == 1){
-			auto B = Lat.basisVector.getBVec();
 			auto & b1 = B[0]*0.5;
 			auto N1 = Nb[0];
 			
@@ -161,11 +163,10 @@ protected:
 				auto kPoint = (i1/N1)*b1;
 				auto & tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
-					rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
 		if( Nb.size() == 2){
-			auto B = Lat.basisVector.getBVec();
 			auto & b1 = B[0]*0.5;
 			auto & b2 = B[1]*0.5;
 			auto N1 = Nb[0], N2 = Nb[1];
@@ -174,11 +175,10 @@ protected:
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
 				auto & tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
-					rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
 		if( Nb.size() == 3){
-			auto B = Lat.basisVector.getBVec();
 			auto & b1 = B[0]*0.5;
 			auto & b2 = B[1]*0.5;
 			auto & b3 = B[2]*0.5;
@@ -189,7 +189,7 @@ protected:
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3;
 				auto & tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
-					rtbd.KEigenValVec.push_back(rtbd.HamEvd(kPoint));
+					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
 	}

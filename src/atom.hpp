@@ -46,6 +46,12 @@ public:
 	static	unsigned	totalIndexSize;
 	
 	Atom()	{ }
+	~Atom()	{
+		orbitalMap.clear();
+		orbitalLabel.clear();
+		indexMap.clear();
+		indexList.clear();
+	}
 	void	createOrbitalContent(deque<string> _orbitalLabel, string _spinDegree, H_SPACE _h_space){
 		spinDegree = _spinDegree;
 		h_space = _h_space;
