@@ -64,10 +64,8 @@ protected:
 	void		constructHam	(TBDataSource & rtbd, bool withMu = true)					{
 		// Construct the Hamiltonian from the system-build structure: TBDataSource (tbd).
 		
-		if( Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
-			rtbd.constructTBMHam();
-			if( withMu ) rtbd.addChemicalPotential(rtbd.Lat.parameter.VAR("Mu").real());
-		}
+		if( Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+			rtbd.constructTBMHam(withMu);
 		
 		// Construct the customized Hamiltonian.
 		Hamiltonian();
@@ -131,7 +129,7 @@ protected:
 		
 		constructHam(rtbd);
 		for ( auto kp: highSymmetryLine){
-			auto & evv = rtbd.HamEvd(kp.second);
+			auto evv = rtbd.HamEvd(kp.second);
 			evv.eigenVector.setPrintLength(16);
 			out<< kp.first<<" "<< kp.second <<" "<<evv.eigenValue<<endl;
 		}
@@ -152,46 +150,47 @@ protected:
 		auto Nb = Lat.parameter.VEC(kMeshSelection, Lat.parameter.VEC("Nb"));
 		auto B = Lat.basisVector.getBVec();
 		
-			
 		rtbd.KEigenValVec.clear();
-			
+		
 		if( Nb.size() == 1){
-			auto & b1 = B[0]*0.5;
+			auto & b1 = B[0];
 			auto N1 = Nb[0];
 			
-			for (double i1=-N1; i1<N1; i1++){
+			for (double i1=0; i1<N1; i1++){
 				auto kPoint = (i1/N1)*b1;
-				auto & tmpEVV = rtbd.HamEvd(kPoint);
+				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
 					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
 		if( Nb.size() == 2){
-			auto & b1 = B[0]*0.5;
-			auto & b2 = B[1]*0.5;
+			auto & b1 = B[0];
+			auto & b2 = B[1];
 			auto N1 = Nb[0], N2 = Nb[1];
-			for (double i1=-N1; i1<N1; i1++)
-			for (double i2=-N2; i2<N2; i2++){
+			for (double i1=0; i1<N1; i1++)
+			for (double i2=0; i2<N2; i2++){
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
-				auto & tmpEVV = rtbd.HamEvd(kPoint);
+				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
 					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
 		if( Nb.size() == 3){
-			auto & b1 = B[0]*0.5;
-			auto & b2 = B[1]*0.5;
-			auto & b3 = B[2]*0.5;
+			auto & b1 = B[0];
+			auto & b2 = B[1];
+			auto & b3 = B[2];
 			auto N1 = Nb[0], N2 = Nb[1], N3 = Nb[2];
-			for (double i1=-N1; i1<N1; i1++)
-			for (double i2=-N2; i2<N2; i2++)
-			for (double i3=-N3; i3<N3; i3++) {
+			for (double i1=0; i1<N1; i1++)
+			for (double i2=0; i2<N2; i2++)
+			for (double i3=0; i3<N3; i3++) {
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3;
-				auto & tmpEVV = rtbd.HamEvd(kPoint);
+				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
 					rtbd.KEigenValVec.push_back(tmpEVV);
 			}
 		}
+		
+		
 	}
 	
 	/*-----------------------------------------------------
@@ -439,7 +438,9 @@ protected:
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 		
 		tbd.order_old = tbd.order;
+		// *********************************
 		calculateChemicalPotential(false);
+		// *********************************
 		
 		if( tbd.Lat.parameter.STR("spin") == "on" ) {
 			tbd.calculate4DensityOrder();

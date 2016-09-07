@@ -157,13 +157,12 @@ private:
 public:
 	
 	void	constructHamList()								{
+		
 		TBD.initOrder();
 		HundCouplingList.clear();
 		SuperExchangeList.clear();
 		DMExchangeList.clear();
 		FieldBList.clear();
-		
-		//TBD.calculate4DensityOrder();
 		
 		while( TBD.Lat.iterate() ){
 			

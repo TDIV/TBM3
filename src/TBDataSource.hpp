@@ -14,11 +14,11 @@
 //  TBM^3
 //
 
-class	MatrixElement{
+struct MatrixElement{
 public:
 	int		I,J;
-	r_mat	bondVector;
 	x_var	val;
+	r_mat	bondVector;
 	
 	MatrixElement(){ }
 	MatrixElement(int i, int j, x_var _val, r_mat _bondVector){
@@ -34,6 +34,7 @@ public:
 		bondVector = _bondVector;
 		return *this;
 	}
+	
 };
 
 struct	EigVec{
@@ -83,13 +84,12 @@ public:
 	vector<MatrixElement>	hamElementList;	// A list to store all the matrix elements
 	x_mat					Ham;			// The body of the Hamiltonian (matrix).
 	vector<EigVec>			KEigenValVec;	// Calculated K-space dependent eigen value and vectore.
-	EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
+	//EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 	r_var					maxE,	minE;
 	
 	map<string, double>		energyMap;
 
 	void initHam	()		{
-		if( Ham.size() > 0 )
 		Ham = x_mat(Lat.indexSize(), Lat.indexSize());
 		initOrder();
 	}
@@ -938,45 +938,7 @@ public:
 			}
 		}
 	}
-	
-	/*------------------------------------------------
-	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
-	 -------------------------------------------------*/
-	void constructTBMHam	()					{
-		
-		Ham.zerolize();
-		hamElementList.clear();
-		maxE = -10000;
-		minE =  10000;
-		
-		initHam();
-
-		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
-		while( Lat.iterate() ) {
-			
-			auto atomI = Lat.getAtom();
-			
-			for( auto & iter : Lat.hamParser.getOperationList("hundSpin")	)	{	addHundSpin(iter.first, iter.second		);	}
-			for( auto & iter : Lat.hamParser.getOperationList("orbital")	)	{	addOrbitalEng(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("site")		)	{	addSiteCouple(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("siteHc")		)	{	addSiteCoupleHc(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("hopping")	)	{	addHoppingInt(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("hoppingHc")	)	{	addHoppingIntHc(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("bond")		)	{	addBondCouple(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("bondHc")		)	{	addBondCoupleHc(iter.first, iter.second	);	}
-			for( auto & iter : Lat.hamParser.getOperationList("screenCoulomb"))	{	addScreenCoulomb(iter.first, iter.second);	}
-			for( auto & iter : Lat.hamParser.getOperationList("fieldB")	)		{	addFieldB(iter.first, iter.second		);	}
-			
-			
-			if( Lat.HSpace() != NORMAL){
-				for( auto & iter : Lat.hamParser.getOperationList("pairingS") ){ addPairingS	(iter.first, iter.second	); }
-				for( auto & iter : Lat.hamParser.getOperationList("pairingU") ){ addPairingU	(iter.first, iter.second	); }
-				for( auto & iter : Lat.hamParser.getOperationList("pairingD") ){ addPairingD	(iter.first, iter.second	); }
-				for( auto & iter : Lat.hamParser.getOperationList("pairingT") ){ addPairingT	(iter.first, iter.second	); }
-			}
-		}
-	}
-	void addChemicalPotential(r_var mu)			{
+	void addChemicalPotential(r_var mu)				{
 		
 		// Apply the Chemical potential
 		//r_var mu = Lat.parameter.VAR("Mu",0).real();
@@ -1001,24 +963,77 @@ public:
 		}
 	}
 	
-	EigVec &	HamEvd			(r_mat kp)		{
+	/*------------------------------------------------
+	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
+	 -------------------------------------------------*/
+	void constructTBMHam	(bool withMu = true)					{
+		
+		initHam();
+		
+		//if( hamElementList.size() > 0 ) return;
+		
+		maxE = -10000;
+		minE =  10000;
+		
+		//unsigned iter = 0;
+		//cout<<"Entering debugging view"<<endl;
+		//while(true){
+		//	hamElementList.push_back(MatrixElement(0,0,0,vec(0,0,0)));
+		//	iter++;
+		//	cout<<iter<<" "<<hamElementList.size()<<endl;
+		//	if( iter % 2000 == 0){
+		//		hamElementList.clear();
+		//	}
+		//}
+		//cout<<"Leaving debugging view"<<endl;
+		
+		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
+		hamElementList.clear();
+		while( Lat.iterate() ) {
+			
+			for( auto & iter : Lat.hamParser.getOperationList("hundSpin")	)	{	addHundSpin(iter.first, iter.second		);	}
+			for( auto & iter : Lat.hamParser.getOperationList("orbital")	)	{	addOrbitalEng(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("site")		)	{	addSiteCouple(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("siteHc")		)	{	addSiteCoupleHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("hopping")	)	{	addHoppingInt(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("hoppingHc")	)	{	addHoppingIntHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("bond")		)	{	addBondCouple(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("bondHc")		)	{	addBondCoupleHc(iter.first, iter.second	);	}
+			for( auto & iter : Lat.hamParser.getOperationList("screenCoulomb"))	{	addScreenCoulomb(iter.first, iter.second);	}
+			for( auto & iter : Lat.hamParser.getOperationList("fieldB")	)		{	addFieldB(iter.first, iter.second		);	}
+			
+			// If space==normal The following part will be ignored.
+			if( Lat.HSpace() == NORMAL) continue;
+			
+			for( auto & iter : Lat.hamParser.getOperationList("pairingS") ){ addPairingS	(iter.first, iter.second	); }
+			for( auto & iter : Lat.hamParser.getOperationList("pairingU") ){ addPairingU	(iter.first, iter.second	); }
+			for( auto & iter : Lat.hamParser.getOperationList("pairingD") ){ addPairingD	(iter.first, iter.second	); }
+			for( auto & iter : Lat.hamParser.getOperationList("pairingT") ){ addPairingT	(iter.first, iter.second	); }
+		}
+		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());
+	}
+
+	EigVec  	HamEvd			(r_mat kp)		{
 		
 		Ham.zerolize();
+		
 		for( auto & elem: hamElementList){
 			
-			auto & bvec = elem.bondVector;
+			auto bvec = elem.bondVector;
 			x_var phase = kp[0]*bvec[0]+ kp[1]*bvec[1]+ kp[2]*bvec[2];
 			auto	exp_IJ=exp(-Im*phase);
 			
 			Ham(elem.I, elem.J) += elem.val * exp_IJ;
 		}
 		
+		EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 		tmpEigValVec.kPoint = kp;
 		
 		tmpEigValVec.message = Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
 		
 		if ( maxE < tmpEigValVec.eigenValue[Lat.indexSize()-1]	){ maxE = tmpEigValVec.eigenValue[Lat.indexSize()-1]; }
 		if ( minE > tmpEigValVec.eigenValue[0]					){ minE = tmpEigValVec.eigenValue[0]; }
+		
 		return tmpEigValVec;
 	}
 	
@@ -1214,19 +1229,8 @@ public:
 		
 		return xvar;
 	}
-	vector<x_mat>	parseSiteVecString(Atom & at, string svec)		{ // @:cspin * Jh * ...
-		
-		removeSpace(svec);
-		auto varList = split(svec, "*");
-		
-		vector<x_mat> xvec;
-		for( auto & elem: varList) xvec.push_back( parseSiteString(at,elem));
-		
-		return xvec;
-	}
 	x_mat			parseBondString(AtomPair & ap, string svar)		{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
-		
 		
 		x_mat xvar;
 		
@@ -1256,33 +1260,36 @@ public:
 			xvar = tmp;
 		}
 		
-		
 		return xvar;
 	}
-	vector<x_mat>	parseBondVecString(AtomPair & ap, string svec)	{ // +1+0+0:1:1:pairS * Jh * ...
+	
+	vector<x_mat>	siteVec;
+	vector<x_mat> &	parseSiteVecString(Atom & at, string svec)		{ // @:cspin * Jh * ...
 		
+		siteVec.clear();
 		removeSpace(svec);
 		auto varList = split(svec, "*");
 		
-		vector<x_mat> xvec;
-		for( auto & elem: varList) xvec.push_back(parseBondString(ap, elem));
+		//vector<x_mat> xvec;
+		for( auto & elem: varList) siteVec.push_back( parseSiteString(at,elem));
 		
+		return siteVec;
+	}
+	
+	vector<x_mat>	bondVec;
+	vector<x_mat> &	parseBondVecString(AtomPair & ap, string svec)	{ // +1+0+0:1:1:pairS * Jh * ...
 		
-		return xvec;
+		bondVec.clear();
+		removeSpace(svec);
+		auto varList = split(svec, "*");
+		
+		//vector<x_mat> xvec;
+		for( auto & elem: varList) bondVec.push_back(parseBondString(ap, elem));
+		
+		return bondVec;
 	}
 
 };
-
-
-
-
-
-
-
-
-
-
-
 
 
 

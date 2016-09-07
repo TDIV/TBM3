@@ -160,6 +160,7 @@ public:
 				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
 				)		and
 				iterationStepIncr()){
+		//while( iterationStepIncr() ){
 		
 			den_diff	= calculateDenMeanField();
 			spin_diff	= calculateSpinVar();
