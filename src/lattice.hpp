@@ -55,7 +55,7 @@ public:
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
-	void			open(string _filename)	{
+	void				open(string _filename)	{
 		parameter.clear();
 		basisVector.clear();
 		orbitalProfile.clear();
@@ -132,10 +132,17 @@ public:
 		infile.close();
 		
 	}
-	size_t			latticeSize()			{ return atomList.size(); }
-	size_t			indexSize()				{ return index_size; }
+	size_t				latticeSize()			{ return atomList.size(); }
+	size_t				indexSize()				{ return index_size; }
 	
-	pair<bool,Atom>	getAtom(r_mat pos)						{
+	Atom				getAtom()								{
+		if( !(atomIndex >= 0 and atomIndex < atomList.size()) ){
+			string ErrorMsg = "Error, index out of range.";
+			ErrorMessage(ErrorMsg);
+		}
+		return atomList[atomIndex];
+	}
+	pair<bool,Atom>		getAtom(r_mat pos)						{
 		point p = point(pos[0], pos[1], pos[2]);
 		
 		vector<value>	result_s;
@@ -144,23 +151,29 @@ public:
 		unsigned exIndex = result_s[0].second;
 		Atom atom = extendedAtomList[exIndex];
 		
-		r_mat pos_diff = pos - atom.pos;
+		r_mat pos_diff(1,3);
+		for(unsigned i=0 ; i<pos_diff.size() ; i++)
+			pos_diff[i] = pos[i] - atom.pos[i];
+		
 		if( sqrt(cdot(pos_diff, pos_diff)) > 0.01 ) {
 			return make_pair(false, atom);
 		}
 		
 		return make_pair(true, atom);
 	}
-	Atom			getAtom(unsigned index)					{
+	Atom				getAtom(unsigned index)					{
 		if( index >= atomList.size() ){
 			string ErrorMsg = "Error, index out of range.";
 			ErrorMessage(ErrorMsg);
 		}
 		return atomList[index];
 	}
-	AtomPair		getPair(unsigned index, r_mat bond)		{
-		Atom atomI = getAtom(index);
-		r_mat posJ = atomI.pos + bond;
+	
+	AtomPair			getPair(r_mat bond)						{
+		Atom atomI = getAtom();
+		r_mat posJ(1,3);
+		for(unsigned i=0 ; i<posJ.size() ; i++)
+			posJ[i] = atomI.pos[i] + bond[i];
 		point p = point(posJ[0], posJ[1], posJ[2]);
 		
 		vector<value>	result_s;
@@ -171,9 +184,30 @@ public:
 		
 		return AtomPair(atomI, atomJ, bond);
 	}
-	AtomPair		getPair(unsigned index, string bondStr)	{
+	AtomPair			getPair(string bondStr)					{
+		return getPair(vec(bondStr));
+	}
+	AtomPair			getPair(unsigned index, r_mat bond)		{
+		Atom atomI = getAtom(index);
+		
+		r_mat posJ(1,3);
+		for(unsigned i=0 ; i<posJ.size() ; i++)
+			posJ[i] = atomI.pos[i] + bond[i];
+		
+		point p = point(posJ[0], posJ[1], posJ[2]);
+		
+		vector<value>	result_s;
+		rtree.query(bgi::nearest(p, 1), std::back_inserter(result_s));
+		
+		unsigned exIndex = result_s[0].second;
+		Atom atomJ = extendedAtomList[exIndex];
+		
+		return AtomPair(atomI, atomJ, bond);
+	}
+	AtomPair			getPair(unsigned index, string bondStr)	{
 		return getPair(index, vec(bondStr));
 	}
+
 	pair<Atom, vector<Atom> > getBox(unsigned index)		{
 		Atom atomI = getAtom(index);
 		r_mat pos = atomI.pos;
@@ -190,35 +224,14 @@ public:
 			auto indexJ = result_s[i].second;
 			Atom atomJ = extendedAtomList[indexJ];
 			
-			r_mat distanceIJ = atomJ.pos - atomI.pos;
+			r_mat distanceIJ(1,3);
+			for(unsigned i=0 ; i<distanceIJ.size() ; i++)
+				distanceIJ[i] = atomJ.pos[i] - atomI.pos[i];
+			
 			if( sqrt(cdot(distanceIJ, distanceIJ))<= radius )
 				atomJList.push_back(atomJ);
 		}
 		return make_pair(atomI, atomJList);
-	}
-	
-	Atom			getAtom()								{
-		if( !(atomIndex >= 0 and atomIndex < atomList.size()) ){
-			string ErrorMsg = "Error, index out of range.";
-			ErrorMessage(ErrorMsg);
-		}
-		return atomList[atomIndex];
-	}
-	AtomPair		getPair(r_mat bond)						{
-		Atom atomI = getAtom();
-		r_mat posJ = atomI.pos + bond;
-		point p = point(posJ[0], posJ[1], posJ[2]);
-		
-		vector<value>	result_s;
-		rtree.query(bgi::nearest(p, 1), std::back_inserter(result_s));
-		
-		unsigned exIndex = result_s[0].second;
-		Atom atomJ = extendedAtomList[exIndex];
-		
-		return AtomPair(atomI, atomJ, bond);
-	}
-	AtomPair		getPair(string bondStr)					{
-		return getPair(vec(bondStr));
 	}
 	pair<Atom, vector<Atom> > getRBox(double radius = -1)	{
 		Atom atomI = getAtom();
@@ -239,7 +252,10 @@ public:
 			auto indexJ = result_s[i].second;
 			Atom atomJ = extendedAtomList[indexJ];
 			
-			r_mat distanceIJ = atomJ.pos - atomI.pos;
+			r_mat distanceIJ(1,3);
+			for(unsigned i=0 ; i<distanceIJ.size() ; i++)
+				distanceIJ[i] = atomJ.pos[i] - atomI.pos[i];
+			
 			if( sqrt(cdot(distanceIJ, distanceIJ))<= radius )
 				atomJList.push_back(atomJ);
 		}
@@ -271,17 +287,20 @@ public:
 		auto vecParser = splitByIntNumber(lineParser[0]);
 		if( vecParser.size() == 6){
 			if( CoordinateSelect == -1){ // Cartesian coordinate
-				retVec = tbm::vec(
-							 PMStr(vecParser[0])*StrToDouble(vecParser[1]),
-							 PMStr(vecParser[2])*StrToDouble(vecParser[3]),
-							 PMStr(vecParser[4])*StrToDouble(vecParser[5])
-							 );
+				retVec[0] = PMStr(vecParser[0])*StrToDouble(vecParser[1]);
+				retVec[1] = PMStr(vecParser[2])*StrToDouble(vecParser[3]);
+				retVec[1] = PMStr(vecParser[4])*StrToDouble(vecParser[5]);
 			}
 			else{
-				auto bvec = bondVector.getBond(CoordinateSelect);
-				retVec =PMStr(vecParser[0]) * StrToDouble(vecParser[1]) * bvec[0] +
-						PMStr(vecParser[2]) * StrToDouble(vecParser[3]) * bvec[1] +
-						PMStr(vecParser[4]) * StrToDouble(vecParser[5]) * bvec[2] ;
+				auto  bvec = bondVector.getBond(CoordinateSelect);
+				double	n0 = PMStr(vecParser[0]) * StrToDouble(vecParser[1]);
+				double	n1 = PMStr(vecParser[2]) * StrToDouble(vecParser[3]);
+				double	n2 = PMStr(vecParser[4]) * StrToDouble(vecParser[5]);
+				for( unsigned i=0 ; i<retVec.size() ; i++){
+					retVec[i] =	n0 * bvec[0][i] +
+								n1 * bvec[1][i] +
+								n2 * bvec[2][i] ;
+				}
 			}
 		}
 		

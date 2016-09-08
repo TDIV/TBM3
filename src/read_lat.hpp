@@ -296,10 +296,11 @@ public:
 
 // Read in the BondVector section
 class BondVector:			public ParserBase{
-	map<unsigned, vector<r_mat> >	bondMap;
 	
 public:
 	BondVector(): ParserBase("#BondVector"){ }
+	
+	map<unsigned, vector<r_mat> >	bondMap;
 	void	append(unsigned mapKey, string line){
 		
 		auto it = bondMap.find(mapKey);
@@ -317,8 +318,8 @@ public:
 			bondMap[mapKey].push_back(a_vec);
 		}
 	}
-	vector<r_mat>	getBond(unsigned mapKey)	{
-	auto it = bondMap.find(mapKey);
+	vector<r_mat> &	getBond(unsigned mapKey)	{
+		auto it = bondMap.find(mapKey);
 		if( it == bondMap.end()){
 			ErrorMessage("Error, cannot find bondVector definition of: #"+IntToStr(mapKey));
 		}
@@ -531,8 +532,10 @@ public:
 // Read in the #Hamiltonian section
 class HamiltonianParser:	public ParserBase{
 public:
-	vector< boost::tuple<string, string, string> >	hamOperationList;	// Store the input from "xxx.lat.tbm".
 	map< string, vector<pair<string, string> > >	hamOperationMap;	// Store the input from "xxx.lat.tbm".
+	
+	typedef vector<boost::tuple<string, deque<string>, deque<string> > >	pairOperationList;
+	map< string, pairOperationList >				hamOperationListMap;// Store the input from "xxx.lat.tbm".
 	
 	HamiltonianParser(): ParserBase("#Hamiltonian"){ }
 	
@@ -543,14 +546,27 @@ public:
 			removeSpace(parser[0]);
 			replaceAll(parser[1], "\t", " ");
 			removeSpace(parser[2]);
-			hamOperationList.push_back( boost::make_tuple(parser[0], parser[1], parser[2]));
 			
+			// Old version temporate
 			if( hamOperationMap.find(parser[0]) == hamOperationMap.end() ){
 				hamOperationMap[parser[0]] =  vector<pair<string, string> >();
 				hamOperationMap[parser[0]].push_back(make_pair(parser[1], parser[2]));
 			}
 			else{
 				hamOperationMap[parser[0]].push_back(make_pair(parser[1], parser[2]));
+			}
+			
+			// New version temporate
+			auto optList = split( parser[1], " ");
+			auto varList = split( parser[2], "*");
+			
+			if( hamOperationListMap.find(parser[0]) == hamOperationListMap.end() ){
+				hamOperationListMap[parser[0]] =  pairOperationList();
+				
+				hamOperationListMap[parser[0]].push_back(boost::make_tuple(line, optList, varList));
+			}
+			else{
+				hamOperationListMap[parser[0]].push_back(boost::make_tuple(line, optList, varList));
 			}
 		}
 	}
@@ -561,8 +577,11 @@ public:
 		return hamOperationMap[strKey];
 	}
 	
-	void	clear()				{
-		hamOperationList.clear();
+	pairOperationList & getOperationListMap(string strKey){
+		if( hamOperationListMap.find(strKey) == hamOperationListMap.end() ){
+			hamOperationListMap[strKey] =  pairOperationList();
+		}
+		return hamOperationListMap[strKey];
 	}
 };
 

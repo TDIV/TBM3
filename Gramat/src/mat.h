@@ -192,6 +192,15 @@ namespace gmt {
 	
 		var &			operator()	(unsigned i, unsigned j){return at(i,j);}
 		var &			at			(unsigned , unsigned );
+		
+		matrix&			operator-()	{
+			matrix  *ret = new matrix(cols(),rows());
+			ret->set_cpy_type(PTR);
+
+			for (int i=0 ; i< size() ; i++) ret->index(i) = -index(i);
+
+			return *ret;
+		}
 	
 		void			setPrintFlag(unsigned flag){print_flag=flag;}
 		void			setPrintLength(unsigned len){print_len = len;}

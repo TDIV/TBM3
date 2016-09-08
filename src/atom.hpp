@@ -274,16 +274,20 @@ public:
 unsigned Atom::totalIndexSize = 0;
 
 class AtomPair{
-	r_mat inputBond;
 public:
 	Atom atomI;
 	Atom atomJ;
+	r_mat inputBond;
+	
 	AtomPair(){
 	}
 	AtomPair(Atom _atomI, Atom _atomJ, r_mat _inputBond):inputBond(_inputBond), atomI(_atomI), atomJ(_atomJ){
 	}
-	r_mat & bondIJ(){
-		return atomJ.pos - atomI.pos;
+	r_mat bondIJ(){
+		r_mat bondDelta(1,3);
+		for( unsigned i=0 ; i<bondDelta.size() ; i++)
+			bondDelta[i] = atomJ.pos[i] - atomI.pos[i];
+		return bondDelta;
 	}
 	bool withinRange(r_var ratio = 0.2){
 		r_mat distance(1,3);
