@@ -838,8 +838,8 @@ public:
 		if( optList.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		if( optList.size() == 1){
 			// This part will not be effective in the quantum Hamiltonian, but goes to the Classical spin part.
-			// Handeling the following operations.
-			// fieldB	> Fe   > [0,0,1] * B
+			// That handeling the following operations.
+			// fieldB	> Fe   > [0,0,1] * B (ignored)
 			return;
 		}
 		
