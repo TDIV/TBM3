@@ -241,8 +241,6 @@ protected:
 			}
 		}
 		
-		rtbd.order.save();
-		
 		return totalDen;
 	}
 	void	calculateChemicalPotential	(bool printResult = false)							{

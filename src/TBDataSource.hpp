@@ -226,8 +226,7 @@ public:
 		auto atomI = Lat.getAtom();
 		if( optList[0] != atomI.atomName )	return;
 		
-		x_mat sVec = parseSiteString(atomI, varList[0]);
-		x_var val = sVec[0];
+		x_var val = parseSiteString(atomI, varList[0])[0];
 		for( unsigned i=1 ; i<varList.size() ; i++){
 			val = val * parseSiteString(atomI, varList[i])[0];
 		}
@@ -523,7 +522,81 @@ public:
 		}
 	}
 	
-	void		addPairingS		(string opt, string svar)	{
+	void		addScreenCoulomb(string opt, deque<string> optList, deque<string> varList)	{
+		
+		double radius = Lat.parameter.VAR("bondRadius", 0).real();
+		
+		if( optList.size()	!= 2)	{ ErrorMessage("Error, not a valid operation:\n "+opt); }
+		if( optList[1][0]	!= '~')	{ ErrorMessage("Error, not a valid operation:\n "+opt); }
+		if( varList.size()	< 2)	{ ErrorMessage("Error, not enough arguments:\n "+opt); }
+		
+		
+		
+		optList[1][0] = ' ';
+		double tmpRadius = StrToDouble(optList[1]);
+		if( tmpRadius > radius){
+			 ErrorMessage("Error, in operation:\n "+opt
+						  +"\n the given radius,~"+DoubleToStr(tmpRadius)+", "
+						  +"is oarger the 'bondRadius(="+DoubleToStr(radius)+")'.");
+		}
+		radius = tmpRadius;
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != optList[0]){ return; } // Name does not match.
+		
+		auto orderKey = varList[0];
+		r_var alpha = parseSiteString(atomI, varList[1])[0].real();
+		for( unsigned i=2 ; i<varList.size() ; i++){
+			alpha = alpha * parseSiteString(atomI, varList[i])[0].real();
+		}
+
+		//*****************************************************************
+		//*        Query the neighbor atoms inside a sphere.              *
+		auto rboxAtoms = Lat.getRBox(radius);
+		//*                                                               *
+		//*****************************************************************
+		
+		//*****************************************************************
+		// Sum ove the coulomb term with the given charges (Z_i + Den_i).
+		//*****************************************************************
+		double sumScreenCoulomb = 0;
+		for( auto & atomJ: rboxAtoms.second ){
+			auto orderJ = order.findOrder(atomJ, orderKey);
+			
+			double Charge = -Lat.coreCharge.getCharge(atomJ.atomName);
+			if( orderJ.first ){ Charge += orderJ.second[0].real(); }
+			
+			r_mat vecIJ(1,3);
+			for(unsigned i=0 ; i<vecIJ.size() ; i++)
+				vecIJ[i] = atomJ.pos[i] - atomI.pos[i];
+			
+			double distIJ = sqrt(cdot(vecIJ,vecIJ));
+			
+			if( distIJ > 0)
+			sumScreenCoulomb += alpha * Charge * exp(-distIJ/radius) / distIJ;
+		}
+		
+		//*****************************************************************
+		// Attribute the surrounding Mean-field Coulomb potential to the Hamiltonian.
+		//*****************************************************************
+		x_mat coulomb(1,1);
+		coulomb[0] = sumScreenCoulomb;
+		order.setNew(atomI.atomIndex, "@:coulomb", coulomb);
+		
+		auto & orbitalIndex_I = atomI.allIndexList();
+		for( auto & index_I: orbitalIndex_I){
+			
+			char ph_char_I = index_I.first[index_I.first.size()-2];
+			if( ph_char_I != 'B' ){
+				hamElementList.push_back(MatrixElement(index_I.second, index_I.second, sumScreenCoulomb,	vec(0,0,0))); continue;
+			}
+			else{
+				hamElementList.push_back(MatrixElement(index_I.second, index_I.second,-sumScreenCoulomb,	vec(0,0,0))); continue;
+			}
+		}
+	}
+	
+	void		addPairingS		(string opt, deque<string> optList, deque<string> varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
@@ -535,16 +608,12 @@ public:
 			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
 		}
 		
+		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		replaceAll(opt, "\t", " ");
-		auto parser = split(opt, " ");
-		if( parser.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec = split(parser[0], ":");
-		auto secondSec = split(parser[1], ":");
+		auto firstSec	= split(optList[0], ":");
+		auto secondSec	= split(optList[1], ":");
 		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
+		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
 		AtomPair pair(atomI, atomI, vec(0,0,0));
@@ -557,19 +626,18 @@ public:
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_var val = 0;
-		if( firstSec.size() == 2 ){
-			auto xvec = parseSiteVecString(atomI, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+		if( firstSec.size() == 2 ){ // site only pairing
+			val = parseSiteString(atomI, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseSiteString(atomI, varList[i])[0];
+			}
+	
 		}
 		if( firstSec.size() == 3 ){
-			auto xvec = parseBondVecString(pair, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+			val = parseBondString(pair, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseBondString(pair, varList[i])[0];
+			}
 		}
 		
 		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
@@ -591,25 +659,24 @@ public:
 			}
 		}
 	}
-	void		addPairingU		(string opt, string svar)	{
+	void		addPairingU		(string opt, deque<string> optList, deque<string> varList)	{
 		/*
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
+		 Bond operation: "Fe	1:2".		(site only operation)
+		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
 		 */
-		if( Lat.HSpace() == NORMAL or Lat.parameter.STR("spin") == "off"){
+		if( Lat.HSpace() == NORMAL){
 			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
 		}
-		if( Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, Up-Up pairing operation:\n"+opt+".\n Cannot be applited with spinful-nambu space.");
+		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
+			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
 		}
 		
-		replaceAll(opt, "\t", " ");
-		auto parser = split(opt, " ");
-		if( parser.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		auto firstSec = split(parser[0], ":");
-		auto secondSec = split(parser[1], ":");
+		auto firstSec	= split(optList[0], ":");
+		auto secondSec	= split(optList[1], ":");
 		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
 		AtomPair pair(atomI, atomI, vec(0,0,0));
@@ -622,19 +689,18 @@ public:
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_var val = 0;
-		if( firstSec.size() == 2 ){
-			auto xvec = parseSiteVecString(atomI, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+		if( firstSec.size() == 2 ){ // site only pairing
+			val = parseSiteString(atomI, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseSiteString(atomI, varList[i])[0];
+			}
+	
 		}
 		if( firstSec.size() == 3 ){
-			auto xvec = parseBondVecString(pair, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+			val = parseBondString(pair, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseBondString(pair, varList[i])[0];
+			}
 		}
 		
 		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
@@ -648,25 +714,24 @@ public:
 			if(	(iterI.first == "Bu" and iterJ.first == "Au")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
 		}
 	}
-	void		addPairingD		(string opt, string svar)	{
+	void		addPairingD		(string opt, deque<string> optList, deque<string> varList)	{
 		/*
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
+		 Bond operation: "Fe	1:2".		(site only operation)
+		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
 		 */
-		if( Lat.HSpace() == NORMAL or Lat.parameter.STR("spin") == "off"){
+		if( Lat.HSpace() == NORMAL){
 			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
 		}
-		if( Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, Dn-Dn pairing operation:\n"+opt+".\n Cannot be applited with spinful-nambu space.");
+		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
+			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
 		}
 		
-		replaceAll(opt, "\t", " ");
-		auto parser = split(opt, " ");
-		if( parser.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		auto firstSec = split(parser[0], ":");
-		auto secondSec = split(parser[1], ":");
+		auto firstSec	= split(optList[0], ":");
+		auto secondSec	= split(optList[1], ":");
 		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
 		AtomPair pair(atomI, atomI, vec(0,0,0));
@@ -679,19 +744,18 @@ public:
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_var val = 0;
-		if( firstSec.size() == 2 ){
-			auto xvec = parseSiteVecString(atomI, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+		if( firstSec.size() == 2 ){ // site only pairing
+			val = parseSiteString(atomI, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseSiteString(atomI, varList[i])[0];
+			}
+	
 		}
 		if( firstSec.size() == 3 ){
-			auto xvec = parseBondVecString(pair, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+			val = parseBondString(pair, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseBondString(pair, varList[i])[0];
+			}
 		}
 		
 		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
@@ -705,24 +769,24 @@ public:
 			if(	(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
 		}
 	}
-	void		addPairingT		(string opt, string svar)	{
-		
+	void		addPairingT		(string opt, deque<string> optList, deque<string> varList)	{
 		/*
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
+		 Bond operation: "Fe	1:2".		(site only operation)
+		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
 		 */
-		if( Lat.HSpace() == NORMAL)
-			{ ErrorMessage("Error, triplet pairing operation:\n"+opt+".\n Cannot be applited with normal space."); }
-		if( Lat.HSpace() == NAMBU and Lat.parameter.STR("spin") == "on")
-			{ ErrorMessage("Error, triplet pairing operation:\n"+opt+".\n Cannot be applited with spinful-Nambu space."); }
+		if( Lat.HSpace() == NORMAL){
+			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
+		}
+		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
+			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
+		}
 		
-		replaceAll(opt, "\t", " ");
-		auto parser = split(opt, " ");
-		if( parser.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		auto firstSec = split(parser[0], ":");
-		auto secondSec = split(parser[1], ":");
+		auto firstSec	= split(optList[0], ":");
+		auto secondSec	= split(optList[1], ":");
 		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
 		AtomPair pair(atomI, atomI, vec(0,0,0));
@@ -735,21 +799,19 @@ public:
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_var val = 0;
-		if( firstSec.size() == 2 ){
-			auto xvec = parseSiteVecString(atomI, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+		if( firstSec.size() == 2 ){ // site only pairing
+			val = parseSiteString(atomI, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseSiteString(atomI, varList[i])[0];
+			}
+	
 		}
 		if( firstSec.size() == 3 ){
-			auto xvec = parseBondVecString(pair, svar);
-			x_mat sVec(1,3);
-			if( xvec.size() >= 1 ){ sVec = xvec[0]; }
-			for( unsigned i=1 ; i<xvec.size() ; i++){ sVec = sVec * xvec[i][0].real(); }
-			val = sVec[0].real();
+			val = parseBondString(pair, varList[0])[0];
+			for( unsigned i=1 ; i<varList.size() ; i++){
+				val = val * parseBondString(pair, varList[i])[0];
+			}
 		}
-		
 		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
 		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
 		for( unsigned ii = 0; ii<subIndexI.size() ; ii++)
@@ -765,99 +827,35 @@ public:
 			if(		(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ())); continue;}
 		}
 	}
-	
-	void		addScreenCoulomb(string opt, string svar)	{
-		replaceAll(opt, "\t", " ");
-		
-		auto parser = split(opt, " ");
-		if( parser.size() > 2)	{ ErrorMessage("Error, not a valid operation:\n screenCoulomb > "+opt); }
-		
-		double radius = Lat.parameter.VAR("bondRadius", 0).real();
-		
-		if( parser.size() == 2){
-			if( parser[1][0] != '~'){ ErrorMessage("Error, not a valid operation:\n screenCoulomb > "+opt); }
-			
-			parser[1][0] = ' ';
-			double tmpRadius = StrToDouble(parser[1]);
-			if( tmpRadius > radius){
-				 ErrorMessage("Error, in operation:\n screenCoulomb > "+opt+" > "+svar
-							  +"\n the given radius,~"+DoubleToStr(tmpRadius)+", "
-							  +"is oarger the 'bondRadius(="+DoubleToStr(radius)+")'.");
-			}
-			radius = tmpRadius;
-		}
-		
-		auto atomI = Lat.getAtom();
-		if( atomI.atomName != parser[0]){ return; } // Name does not match.
-		
-		removeSpace(svar);
-		auto svarParser = split(svar, "*");
-		auto orderKey = svarParser[0];
-		r_var alpha = 0.0;
-		if( svarParser.size() == 2) alpha = parseSiteString(atomI, svarParser[1])[0].real();
 
-		auto rboxAtoms = Lat.getRBox(radius);
+	void		addFieldB		(string opt, deque<string> optList, deque<string> varList)	{ // svar === " @:cspin * Jse "
+		// *******************************
+		// fieldB	> Fe   > [0,0,1] * B
+		// fieldB	> Fe 1 > [0,0,1] * B
+		// fieldB	> Fe 2 > [0,0,1] * B
+		// *******************************
 		
-		// Sum ove the coulomb term with the given charges (Z_i + Den_i).
-		double sumScreenCoulomb = 0;
-		for( auto & atomJ: rboxAtoms.second ){
-			auto orderJ = order.findOrder(atomJ, orderKey);
-			
-			double Charge = -Lat.coreCharge.getCharge(atomJ.atomName);
-			if( orderJ.first ){ Charge += orderJ.second[0].real(); }
-			
-			r_mat vecIJ(1,3);
-			for(unsigned i=0 ; i<vecIJ.size() ; i++)
-				vecIJ[i] = atomJ.pos[i] - atomI.pos[i];
-			
-			double distIJ = sqrt(cdot(vecIJ,vecIJ));
-			
-			if( distIJ > 0)
-			sumScreenCoulomb += alpha * Charge * exp(-distIJ/radius) / distIJ;
+		if( optList.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		if( optList.size() == 1){
+			// This part will not be effective in the quantum Hamiltonian, but goes to the Classical spin part.
+			// Handeling the following operations.
+			// fieldB	> Fe   > [0,0,1] * B
+			return;
 		}
 		
-		x_mat coulomb(1,1);
-		coulomb[0] = sumScreenCoulomb;
-		order.setNew(atomI.atomIndex, "@:coulomb", coulomb);
-		
-		auto & orbitalIndex_I = atomI.allIndexList();
-		for( auto & index_I: orbitalIndex_I){
-			
-			char ph_char_I = index_I.first[index_I.first.size()-2];
-			if( ph_char_I != 'B' ){
-				hamElementList.push_back(MatrixElement(index_I.second, index_I.second, sumScreenCoulomb,	vec(0,0,0))); continue;
-			}
-			else{
-				hamElementList.push_back(MatrixElement(index_I.second, index_I.second,-sumScreenCoulomb,	vec(0,0,0))); continue;
-			}
-		}
-		
-	}
-	
-	void		addFieldB		(string opt, string svar)	{ // svar === " @:cspin * Jse "
-		replaceAll(opt, "\t", " ");
-		auto  parser = split(opt, " ");
-		if( parser.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( parser.size() == 1){ return; }
-		
-		removeSpace(parser[0]);
 		auto dummyParser = split(opt, ":");
 		if( dummyParser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		
 		auto atomI = Lat.getAtom();
-		if( atomI.atomName != parser[0])	return;
+		if( atomI.atomName != optList[0])	return;
 		
-		
-		removeSpace(svar);
-		auto svarParser = split(svar, "*");
-		auto vectorB = parseSiteString(atomI, svarParser[0]);
+		auto vectorB = parseSiteString(atomI, varList[0]);
 		r_var multiplyB = 1.0;
-		if( svarParser.size() == 2) multiplyB = parseSiteString(atomI, svarParser[1])[0].real();
+		if( varList.size() == 2) multiplyB = parseSiteString(atomI, varList[1])[0].real();
 		
 		vectorB = vectorB * multiplyB;
 		
-		string orbital = parser[1];
+		string orbital = optList[1];
 		r_var Sx =-vectorB[0].real();
 		r_var Sy =-vectorB[1].real();
 		r_var Sz =-vectorB[2].real();
@@ -877,7 +875,7 @@ public:
 				unsigned indexBd = atomI.index(orbital+"Bd");
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
-				if( Sx > 0.0001 or Sy > 0.0001){
+				if( Sx > 0.000001 or Sy > 0.000001){
 					ErrorMessage("Error, spin-flip operation:\n"+
 							 opt+
 							 ".\n Cannot be applied for a spin-depende Nambu space Hamiltonian.");
@@ -903,6 +901,7 @@ public:
 			}
 		}
 	}
+	
 	void		addChemicalPotential(r_var mu)				{
 		
 		// Apply the Chemical potential
@@ -975,16 +974,16 @@ public:
 			for( auto & iter : Lat.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
 			for( auto & iter : Lat.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
 			for( auto & iter : Lat.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationList("screenCoulomb"))	{	addScreenCoulomb(iter.first, iter.second);	}
-			for( auto & iter : Lat.hamParser.getOperationList("fieldB")	)		{	addFieldB(iter.first, iter.second		);	}
+			for( auto & iter : Lat.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.get<0>(), iter.get<1>(), iter.get<2>());}
+			for( auto & iter : Lat.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.get<0>(), iter.get<1>(), iter.get<2>());}
 			
 			// If space==normal The following part will be ignored.
 			if( Lat.HSpace() == NORMAL) continue;
 			
-			for( auto & iter : Lat.hamParser.getOperationList("pairingS")	)	{	addPairingS	(iter.first, iter.second	); }
-			for( auto & iter : Lat.hamParser.getOperationList("pairingU")	)	{	addPairingU	(iter.first, iter.second	); }
-			for( auto & iter : Lat.hamParser.getOperationList("pairingD")	)	{	addPairingD	(iter.first, iter.second	); }
-			for( auto & iter : Lat.hamParser.getOperationList("pairingT")	)	{	addPairingT	(iter.first, iter.second	); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingS"))	{	addPairingS	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingU"))	{	addPairingU	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingD"))	{	addPairingD	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingT"))	{	addPairingT	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
 		}
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());
 	}
