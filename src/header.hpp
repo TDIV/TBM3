@@ -2,13 +2,12 @@
 | Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,            |
 |                    Jian-Xin Zhu                            |
 |                                                            |
-| This file is distributed under the terms of the GNU        |
-| General Public License. See the file `LICENSE' in          |
+| This file is distributed under the terms of the BSD        |
+| Berkeley Software Distribution. See the file `LICENSE' in  |
 | the root directory of the present distribution, or         |
-| http://www.gnu.org/copyleft/gpl.txt .                      |
+| https://en.wikipedia.org/wiki/BSD_licenses.                |
 |                                                            |
 |-----------------------------------------------------------*/
-
 //
 //  header.h
 //  TBM^3
@@ -16,10 +15,8 @@
 //  Created by Yuan Yen Tai on 9/10/15.
 //
 
-
 #ifndef _header_h
 #define _header_h
-
 
 #include <vector>
 #include <deque>

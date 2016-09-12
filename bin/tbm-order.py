@@ -1,5 +1,14 @@
 #!/usr/bin/env python
-
+#-------------------------------------------------------------|
+#| Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,            |
+#|                    Jian-Xin Zhu                            |
+#|                                                            |
+#| This file is distributed under the terms of the BSD        |
+#| Berkeley Software Distribution. See the file `LICENSE' in  |
+#| the root directory of the present distribution, or         |
+#| https://en.wikipedia.org/wiki/BSD_licenses.                |
+#|                                                            |
+#|-------------------------------------------------------------
 import os
 import sys
 import scipy
@@ -76,30 +85,59 @@ class   LatticeOrder:
 		self.atomPos = np.array(self.atomPos)
 		self.tree3D = spatial.KDTree( self.atomPos )
 
-	def getOrder(self, orderName, pos):
+	def getOrder(self, key, pos):
 		# ---------------------------------------------------------------
 		# To get the correspond order for an atom of a given position
 		# ---------------------------------------------------------------
+		atomName, orderName = key
 		result = self.tree3D.query(np.array([pos]))
+
 		if result[0] < 0.01 :
-			order = self.atomOrderList[int(result[1])].orderMap
-			if orderName in order:
-				return True,order[orderName].copy()
+			atom = self.atomOrderList[int(result[1])]
+			atomOrder = self.atomOrderList[int(result[1])].orderMap
+
+			if atomName == "":
+				atomName = atom.atomName
+
+			if (orderName in atomOrder) and atomName == atom.atomName:
+				return True,atomOrder[orderName].copy()
 
 		return False,np.mat([0.0])
 
-	def setOrder(self, orderName, pos, order):
+	def setOrder(self, key, pos, order):
 		# ---------------------------------------------------------------
 		# To set the correspond order for an atom of a given position
 		# ---------------------------------------------------------------
+		atomName, orderName = key
 		result = self.tree3D.query(np.array([pos]))
-		if result[0] < 0.01 and orderName in self.atomOrderList[int(result[1])].orderMap:
-			atomOrder = self.atomOrderList[int(result[1])]
-			print atomOrder.atomInfo
-			self.atomOrderList[int(result[1])].orderMap[orderName] = np.mat(order)
 
-	def save(self):
-		f = open(self.filename, 'w')
+		if result[0] < 0.01 :
+			atom = self.atomOrderList[int(result[1])]
+			atomOrder = self.atomOrderList[int(result[1])].orderMap
+
+			if atomName == "":
+				atomName = atom.atomName
+
+			if (orderName in atomOrder) and atomName == atom.atomName:
+				print atom.atomInfo,
+				print orderName, " = ", MatToStr( np.mat( order ) )
+				self.atomOrderList[int(result[1])].orderMap[orderName] = np.mat(order)
+
+		#if result[0] < 0.01 and orderName in self.atomOrderList[int(result[1])].orderMap:
+		#	atom = self.atomOrderList[int(result[1])]
+		#	atomOrder = self.atomOrderList[int(result[1])]
+
+		#	if atomName == "":
+				atomName = atom.atomName
+
+
+	def save(self, _filename = ""):
+		fname = ""
+		fname == self.filename
+		if _filename != "":
+			fname = _filename+".ord"
+
+		f = open(fname, 'w')
 		for atom in self.atomOrderList:
 			f.write(atom.atomInfo)
 			f.write(atom.getOrderString())
@@ -110,15 +148,36 @@ class   LatticeOrder:
 
 
 if __name__ == "__main__":
+
+	inputLatticeFileName = "sys.argv[1]"
+
+	print sys.argv
+
 	content = """#!/usr/bin/env python
+#|---------------------------------------------------------------
+#| Modify this file to manipulate the orders in following ways:
+#| 1. Access the order:
+#|         LatOrder.getOrder( key, pos)
+#| 2. Set new value to the order:
+#|         LatOrder.setOrder( key, pos, order)
+#| 3. Save the new order:
+#|         LatOrder.save( filename = "" )
+#|---------------------------------------------------------------
 import imp
 import sys
 import numpy as np
 
+### Loading LatticeOrder class from the TBM3 bin/ path.
 foo = imp.load_source('LO', '"""+sys.argv[0]+"""')
-LatOrder = foo.LatticeOrder(sys.argv[1]+".ord")
-#found, order = LatOrder.getOrder('@:cspin', pos=[0, 0, 0])
-#LatOrder.setOrder('@:cspin', pos=[0.5, 0.5, 0.5,] order=[1,2,3])
+LatOrder = foo.LatticeOrder("""+inputLatticeFileName+"""+'.ord')
+
+#### Query the correspond order in the given atom position.
+#found, order = LatOrder.getOrder(key=('Fe','@:cspin'), pos=[0, 0, 0])
+
+#### Setup the correspond order in the given atom position.
+#LatOrder.setOrder(key=('Fe','@:cspin'), pos=[0.5, 0.5, 0.5,], order=[1,2,3])
+
+#### Save the order in the original input file.
 #LatOrder.save()
 """
 	filename = "orderAnalyzer.py"
