@@ -13,7 +13,16 @@
 //  TBClassicalSpinBase.hpp
 //  TBM^3
 //
-
+/*
+ This structure will be passed through all future models.
+ It can be used to construct most of the classical spin interactions for total energy/LLG dynamic calculation:
+ 
+	hund		> Fe	1		> @:cspin * B
+	hund		> Fe	2		> @:cspin * B
+	superEx		> Fe:Fe:+1+0+0	> @:cspin * Jse
+	dmEx		> Fe:Fe:+1+0+0	> @:cspin * Jdm
+	fieldB		> Fe			> @:cspin * B
+ */
 class TBClassicalSpinBase{
 public:
 	TBClassicalSpinBase(TBDataSource & _tbd): TBD(_tbd)		{ }

@@ -46,7 +46,7 @@ struct	EigVec{
 
 /*
  This structure will be passed through all future models.
- A. It can be used to construct all matrix element, for example:
+ It can be used to construct all matrix element, for example:
  	orbital		> Fe 1		> 1		%Create the on-site energy for the first orbital of Fe.
  	hundSpin	> Fe 1		> 1,0,0 %Create a classical spin (x-direction) coupled to orbital 1.
  
