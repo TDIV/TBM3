@@ -1,0 +1,49 @@
+#KPointPath
+G      0     0     0    
+X      1     0     0    
+M      1     1     0    
+G      0     0     0    
+
+
+#Parameters
+isCalculateMu	= 0
+isCalculateLDOS	= 0
+isCalculateBand	= 1
+isCalculateVar 	= 0
+isCalculateSpinX= 0
+
+max_iter	= 10000
+spin		= "on"
+space		= "normal"
+Nb			= 4,4,1
+bondRadius	= 4
+
+Mu			= 0
+Temperature	= 0.0001
+
+t1			= -1.0
+t2			= -1.0
+
+ldos_Nb	= 30,30,1
+ldos_dE	= 0.005
+ldos_Gamma = 0.06
+
+#LDOSList
+0		0		0		1
+
+#CoreCharge
+Cu	> 1
+
+#Init
+
+#Hamiltonian
+
+% Fe-O bond hopping terms
+orbital	> Cu 1 > 0
+orbital	> Cu 1 > 0
+
+hopping > Cu:Cu:+1+0+0 1:1 >  t1
+hopping > Cu:Cu:-1+0+0 1:1 >  t1
+hopping > Cu:Cu:+0+1+0 1:1 >  t2
+hopping > Cu:Cu:+0-1+0 1:1 >  t2
+

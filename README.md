@@ -121,7 +121,7 @@ We are working on to provide more possible options for different hardward select
 
 ## License
 
-TBM3 is licensed under the GNU General Public License.
+TBM3 is licensed under the BSD Berkeley Software Distribution.
 
 ## Contact
 

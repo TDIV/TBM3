@@ -31,7 +31,7 @@ Mu			= 0
 Temperature	= 0.0001
 
 t1			= 1
-t2			= 0.5
+t2			= 0.0
 
 #LDOSList
 0		0		0		1 2

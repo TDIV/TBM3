@@ -2,12 +2,13 @@
 | Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,            |
 |                    Jian-Xin Zhu                            |
 |                                                            |
-| This file is distributed under the terms of the BSD        |
-| Berkeley Software Distribution. See the file `LICENSE' in  |
+| This file is distributed under the terms of the GNU        |
+| General Public License. See the file `LICENSE' in          |
 | the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| http://www.gnu.org/copyleft/gpl.txt .                      |
 |                                                            |
 |-----------------------------------------------------------*/
+
 //
 //  lattice.hpp
 //  TBM^3
@@ -288,7 +289,7 @@ public:
 			if( CoordinateSelect == -1){ // Cartesian coordinate
 				retVec[0] = PMStr(vecParser[0])*StrToDouble(vecParser[1]);
 				retVec[1] = PMStr(vecParser[2])*StrToDouble(vecParser[3]);
-				retVec[1] = PMStr(vecParser[4])*StrToDouble(vecParser[5]);
+				retVec[2] = PMStr(vecParser[4])*StrToDouble(vecParser[5]);
 			}
 			else{
 				auto  bvec = bondVector.getBond(CoordinateSelect);

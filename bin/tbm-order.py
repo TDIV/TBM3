@@ -131,11 +131,17 @@ class   LatticeOrder:
 				atomName = atom.atomName
 
 
-	def save(self, _filename = ""):
-		fname = ""
-		fname == self.filename
-		if _filename != "":
+	def save(self, _filename = ''):
+		fname = _filename
+
+		if fname == '':
+			fname = self.filename
+		else:
 			fname = _filename+".ord"
+
+		print
+		print "Save to:", fname
+		print
 
 		f = open(fname, 'w')
 		for atom in self.atomOrderList:
@@ -150,8 +156,6 @@ class   LatticeOrder:
 if __name__ == "__main__":
 
 	inputLatticeFileName = "sys.argv[1]"
-
-	print sys.argv
 
 	content = """#!/usr/bin/env python
 #|---------------------------------------------------------------

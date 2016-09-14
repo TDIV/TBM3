@@ -1,10 +1,10 @@
 #BasisVector
  1               0               0              
  0               1               0              
- 0               0               3              
+ 0               0               1              
 
 #OrbitalProfile
-Fe        dxz     dyz    
+Cu        dx2-y2    
 
 #Atoms
-1     0             0             0            
+1     0.5             0.5             0.5            

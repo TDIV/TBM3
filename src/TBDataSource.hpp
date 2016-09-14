@@ -2,12 +2,13 @@
 | Copyright (C) 2016 Yuan-Yen Tai, Hongchul Choi,            |
 |                    Jian-Xin Zhu                            |
 |                                                            |
-| This file is distributed under the terms of the BSD        |
-| Berkeley Software Distribution. See the file `LICENSE' in  |
+| This file is distributed under the terms of the GNU        |
+| General Public License. See the file `LICENSE' in          |
 | the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| http://www.gnu.org/copyleft/gpl.txt .                      |
 |                                                            |
 |-----------------------------------------------------------*/
+
 //
 //  TBDataSource.hpp
 //  TBM^3
@@ -326,6 +327,7 @@ public:
 		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto pair = Lat.getPair(firstSec[2]);
+		auto bond = pair.bondIJ();
 		if( pair.atomI.atomName != firstSec[0])	return;
 		if( pair.atomJ.atomName != firstSec[1])	return;
 		if( !pair.withinRange() )				return;
@@ -420,8 +422,8 @@ public:
 		if( pair.atomJ.atomName != firstSec[1])	return;
 		if( !pair.withinRange() )				return;
 		
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
+		//if(!pair.atomI.hasOrbital(secondSec[0]))return;
+		//if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_mat sVec = parseBondString(pair, varList[0]);
 		x_var val = sVec[0];
@@ -477,8 +479,8 @@ public:
 		if( pair.atomJ.atomName != firstSec[1])	return;
 		if( !pair.withinRange() )				return;
 		
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
+		//if(!pair.atomI.hasOrbital(secondSec[0]))return;
+		//if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
 		x_mat sVec = parseBondString(pair, varList[0]);
 		x_var val = sVec[0];
