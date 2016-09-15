@@ -1178,7 +1178,8 @@ public:
 		}
 	}
 	
-	x_mat		parseSiteString(Atom & at, string svar)			{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
+	x_mat		parseSiteString(Atom & at, string svar)			{
+		// @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		
 		x_mat xvar;
@@ -1206,10 +1207,12 @@ public:
 		return xvar;
 	}
 	
-	x_mat		parseBondString(AtomPair & ap, string svar)		{ // @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
+	x_mat		parseBondString(AtomPair & ap, string svar)		{
+		// @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		
 		x_mat xvar;
+		
 		
 		replaceAll(svar, "@", vecToStr(ap.bondIJ()) );
 		if( svar[0] == '@'){ // Order parameter

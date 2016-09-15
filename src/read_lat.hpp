@@ -34,7 +34,7 @@ public:
 class Parameter:			public ParserBase{
 	map<string, string>	strPool;
 	map<string, x_var>	varPool;
-	map<string, r_mat>	vectorPool;
+	map<string, x_mat>	vectorPool;
 	vector<string>		inputLines;
 public:
 	Parameter(): tbm::ParserBase("#Parameters"){ }
@@ -43,38 +43,31 @@ public:
 		inputLines.push_back(line);
 		
 		auto lineParser = split(line, "=");
+		
 		if ( lineParser.size() == 2) {
 			string parameterName =lineParser[0];
 			removeSpace(parameterName);
 			
 			string parameterLine = lineParser[1];
 			
-			auto lineParser2nd = split(parameterLine, ",");
-			
-			if (lineParser2nd.size() == 1) {
-				
-				string singleParameter = lineParser2nd[0];
-				removeSpace(singleParameter);
-				
-				if (singleParameter[0] == '\"' and singleParameter[singleParameter.size()-1] == '\"') {
-					// The string type goes here.
-					singleParameter.erase(0,1);
-					singleParameter.pop_back();
-					strPool[parameterName] = singleParameter;
+			removeSpaceTopToe(parameterLine);
+			if( parameterLine[0] == '\"' and parameterLine[parameterLine.size()-1] == '\"' ){
+				// Recognized as a string input.
+				parameterLine.erase(0,1);
+				parameterLine.pop_back();
+				strPool[parameterName] = parameterLine;
+			}
+			else if(parameterLine[0] != '\"' and parameterLine[parameterLine.size()-1] != '\"'){
+				// Recognized as a variable or 1D vector.
+				auto tmpVec = StrToXVec(parameterLine);
+				if( tmpVec.size() == 1 ){
+					varPool[parameterName] = tmpVec[0];
 				}
-				else{
-					// The variable type goes here.
-					varPool[parameterName] = StrToComplex( singleParameter );
+				else if(tmpVec.size() > 1){
+					vectorPool[parameterName] = tmpVec;
 				}
 			}
-			else if (lineParser2nd.size() > 1) {
-				// The complex vector type goes here
-				
-				r_mat	varVec(1, lineParser2nd.size()); // Make a vector of real-matrix type
-				for( unsigned i=0 ; i<lineParser2nd.size() ; i++){
-					varVec[i] = StrToDouble(lineParser2nd[i]);
-				}
-				vectorPool[parameterName] = varVec;
+			else{
 			}
 		}
 	}
@@ -107,11 +100,11 @@ public:
 		varPool[key] = defaultValue;
 		return varPool[key];
 	}
-	r_mat & 	VEC(string key)						{
-		r_mat defaultVal(1,1);
+	x_mat & 	VEC(string key)						{
+		x_mat defaultVal(1,1);
 		return VEC(key, defaultVal);
 	}
-	r_mat &		VEC(string key, r_mat defaultValue)	{
+	x_mat &		VEC(string key, x_mat defaultValue)	{
 		if (vectorPool.find(key) != vectorPool.end()) {
 			return vectorPool[key];
 		}

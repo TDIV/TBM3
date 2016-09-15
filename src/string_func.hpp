@@ -18,7 +18,7 @@
 #ifndef _string_func_h
 #define _string_func_h
 
-void removeSpace(std::string & str) {
+void			removeSpace			(std::string & str){
 	if (str.size() > 0) {
 		string tmpStr = "";
 		for( unsigned i=0 ; i<str.size() ; i++){
@@ -29,9 +29,17 @@ void removeSpace(std::string & str) {
 		str = tmpStr;
 	}
 }
+void			removeSpaceTopToe	(std::string & str){
+	while(str[0] == ' ' and str.size() > 0){
+		str.erase(str.begin());
+	}
+	while(str[str.size()-1] == ' ' and str.size() > 0){
+		str.pop_back();
+	}
+}
 
-// The string replace function.
 void			replaceAll(std::string& str, const std::string& from, const std::string& to) {
+	// The string replace function.
 	if(from.empty())
 		return;
 	size_t start_pos = 0;
@@ -40,7 +48,6 @@ void			replaceAll(std::string& str, const std::string& from, const std::string& 
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 	}
 }
-
 void			deleteComment(std::string& str, char comment = '%'){
 	string tmpStr = "";
 	for(auto & c: str){
@@ -51,9 +58,8 @@ void			deleteComment(std::string& str, char comment = '%'){
 		}
 	}
 }
-
-// The string split function.
 deque<string>	split(string line, string delimiter) {
+	// The string split function.
 	replaceAll(line, "\t", " ");
     std::deque<std::string> content;
     
@@ -68,9 +74,8 @@ deque<string>	split(string line, string delimiter) {
     
     return content;
 }
-
-// The string split function.
 deque<string>	splitByIntNumber(string line) {
+	// The string split function.
 	replaceAll(line, "\t", " ");
     std::deque<std::string> content;
 	line += " ";
@@ -99,32 +104,31 @@ deque<string>	splitByIntNumber(string line) {
     return content;
 }
 
-// eifjofejfojsef
 
 /* String-Variable convertors. */
-int				StrToInt(string Str)	{
+int				StrToInt		(string Str)	{
     istringstream iss(Str);
     int var;
     iss>>var;
     return var;
 }
-string			IntToStr(int val)		{
+string			IntToStr		(int val)		{
     ostringstream oss;
     oss<<val;
     return oss.str();
 }
-double			StrToDouble(string Str) {
+double			StrToDouble		(string Str)	{
 	istringstream iss(Str);
 	double var;
 	iss>>var;
 	return var;
 }
-string			DoubleToStr(double val)	{
+string			DoubleToStr		(double val)	{
     ostringstream oss;
     oss<<val;
     return oss.str();
 }
-x_var			StrToComplex(string Str){
+x_var			StrToComplex	(string Str)	{
 	replaceAll(Str, " ", "");
 	
 	x_var ret_var;
@@ -143,34 +147,8 @@ x_var			StrToComplex(string Str){
 	}
     return ret_var;
 }
-bool			IsIntStr(string Str)	{
-	bool retVal = true;
-	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+');
-	return retVal;
-}
-bool			IsFloatStr(string Str)	{
-	bool retVal = true;
-	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+' or c=='.');
-	return retVal;
-}
-
-/* Counting how many words in one string. */
-int				WordCount(string token, string line){
-	
-	int count=0;
-	
-    size_t pos = 0;
-    while ((pos = line.find(token)) != std::string::npos) {
-        line.erase(0, pos + token.length());
-		count++;
-    }
-	
-	
-	return count;
-}
-
-/* Convert string type: "(1,2), 2,3, (3,4)" into a 1xN x_mat.*/
-x_mat	&		StrToXVec(string Str)	{
+x_mat	&		StrToXVec		(string Str)	{
+	/* Convert string type: "(1,2), 2,3, (3,4)" into a 1xN x_mat.*/
 	bool xflag = false;
 	vector<pair<bool, string> > subList;
 	
@@ -196,9 +174,35 @@ x_mat	&		StrToXVec(string Str)	{
 		auto & xStr = xList[ii];
 		ret->index(ii) = StrToComplex(xStr);
 	}
-	
 	return *ret;
 }
+
+bool			IsIntStr(string Str)	{
+	bool retVal = true;
+	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+');
+	return retVal;
+}
+bool			IsFloatStr(string Str)	{
+	bool retVal = true;
+	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+' or c=='.');
+	return retVal;
+}
+
+int				WordCount(string token, string line){
+	/* Counting how many words in one string. */
+	
+	int count=0;
+	
+    size_t pos = 0;
+    while ((pos = line.find(token)) != std::string::npos) {
+        line.erase(0, pos + token.length());
+		count++;
+    }
+	
+	
+	return count;
+}
+
 
 /* Translate "+" or "-" into +1 or -1. */
 double			PMStr(string str){ // return +1 or -1 for a given +

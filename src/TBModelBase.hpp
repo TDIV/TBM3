@@ -153,7 +153,7 @@ protected:
 		
 		if( Nb.size() == 1){
 			auto & b1 = B[0];
-			auto N1 = Nb[0];
+			auto N1 = Nb[0].real();
 			
 			for (double i1=0; i1<N1; i1++){
 				auto kPoint = (i1/N1)*b1;
@@ -165,7 +165,7 @@ protected:
 		if( Nb.size() == 2){
 			auto & b1 = B[0];
 			auto & b2 = B[1];
-			auto N1 = Nb[0], N2 = Nb[1];
+			auto N1 = Nb[0].real(), N2 = Nb[1].real();
 			for (double i1=0; i1<N1; i1++)
 			for (double i2=0; i2<N2; i2++){
 				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
@@ -178,7 +178,7 @@ protected:
 			auto & b1 = B[0];
 			auto & b2 = B[1];
 			auto & b3 = B[2];
-			auto N1 = Nb[0], N2 = Nb[1], N3 = Nb[2];
+			auto N1 = Nb[0].real(), N2 = Nb[1].real(), N3 = Nb[2].real();
 			for (double i1=0; i1<N1; i1++)
 			for (double i2=0; i2<N2; i2++)
 			for (double i3=0; i3<N3; i3++) {
@@ -304,12 +304,12 @@ protected:
 		KHamEvd(rtbd);
 		kMeshSelection = "Nb";
 		
-		r_mat ldos_E(1,2);
+		x_mat ldos_E(1,2);
 		ldos_E[0] = rtbd.minE;
 		ldos_E[1] = rtbd.maxE;
 		ldos_E = Lat.parameter.VEC("ldos_E", ldos_E);
 		
-		if( ldos_E[0] > ldos_E[1]){
+		if( ldos_E[0].real() > ldos_E[1].real()){
 			auto tmpE = ldos_E[1];
 			ldos_E[1] = ldos_E[0];
 			ldos_E[0] = tmpE;
@@ -357,7 +357,7 @@ protected:
 					}
 				}
 				
-				for( double eng = ldos_E[0]; eng <= ldos_E[1]+4*stepE ; eng += stepE ){
+				for( double eng = ldos_E[0].real(); eng <= ldos_E[1].real()+4*stepE ; eng += stepE ){
 					ldos.push_back(make_pair(eng, 0));
 				}
 				

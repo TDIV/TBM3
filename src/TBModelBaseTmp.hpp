@@ -57,7 +57,7 @@ void	TBModelBase::calculateSpinSusceptibility	(TBDataSource & rtbd){
 	auto Nb = Lat.parameter.VEC("Nb");
 	double max_Nb = 0;
 	for(unsigned iNb = 0 ; iNb < Nb.size() ; iNb++){
-		if( Nb[iNb] > max_Nb ) max_Nb = Nb[iNb];
+		if( Nb[iNb].real() > max_Nb ) max_Nb = Nb[iNb].real();
 	}
 	
 	map<double, pair<r_mat, double> > indexedQMap;
