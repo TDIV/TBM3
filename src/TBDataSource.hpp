@@ -993,6 +993,7 @@ public:
 		
 		Ham.zerolize();
 		
+		//cout<<kp<<endl;
 		for( auto & elem: hamElementList){
 			
 			auto bvec = elem.bondVector;
@@ -1000,7 +1001,11 @@ public:
 			auto	exp_IJ=exp(-Im*phase);
 			
 			Ham(elem.I, elem.J) += elem.val * exp_IJ;
+			auto tmp = elem.val*exp_IJ;
+			//cout<<elem.I<<" "<<elem.J<<" "<<elem.val<<" "<<exp_IJ<<" "<<tmp<<" "<<bvec<<endl;
+			
 		}
+		//cout<<Ham<<endl;
 		
 		EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 		tmpEigValVec.kPoint = kp;

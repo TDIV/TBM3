@@ -84,18 +84,18 @@ public:
 				if	( header == basisVector())		{flag = header; continue;}
 				if	( header == orbitalProfile())	{flag = header; continue;}
 				if	( header == atomParser())		{flag = header; continue;}
-				if	( header == kSymmPointParser())	{flag = header; continue;}
-				if	( header == bondVector())		{
-					flag = header;
-					iss>>sub_flag;
-					continue;
-				}
+				//if	( header == kSymmPointParser())	{flag = header; continue;}
+				//if	( header == bondVector())		{
+				//	flag = header;
+				//	iss>>sub_flag;
+				//	continue;
+				//}
 			
 				if	( flag == basisVector())		{ basisVector.append(line);						continue;	}
 				if	( flag == orbitalProfile())		{ orbitalProfile.append(line);					continue;	}
 				if	( flag == atomParser())			{ atomParser.append(line);						continue;	}
-				if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
-				if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
+				//if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
+				//if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
 			}
 		}
 		infile.close();
@@ -103,10 +103,10 @@ public:
 		infile.open(_filename+".tbm");
 		if ( infile.is_open() ) {
 			
+			sub_flag = "0";
             while ( getline(infile, line) ) {
 				deleteComment(line); // Clean the commented words
 				istringstream iss(line);
-				sub_flag = "0";
 				iss >> header;
 				if	( header == parameter())		{flag = header; continue;}
 				if	( header == ldosList())			{flag = header; continue;}
