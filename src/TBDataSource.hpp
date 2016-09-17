@@ -993,7 +993,7 @@ public:
 		
 		Ham.zerolize();
 		
-		//cout<<kp<<endl;
+		//cout<<"KKK"<<kp<<endl;
 		for( auto & elem: hamElementList){
 			
 			auto bvec = elem.bondVector;
@@ -1002,10 +1002,14 @@ public:
 			
 			Ham(elem.I, elem.J) += elem.val * exp_IJ;
 			auto tmp = elem.val*exp_IJ;
-			//cout<<elem.I<<" "<<elem.J<<" "<<elem.val<<" "<<exp_IJ<<" "<<tmp<<" "<<bvec<<endl;
 			
 		}
-		//cout<<Ham<<endl;
+		//cout<<Ham<<endl<<endl;
+		//for( unsigned i=0 ; i<Ham.cols() ; i++)
+		//for( unsigned j=0 ; j<Ham.cols() ; j++){
+		//	if( abs(Ham(i,j)) > 0.0001 )
+		//	cout<<fformat(i)<<fformat(j)<<" "<<Ham(i,j)<<endl;
+		//}
 		
 		EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 		tmpEigValVec.kPoint = kp;

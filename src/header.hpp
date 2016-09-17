@@ -42,6 +42,8 @@
 // BEGIN INCLUDING 3RD PARTY HEADERS
 #include <boost/geometry/index/rtree.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #if defined __SUNPRO_CC
 #   pragma enable_warn
@@ -78,7 +80,6 @@ void ErrorMessage(string errorStr) {
 #include "atom.hpp"
 #include "lattice.hpp"
 #include "order_parameter.hpp"
-#include "TBWannierHandler.hpp"
 #include "TBDataSource.hpp"
 #include "TBModelBase.hpp"
 #include "TBClassicalSpinBase.hpp"

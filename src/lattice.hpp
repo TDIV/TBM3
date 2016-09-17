@@ -77,59 +77,47 @@ public:
                 istringstream iss(line);
 				sub_flag = "0";
 				iss >> header;
-				//cout<<header<<" "<<sub_flag<<endl;
-				
-				//auto lineParser = split(line, " ");
 				
 				if	( header == basisVector())		{flag = header; continue;}
 				if	( header == orbitalProfile())	{flag = header; continue;}
 				if	( header == atomParser())		{flag = header; continue;}
-				//if	( header == kSymmPointParser())	{flag = header; continue;}
-				//if	( header == bondVector())		{
-				//	flag = header;
-				//	iss>>sub_flag;
-				//	continue;
-				//}
 			
 				if	( flag == basisVector())		{ basisVector.append(line);						continue;	}
 				if	( flag == orbitalProfile())		{ orbitalProfile.append(line);					continue;	}
 				if	( flag == atomParser())			{ atomParser.append(line);						continue;	}
-				//if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
-				//if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
 			}
 		}
 		infile.close();
 		
-		infile.open(_filename+".tbm");
-		if ( infile.is_open() ) {
+		TBMImportParser	importParser;
+		importParser.append(_filename+".tbm", _filename);
+		
+		sub_flag = "0";
+		for( auto & line: importParser.tbmLineStorage){
 			
-			sub_flag = "0";
-            while ( getline(infile, line) ) {
-				deleteComment(line); // Clean the commented words
-				istringstream iss(line);
-				iss >> header;
-				if	( header == parameter())		{flag = header; continue;}
-				if	( header == ldosList())			{flag = header; continue;}
-				if	( header == coreCharge())		{flag = header;	continue;}
-				if	( header == initOrder())		{flag = header;	continue;}
-				if	( header == hamParser())		{flag = header;	continue;}
-				if	( header == kSymmPointParser())	{flag = header; continue;}
-				if	( header == bondVector())			{
-					flag = header;
-					iss>>sub_flag;
-					continue;
-				}
-				
-				if	( flag == parameter())			{ parameter.append(line);	continue; }
-				if	( flag == ldosList())			{ ldosList.append(line);	continue; }
-				if	( flag == coreCharge())			{ coreCharge.append(line);	continue; }
-				if	( flag == initOrder())			{ initOrder.append(line);	continue; }
-				if	( flag == hamParser())			{ hamParser.append(line);	continue; }
-				if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
-				if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
+			deleteComment(line); // Clean the commented words
+			istringstream iss(line);
+			iss >> header;
+			if	( header == parameter())		{flag = header; continue;}
+			if	( header == ldosList())			{flag = header; continue;}
+			if	( header == coreCharge())		{flag = header;	continue;}
+			if	( header == initOrder())		{flag = header;	continue;}
+			if	( header == hamParser())		{flag = header;	continue;}
+			if	( header == kSymmPointParser())	{flag = header; continue;}
+			if	( header == bondVector())			{
+				flag = header;
+				iss>>sub_flag;
+				continue;
 			}
+			
+			if	( flag == parameter())			{ parameter.append(line);	continue; }
+			if	( flag == ldosList())			{ ldosList.append(line);	continue; }
+			if	( flag == coreCharge())			{ coreCharge.append(line);	continue; }
+			if	( flag == initOrder())			{ initOrder.append(line);	continue; }
+			if	( flag == hamParser())			{ hamParser.append(line);	continue; }
+			if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
+			if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
 		}
-		infile.close();
 		
 	}
 	size_t				latticeSize()			{ return atomList.size(); }

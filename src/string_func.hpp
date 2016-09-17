@@ -30,10 +30,10 @@ void			removeSpace			(std::string & str){
 	}
 }
 void			removeSpaceTopToe	(std::string & str){
-	while(str[0] == ' ' and str.size() > 0){
+	while( (str[0] == ' ' or str[0] == '\t') and str.size() > 0){
 		str.erase(str.begin());
 	}
-	while(str[str.size()-1] == ' ' and str.size() > 0){
+	while( (str[str.size()-1] == ' ' or str[str.size()-1] == '\t') and str.size() > 0){
 		str.pop_back();
 	}
 }

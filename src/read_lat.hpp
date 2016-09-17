@@ -471,7 +471,7 @@ public:
 	}
 };
 
-// Read in the #CoreCharge section
+// Read in the #LDOSList section
 class LDOSList :	public ParserBase{
 public:
 	vector<pair<r_mat, vector<string> > > LDOSSelector;	// Store the input from "xxx.lat.tbm".
@@ -577,16 +577,77 @@ public:
 	}
 };
 
+// Use the TBMImportParser to setup multiple file with the #Import function.
+class TBMImportParser: public ParserBase{
+public:
+	
+	set<string>		tbmFilenameStorage;
+	vector<string>	tbmLineStorage;
+	
+	TBMImportParser(): ParserBase("#Import"){ }
+	
+	void	append(string filename, string upperLevelFilename)	{
+		
+		tbmFilenameStorage.insert(filename);
+		
+        ifstream infile;
+		infile.open(filename);
+		
+		if ( infile.good() ) {
+			string line;
+			string header = "";
+			string flag	= "";
+			
+            while ( getline(infile, line) ) {
+				deleteComment(line);
+				istringstream iss(line);
+				iss >> header;
+				
+				removeSpace(header);
+				
+				if	( header == "#Import")	{ flag = header; continue; }
+				else if(header[0] == '#')	{ flag = header; }
+				
+				if	( flag	== "#Import")		{
+					removeSpaceTopToe(line);
+					if( line[0] != '\"' and line[line.size()-1] != '\"'){
+						continue;
+					}
+					replaceAll(line, "\"", "");
 
-/*######################################################
- The following class will be read from ooo.w90 file.
- ######################################################*/
+					// Make sure that this filename is not stored inside the pool.
+					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
+						tbmFilenameStorage.insert(line);
 
+						TBMImportParser * importer = new TBMImportParser();
+						importer->append(line, filename);
 
-
-
-
-
+						for( auto & line: importer->tbmLineStorage){
+							tbmLineStorage.push_back(line);
+						}
+						
+						for( auto & imp_filename: importer->tbmFilenameStorage){
+							tbmFilenameStorage.insert(imp_filename);
+						}
+					}
+					else{
+						ErrorMessage("Error: from \""+filename+"\"\n\""
+										+ line +"\" is multiple imported.\n"
+										+"Please check your file import structure.");
+					}
+				}
+				else{
+					tbmLineStorage.push_back(line);
+				}
+			}
+		}
+		else{
+			ErrorMessage("Error: from "+upperLevelFilename+" \n Cannot find import file: "+ filename);
+		}
+		
+		infile.close();
+	}
+};
 
 
 
