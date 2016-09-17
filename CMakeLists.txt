@@ -62,8 +62,11 @@ include_directories(SYSTEM ~/opt/TBM3/include)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/..)
 
-add_executable(run src/main.cpp)
-target_link_libraries(run ${LIBS} ${EXTRA_LIBS} stdc++)
+add_executable(tbm-run src/main-tbm-run.cpp)
+add_executable(tbm-wannier src/main-tbm-wannier.cpp)
+
+target_link_libraries(tbm-run ${LIBS} ${EXTRA_LIBS} stdc++)
+target_link_libraries(tbm-wannier ${LIBS} ${EXTRA_LIBS} stdc++)
 
 
 # -- REPORT -------------------------------------------

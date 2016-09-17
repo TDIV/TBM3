@@ -19,8 +19,11 @@ CFLAGS = 	-I$(IDIR)\
 			-L$(CUDA_DIR)/lib64\
 			$(OSFLAG)
 
-tbm-run: src/main.cpp
-	$(CC) src/main.cpp -o bin/tbm-run $(CFLAGS)
+tbm-run: src/main-tbm-run.cpp
+	$(CC) src/main-tbm-run.cpp -o bin/tbm-run $(CFLAGS)
+
+tbm-wannier: src/main-tbm-wannier.cpp
+	$(CC) src/main-tbm-wannier.cpp -o bin/tbm-wannier $(CFLAGS)
 
 clean:
 	rm bin/tbm-run

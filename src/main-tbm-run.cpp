@@ -9,7 +9,7 @@
 |                                                            |
 |-----------------------------------------------------------*/
 //
-//  main.cpp
+//  main-tbm-run.cpp
 //  TBM^3
 //
 
@@ -17,7 +17,6 @@
 
 #include <iostream>
 #include <random>
-
 
 class TBModel: public tbm::TBModelBase, public tbm::TBClassicalSpinBase{
 public:

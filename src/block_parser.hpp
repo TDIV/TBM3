@@ -449,7 +449,7 @@ public:
 class CoreCharge:	public ParserBase{
 	map<string, r_var> coreChargeMap;	// Store the input from "xxx.lat.tbm".
 public:
-	CoreCharge(): ParserBase("#CoreCharge"){ }
+	CoreCharge(): ParserBase("#CoreCharge")	{ }
 	
 	void	append(string line)				{
 		auto parser = split(line, ">");
