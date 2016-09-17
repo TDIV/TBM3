@@ -42,33 +42,34 @@ public:
 	}
 
 	// Read from xxx.lat
-	Parameter			parameter;
 	BasisVector			basisVector;
-	BondVector			bondVector;
 	OrbitalProfile		orbitalProfile;
 	AtomStringParser	atomParser;
-	KSymmetryPoint		kSymmPointParser;
 	
 	// Read from xxx.lat.tbm
+	Parameter			parameter;
+	KSymmetryPoint		kSymmPointParser;
+	BondVector			bondVector;
 	InitOrder			initOrder;
 	HamiltonianParser	hamParser;
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
 	void				open(string _filename)					{
-		parameter.clear();
 		basisVector.clear();
 		orbitalProfile.clear();
 		atomParser.clear();
+		
+		parameter.clear();
 		
 		extendedAtomList.clear();
 		rtree.clear();
 		
 		string line;
+		string header = "";
 		string flag = "";
 		string sub_flag = "";
-		string header = "";
-			
+		
         ifstream infile(_filename);
 		if ( infile.is_open() ) {
 
