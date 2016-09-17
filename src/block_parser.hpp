@@ -387,12 +387,10 @@ public:
 		fileString += '\n';
 		return fileString;
 	}
-	
 	bool	isValidAtomIndex(unsigned orbitalIndex){
 		
 		return orbitalIndex >= 0 and orbitalIndex < orbitalList.size();
 	}
-	
 	void	clear(){
 		orbitalList.clear();
 	}
@@ -405,7 +403,7 @@ public:
 	
 	AtomStringParser(): ParserBase("#Atoms"){ }
 	
-	void	append(string line){
+	void	append(string line)	{
 		auto lineParser = split(line, " ");
 		if( lineParser.size() == 4){
 			r_mat	pos(1,3);
@@ -416,7 +414,6 @@ public:
 			atomInfoList.push_back(make_pair(index, pos));
 		}
 	}
-	
 	void	changeProperty(vector<double> box, unsigned from, unsigned to){
 		
 		unsigned totalAtomChanged = 0;
@@ -438,8 +435,7 @@ public:
 		
 		cout<<endl;
 	}
-	
-	void	clear(){
+	void	clear()				{
 		atomInfoList.clear();
 	}
 };
@@ -455,18 +451,18 @@ class CoreCharge:	public ParserBase{
 public:
 	CoreCharge(): ParserBase("#CoreCharge"){ }
 	
-	void	append(string line)	{
+	void	append(string line)				{
 		auto parser = split(line, ">");
 		if( parser.size() == 2){
 			removeSpace(parser[0]);
 			coreChargeMap[parser[0]] = StrToDouble(parser[1]);
 		}
 	}
-	r_var	getCharge(string atomName){
+	r_var	getCharge(string atomName)		{
 		if( coreChargeMap.find(atomName) == coreChargeMap.end() ) return 0;
 		return coreChargeMap[atomName];
 	}
-	void	clear()				{
+	void	clear()							{
 		coreChargeMap.clear();
 	}
 };

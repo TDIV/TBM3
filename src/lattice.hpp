@@ -55,7 +55,7 @@ public:
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
-	void				open(string _filename)	{
+	void				open(string _filename)					{
 		parameter.clear();
 		basisVector.clear();
 		orbitalProfile.clear();
@@ -120,8 +120,8 @@ public:
 		}
 		
 	}
-	size_t				latticeSize()			{ return atomList.size(); }
-	size_t				indexSize()				{ return index_size; }
+	size_t				latticeSize()							{ return atomList.size(); }
+	size_t				indexSize()								{ return index_size; }
 	
 	Atom				getAtom()								{
 		if( !(atomIndex >= 0 and atomIndex < atomList.size()) ){
@@ -196,7 +196,7 @@ public:
 		return getPair(index, vec(bondStr));
 	}
 
-	pair<Atom, vector<Atom> > getBox(unsigned index)		{
+	pair<Atom, vector<Atom> > getBox(unsigned index)			{
 		Atom atomI = getAtom(index);
 		r_mat pos = atomI.pos;
 		
@@ -221,7 +221,7 @@ public:
 		}
 		return make_pair(atomI, atomJList);
 	}
-	pair<Atom, vector<Atom> > getRBox(double radius = -1)	{
+	pair<Atom, vector<Atom> > getRBox(double radius = -1)		{
 		Atom atomI = getAtom();
 		r_mat pos = atomI.pos;
 		
@@ -250,9 +250,9 @@ public:
 		return make_pair(atomI, atomJList);
 	}
 	
-	vector<Atom>	getAtomList()		{ return atomList; }
+	vector<Atom>		getAtomList()							{ return atomList; }
 	
-	r_mat			vec(string line)	{
+	r_mat				vec(string line)						{
 		// line = "+1+0+1"		-> use Cartesian coordinate
 		// line = "+1+0+1#"		-> use BondVector 0
 		// line = "+1+0+1#0"	-> use BondVector 0
@@ -294,10 +294,10 @@ public:
 		
 		return retVec;
 	}
-	H_SPACE			HSpace()			{return h_space;}
-	string			FileName()			{return filename;}
+	H_SPACE				HSpace()								{return h_space;}
+	string				FileName()								{return filename;}
 	
-	bool			iterate()			{
+	bool				iterate()								{
 		atomIndex++;
 		
 		if( atomIndex == latticeSize())	{
@@ -306,8 +306,8 @@ public:
 		}
 		return true;
 	}
-	
-	void			shiftXYZ(double X, double Y, double Z)	{
+
+	void				shiftXYZ(double X, double Y, double Z)	{
 		r_mat shiftPos(1,3);
 		shiftPos[0] = X;
 		shiftPos[1] = Y;
@@ -316,8 +316,7 @@ public:
 			atom.pos = atom.pos + shiftPos;
 		}
 	}
-	
-	void			changeAtomName(vector<string> optList)	{
+	void				changeAtomName(vector<string> optList)	{
 		
 		if( optList.size() != 2 ){
 			ErrorMessage("Error, the arguments for '-changeAtom' are not correct.");
@@ -354,8 +353,8 @@ public:
 		}
 		
 	}
-	
-	void createAtomList(bool needExpandedAtomList = true)				{
+
+	void				createAtomList(bool needExpandedAtomList = true)				{
 		atomList.clear();
 		Atom::totalIndexSize = 0;
 		index_size = 0;
@@ -397,9 +396,9 @@ public:
 		}
 
 	}
-	
+
 private:
-	void updateExpandedAtomList()		{
+	void				updateExpandedAtomList()		{
 		
 		extendedAtomList.clear();
 		

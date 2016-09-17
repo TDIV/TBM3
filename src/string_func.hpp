@@ -38,7 +38,7 @@ void			removeSpaceTopToe	(std::string & str){
 	}
 }
 
-void			replaceAll(std::string& str, const std::string& from, const std::string& to) {
+void			replaceAll		(std::string& str, const std::string& from, const std::string& to) {
 	// The string replace function.
 	if(from.empty())
 		return;
@@ -48,7 +48,7 @@ void			replaceAll(std::string& str, const std::string& from, const std::string& 
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 	}
 }
-void			deleteComment(std::string& str, char comment = '%'){
+void			deleteComment	(std::string& str, char comment = '%'){
 	string tmpStr = "";
 	for(auto & c: str){
 		if( c!= comment) tmpStr.push_back(c);
@@ -58,7 +58,7 @@ void			deleteComment(std::string& str, char comment = '%'){
 		}
 	}
 }
-deque<string>	split(string line, string delimiter) {
+deque<string>	split			(string line, string delimiter){
 	// The string split function.
 	replaceAll(line, "\t", " ");
     std::deque<std::string> content;
@@ -74,7 +74,7 @@ deque<string>	split(string line, string delimiter) {
     
     return content;
 }
-deque<string>	splitByIntNumber(string line) {
+deque<string>	splitByIntNumber(string line)		{
 	// The string split function.
 	replaceAll(line, "\t", " ");
     std::deque<std::string> content;
@@ -177,12 +177,12 @@ x_mat	&		StrToXVec		(string Str)	{
 	return *ret;
 }
 
-bool			IsIntStr(string Str)	{
+bool			IsIntStr(string Str)			{
 	bool retVal = true;
 	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+');
 	return retVal;
 }
-bool			IsFloatStr(string Str)	{
+bool			IsFloatStr(string Str)			{
 	bool retVal = true;
 	for(auto &c: Str) retVal = retVal and ( (c>='0' and c<='9') or c=='-' or c=='+' or c=='.');
 	return retVal;
@@ -203,14 +203,12 @@ int				WordCount(string token, string line){
 	return count;
 }
 
-
 /* Translate "+" or "-" into +1 or -1. */
 double			PMStr(string str){ // return +1 or -1 for a given +
 	if(str == "+") return +1;
 	if(str == "-") return -1;
 	return 0;
 }
-
 
 pair<bool,vector<double> > makeBoxFromStr(string pointA, string pointB){
 	replaceAll(pointA, "[", "");
@@ -250,28 +248,6 @@ pair<bool,vector<double> > makeBoxFromStr(string pointA, string pointB){
 	
 	return make_pair(false,returnSixBoxValue);
 }
-
-// This function will extract the atom informations, for:
-// 1. Number of orbitals.
-// 2. If the atom has spin degree of freedom.
-vector<string>	analyze_atom_label(string label){
-	vector<string> lab_list;
-	string L_num  = "";
-	string L_spin = "";
-	for (unsigned i=0; i<label.size(); i++) {
-		if ( label[i] >= '0' and label[i] <= '9') {
-			L_num.push_back(label[i]);
-		}
-		else{
-			L_spin.push_back(label[i]);
-		}
-	}
-	lab_list.push_back(L_num);
-	lab_list.push_back(L_spin);
-	return lab_list;
-}
-
-
 
 #endif
 

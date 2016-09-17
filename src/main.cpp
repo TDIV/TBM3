@@ -29,20 +29,16 @@ public:
 			iteration_steps = 0;
 		}
 
-	void initOrder()	override{
+	void	initOrder()		override	{
 		Lat.createAtomList(false);
 		tbd.order.clear();
 		tbd.order.load(Lat.initOrder.orderOperationList);
 		tbd.order.save();
 	}
-
-	void Hamiltonian()	override{
-		
+	void	Hamiltonian()	override	{
 		constructHamList();
 	}
-
-	void run()			override{
-		
+	void	run()			override	{
 		// Set the cuda device for calculation.
 		cudaSetDevice((int)Lat.parameter.VAR("cudaSetDevice", 0).real());
 		
@@ -93,12 +89,12 @@ public:
 		
 	}
 	
-	bool iterationStepIncr()	{
+	bool	iterationStepIncr()			{
 		iteration_steps += 1;
 		return iteration_steps <= iteration_max;
 	}
 	
-	double	calculateDenMeanField()	{
+	double	calculateDenMeanField()		{
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 			
@@ -126,7 +122,7 @@ public:
 		}
 		return den_diff;
 	}
-	double	calculateSpinVar()		{
+	double	calculateSpinVar()			{
 		
 		tbd.order.load();
 		tbd.order.save("previous");
@@ -148,7 +144,7 @@ public:
 		cout<<endl;
 		return diff;
 	}
-	void	calculateVar()			{
+	void	calculateVar()				{
 		
 		double spin_diff = 1;
 		double den_diff = 1;
@@ -165,6 +161,7 @@ public:
 			spin_diff	= calculateSpinVar();
 		}
 	}
+	
 private:
 	unsigned iteration_steps;
 	unsigned iteration_max;
@@ -208,7 +205,7 @@ int main(int argc, char *argv[]) {
 	// Expand the lattice.
 	// -----------------------------------------------------------------
 	else if	( operationList[1] == "-expand"){
-		cout<<endl<<"Expanding the lattice of '"<<filename<<"' to a larget one :";
+		cout<<endl<<"Expanding the lattice of '"<<filename<<"' to a larger one :";
 		vector<unsigned> N;
 		for(unsigned i=2 ; i<operationList.size() ; i++){ N.push_back(tbm::StrToInt(operationList[i])); }
 		
