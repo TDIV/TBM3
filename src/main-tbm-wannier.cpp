@@ -18,21 +18,30 @@
 #include <iostream>
 #include <random>
 
+string DoubleToPMStr(double val){
+	string PM = "";
+	if( val >= 0 ) PM = "+";
+	return PM+tbm::DoubleToStr(val);
+}
+
 class TBWannierTranslator {
 public:
 	tbm::Parameter			parameter;
 	tbm::BasisVector		basisVector;
-	tbm::OrbitalProfile		orbitalProfile;
-	tbm::AtomStringParser	atomParser;
 	
 	vector<string>			wannierBlockLines;
+	vector<string>			atomSetupLines;
 	
+	// -----------------atomName, position, label(spinless) = 1,2,3 or label(spinfull) = 1u, 2u, 3u .... 1d, 2d, 3d ....
+	vector<boost::tuple<string, tbm::r_mat, string> >	subAtomOrbitalList;
+	
+	string filename;
 	TBWannierTranslator(string _filename){
 		using namespace tbm;
 		
+		filename = _filename;
+		
 		basisVector.clear();
-		orbitalProfile.clear();
-		atomParser.clear();
 		
 		parameter.clear();
 		
@@ -43,7 +52,7 @@ public:
 		string flag = "";
 		
 		ifstream infile(_filename);
-		if ( infile.good() ) {
+		if ( infile.good() )	{
 			
 			while ( getline(infile, line) ) {
 				deleteComment(line); // Clean the commented words
@@ -52,32 +61,100 @@ public:
 				
 				if	( header == parameter())		{flag = header; continue;}
 				if	( header == basisVector())		{flag = header; continue;}
-				if	( header == orbitalProfile())	{flag = header; continue;}
-				if	( header == atomParser())		{flag = header; continue;}
+				if	( header == "#AtomSetup")		{flag = header; continue;}
 				if	( header == "#Wannier")			{flag = header; continue;}
 				
-				if	( flag == parameter())			{ parameter.append(line); continue;
-				}
+				if	( flag == parameter())			{ parameter.append(line);			continue; }
 				if	( flag == basisVector())		{ basisVector.append(line);			continue;	}
-				if	( flag == orbitalProfile())		{ orbitalProfile.append(line);		continue;	}
-				if	( flag == atomParser())			{ atomParser.append(line);			continue;	}
+				if	( flag == "#AtomSetup")			{ atomSetupLines.push_back(line);	continue;	}
 				if	( flag == "#Wannier")			{ wannierBlockLines.push_back(line);continue;	}
 			}
 		}
-		else{
-			ErrorMessage("Error, cannot file file: "+_filename);
+		else					{
+			ErrorMessage("Error, input fiole not found: "+_filename);
 		}
 		infile.close();
+		
+		
+		vector<string> orbitalProfile;
+		vector<string> atomProfile;
+		
+		// Construct the subAtomOrbitalList.
+		for( unsigned ii=0; ii < atomSetupLines.size() ; ii++){
+			auto line = atomSetupLines[ii];
+			auto parser = split(line, ">");
+			
+			if( parser.size() != 3 ) break;
+			
+			// Setup atom name
+			removeSpace( parser[0] );
+			string orbN = IntToStr(ii+1);
+			string atomName = parser[0]+"-"+ orbN;
+			
+			atomProfile.push_back(fformat(IntToStr(ii+1))+" "+parser[1]);
+			orbitalProfile.push_back(fformat(atomName)+" "+parser[2]);
+			
+			// Setup atom position
+			tbm::r_mat pos(1,3);
+			auto posStrList = split(parser[1], " ");
+			for( unsigned p=0 ; p<posStrList.size(); p++){
+				pos[p] = StrToDouble(posStrList[p]);
+			}
+			
+			// Loop through orbital profile and arange in : subAtomOrbitalList.
+			auto orbitalStrList = split(parser[2], " ");
+			if( parameter.STR("spin", "on") == "off" ){
+				for( unsigned i=1 ; i<=orbitalStrList.size() ; i++){
+					string orbN = IntToStr(i);
+					subAtomOrbitalList.push_back(boost::make_tuple( atomName, pos, orbN ));
+				}
+			}
+			else
+			if( parameter.STR("spin", "on") == "on" ){
+				for( unsigned i=1 ; i<=orbitalStrList.size() ; i++){
+					string orbN = IntToStr(i)+"u";
+					subAtomOrbitalList.push_back(boost::make_tuple( atomName, pos, orbN ));
+				}
+				for( unsigned i=1 ; i<=orbitalStrList.size() ; i++){
+					string orbN = IntToStr(i)+"d";
+					subAtomOrbitalList.push_back(boost::make_tuple( atomName, pos, orbN ));
+				}
+			}
+		}
+		
+		ofstream outfile(filename+".lat");
+		outfile<<basisVector.getFileString();
+		
+		outfile<<"#OrbitalProfile"<<endl;
+		for(auto & line: orbitalProfile){
+			outfile<<line<<endl;
+		}
+		outfile<<endl;
+		
+		outfile<<"#Atoms"<<endl;
+		for(auto & line: atomProfile){
+			outfile<<line<<endl;
+		}
+		outfile.close();
 	}
 	
 	void	parseWannierBlock(){
+		using namespace tbm;
 		
 		vector<double> cellVectorDegeneracy;
 		
-		map<string, vector<pair<string, string> > > cellVectorMap;
+		//-- cell N ----------------<PairIndex, cvar  , degeneracy>
+		map<string, vector<boost::tuple<string, string, unsigned> > > cellVectorMap;
+		set<string>	cellVecPool;
 		
 		unsigned flowControler = 0;
 		
+		auto avec = basisVector.getAVec();
+		
+		ofstream outfile(filename+".lat.tbm");
+		
+		
+		outfile<<"#Hamiltonian"<<endl;
 		for( auto & line: wannierBlockLines ){
 			
 			if		( flowControler == 0 )	{
@@ -85,31 +162,68 @@ public:
 				double	w_var;
 				
 				while( iss>>w_var ){
-					if( w_var < 0 )	flowControler = 1;
-					else{
+					if( w_var > 0 and flowControler == 0){
 						cellVectorDegeneracy.push_back(w_var);
+					}
+					else{
+						flowControler = 1;
+						break;
 					}
 				}
 			}
 			
 			if (flowControler == 1){
 				string cellVectorStr = line.substr(0, 16);
-				string subAtomStr = line.substr(16, 10);
-				string cvarStr = line.substr(26, 23);
 				
-				/* Formate output test.
-				cout<< line <<endl;
-				cout<< cellVectorStr <<endl;
-				cout<< subAtomStr<<endl;
-				cout<< cvarStr<<endl;
-				cout<< cellVectorStr << subAtomStr << cvarStr <<" --- "<<endl;
-				 */
+				if( cellVecPool.find(cellVectorStr) == cellVecPool.end()){
+					cellVecPool.insert(cellVectorStr);
+				}
+				double degeneracy = cellVectorDegeneracy[cellVecPool.size()-1];
 				
+				istringstream iss(line);
+				double N0, N1, N2, varReal, varImag;
+				unsigned atomOrb_I, atomOrb_J;
+				iss>> N0 >> N1 >> N2 >> atomOrb_I >> atomOrb_J >> varReal >> varImag ;
+				varReal = varReal / degeneracy;
+				varImag = varImag / degeneracy;
+				
+				// ****** Get sub atoms pair
+				auto subAtomI = subAtomOrbitalList[atomOrb_I-1];
+				auto subAtomJ = subAtomOrbitalList[atomOrb_J-1];
+				
+				// ****** Get sub atoms pair name
+				auto subAtomI_name = subAtomI.get<0>();
+				auto subAtomJ_name = subAtomJ.get<0>();
+				
+				// ****** Get bondIJ of sub atoms pair
+				r_mat posI(1,3), posJ(1,3);
+				posI = subAtomI.get<1>();
+				posJ = N0 * avec[0] + N1 * avec[1] + N2 * avec[2] + subAtomJ.get<1>();
+				auto bondIJ = posJ - posI;
+				
+				// ****** Get orbitals(spins) of sub atoms pair
+				auto orbI = subAtomI.get<2>();
+				auto orbJ = subAtomJ.get<2>();
+				
+				if( parameter.STR("spin") == "off"){
+					outfile<< "hopping  >  ";
+				}
+				if( parameter.STR("spin") == "on"){
+					outfile<< "bond  >  ";
+				}
+				
+				outfile << subAtomI_name<<":"<<subAtomJ_name<<":"
+						<< DoubleToPMStr( bondIJ[0] )
+						<< DoubleToPMStr( bondIJ[1] )
+						<< DoubleToPMStr( bondIJ[2] )
+						<<" "<<orbI<<":"<<orbJ<< "  >  "
+						<< "("<<varReal<<","<<varImag<<")"
+						<<endl;
 				
 			}
 		}
 		
-		cout<<cellVectorDegeneracy.size()<<endl;
+		outfile.close();
 	}
 };
 
@@ -138,10 +252,6 @@ int main(int argc, char *argv[]) {
 	
 	return 0;
 }
-
-
-
-
 
 
 

@@ -68,7 +68,7 @@ public:
 		
 		if( Lat.parameter.VAR("isCalculateBand", 0).real() == 1 ){
 			cout<<endl<<">> Calculating the Band structure."<<endl;
-			calculateBandStructure(tbd);
+			calculateBandStructure(tbd, abs( Lat.parameter.VAR("bandPoints", 10).real()) );
 			cout<<endl;
 		}
 	
