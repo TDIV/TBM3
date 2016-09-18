@@ -26,7 +26,7 @@ class TBClassicalSpinBase{
 public:
 	TBClassicalSpinBase(TBDataSource & _tbd): TBD(_tbd)		{ }
 
-	void addHundCoupling	(string opt, deque<string> optList, deque<string> varList)		{
+	void addHundCoupling	(const string & opt, const deque<string> & optList, const deque<string> & varList)		{
 		
 		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		if( varList.size() == 0){ ErrorMessage("Error, not a valid operation:\n"+opt); }
@@ -54,7 +54,7 @@ public:
 		
 		HundCouplingList.push_back(boost::make_tuple(atomI, pspin, Jh, orderKey));
 	}
-	void addSuperExchange	(string opt, deque<string> optList, deque<string> varList)		{ // svar === " @:cspin * Jse "
+	void addSuperExchange	(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jse "
 		
 		if( optList.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
@@ -84,7 +84,7 @@ public:
 		
 		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Jsx, orderKey));
 	}
-	void addDMExchange		(string opt, deque<string> optList, deque<string> varList)		{ // svar === " @:cspin * Jdm "
+	void addDMExchange		(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jdm "
 		if( optList.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto parser = split(optList[0], ":");
@@ -120,7 +120,7 @@ public:
 		
 		DMExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Dij, orderKey));
 	}
-	void addFieldB			(string opt, deque<string> optList, deque<string> varList)		{ // svar === " @:cspin * Jse "
+	void addFieldB			(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jse "
 		// *******************************
 		// fieldB	> Fe   > [0,0,1] * B
 		// fieldB	> Fe 1 > [0,0,1] * B
@@ -173,11 +173,10 @@ public:
 		while( TBD.Lat.iterate() ){
 			
 			if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("hundSpin"))	addHundCoupling	(iter.get<0>(), iter.get<1>(), iter.get<2>());
-			
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("superEx")	)	addSuperExchange(iter.get<0>(), iter.get<1>(), iter.get<2>());
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("dmEx")	)	addDMExchange	(iter.get<0>(), iter.get<1>(), iter.get<2>());
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.get<0>(), iter.get<1>(), iter.get<2>());
+			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("hundSpin"))	addHundCoupling	(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("superEx")	)	addSuperExchange(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("dmEx")	)	addDMExchange	(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.opt, iter.optList, iter.varList);
 		}
 	}
 	

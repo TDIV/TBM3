@@ -520,12 +520,27 @@ public:
 // Read in the #Hamiltonian section
 class HamiltonianParser:	public ParserBase{
 public:
-	map< string, vector<pair<string, string> > >	hamOperationMap;	// Store the input from "xxx.lat.tbm".
-	
-	typedef vector<boost::tuple<string, deque<string>, deque<string> > >	pairOperationList;
-	map< string, pairOperationList >				hamOperationListMap;// Store the input from "xxx.lat.tbm".
+
+	struct OperationStruct{
+		string opt;
+		deque<string> optList;
+		deque<string> varList;
+		OperationStruct(string opt, string optListStr, string varListStr){
+			optList = split( optListStr, " ");
+			varList = split( varListStr, "*");
+		}
+		~OperationStruct(){
+			opt.clear();
+			optList.clear();
+			varList.clear();
+		}
+	};
+	map< string, vector<OperationStruct> >			hamOperationMap;// Store the input from "xxx.lat.tbm".
 	
 	HamiltonianParser(): ParserBase("#Hamiltonian"){ }
+	~HamiltonianParser(){
+		hamOperationMap.clear();
+	}
 	
 	void	append(string line)	{
 		auto parser = split(line, ">");
@@ -535,41 +550,21 @@ public:
 			replaceAll(parser[1], "\t", " ");
 			removeSpace(parser[2]);
 			
-			// Old version temporate
 			if( hamOperationMap.find(parser[0]) == hamOperationMap.end() ){
-				hamOperationMap[parser[0]] =  vector<pair<string, string> >();
-				hamOperationMap[parser[0]].push_back(make_pair(parser[1], parser[2]));
+				hamOperationMap[parser[0]] = vector<OperationStruct>();
+				hamOperationMap[parser[0]].push_back(OperationStruct(parser[0], parser[1], parser[2]));
 			}
 			else{
-				hamOperationMap[parser[0]].push_back(make_pair(parser[1], parser[2]));
-			}
-			
-			// New version temporate
-			auto optList = split( parser[1], " ");
-			auto varList = split( parser[2], "*");
-			
-			if( hamOperationListMap.find(parser[0]) == hamOperationListMap.end() ){
-				hamOperationListMap[parser[0]] =  pairOperationList();
-				
-				hamOperationListMap[parser[0]].push_back(boost::make_tuple(line, optList, varList));
-			}
-			else{
-				hamOperationListMap[parser[0]].push_back(boost::make_tuple(line, optList, varList));
+				hamOperationMap[parser[0]].push_back(OperationStruct(parser[0], parser[1], parser[2]));
 			}
 		}
-	}
-	vector<pair<string, string> > & getOperationList(string strKey){
-		if( hamOperationMap.find(strKey) == hamOperationMap.end() ){
-			hamOperationMap[strKey] =  vector<pair<string, string> >();
-		}
-		return hamOperationMap[strKey];
 	}
 	
-	pairOperationList & getOperationListMap(string strKey){
-		if( hamOperationListMap.find(strKey) == hamOperationListMap.end() ){
-			hamOperationListMap[strKey] =  pairOperationList();
+	vector<OperationStruct> & getOperationListMap(string strKey){
+		if( hamOperationMap.find(strKey) == hamOperationMap.end() ){
+			hamOperationMap[strKey] =  vector<OperationStruct>();
 		}
-		return hamOperationListMap[strKey];
+		return hamOperationMap[strKey];
 	}
 };
 

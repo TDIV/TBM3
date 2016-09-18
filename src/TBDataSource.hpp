@@ -102,7 +102,7 @@ public:
 	 Using these methods to construct the "hamElementList".
 	 -------------------------------------------------*/
 
-	void		addHundSpin		(string opt, deque<string> optList, deque<string> varList)	{
+	void		addHundSpin		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/* Site operation: "Fe 1".	(operate for only a single orbital) */
 		
 		if( Lat.parameter.STR("spin") == "off"){
@@ -173,7 +173,7 @@ public:
 			}
 		}
 	}
-	void		addOrbitalEng	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addOrbitalEng	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Site operation: "Fe 1".	(operate for only a single orbital)
 		 */
@@ -203,7 +203,7 @@ public:
 		}
 	}
 
-	void		addSiteCouple	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addSiteCouple	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Site operation: "Fe 1u:1u".	(operate for only a single orbital)
 		 Site operation: "Fe 1u:2d".	(operate between orbitals and spin)
@@ -256,7 +256,7 @@ public:
 				hamElementList.push_back(MatrixElement(index_i, index_j,-val, vec(0,0,0)));
 		}
 	}
-	void		addSiteCoupleHc	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addSiteCoupleHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Site operation: "Fe 1u:1u".	(operate for only a single orbital)
 		 Site operation: "Fe 1u:2d".	(operate between orbitals and spin)
@@ -315,7 +315,7 @@ public:
 		}
 	}
 	
-	void		addHoppingInt	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addHoppingInt	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
 		 */
@@ -327,8 +327,6 @@ public:
 		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto pair = Lat.getPair(firstSec[2]);
-		auto bond = pair.bondIJ();
-		
 		if( pair.atomI.atomName != firstSec[0])	return;
 		if( pair.atomJ.atomName != firstSec[1])	return;
 		if( !pair.withinRange() )				return;
@@ -359,7 +357,7 @@ public:
 			}
 		}
 	}
-	void		addHoppingIntHc	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addHoppingIntHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
 		 */
@@ -406,7 +404,7 @@ public:
 		}
 	}
 	
-	void		addBondCouple	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addBondCouple	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe:Fe:+1+0+0 1u:1u".	(operate for only a single orbital)
 		 Bond operation: "Fe:O:+1+0+0# 1u:2d".	(operate between orbitals and spin)
@@ -463,7 +461,7 @@ public:
 			}
 		}
 	}
-	void		addBondCoupleHc	(string opt, deque<string> optList, deque<string> varList)	{
+	void		addBondCoupleHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe:Fe:+1+0+0 1u:1u".	(operate for only a single orbital)
 		 Bond operation: "Fe:O:+1+0+0# 1u:2d".	(operate between orbitals and spin)
@@ -524,7 +522,7 @@ public:
 		}
 	}
 	
-	void		addScreenCoulomb(string opt, deque<string> optList, deque<string> varList)	{
+	void		addScreenCoulomb(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		
 		double radius = Lat.parameter.VAR("bondRadius", 0).real();
 		
@@ -532,10 +530,9 @@ public:
 		if( optList[1][0]	!= '~')	{ ErrorMessage("Error, not a valid operation:\n "+opt); }
 		if( varList.size()	< 2)	{ ErrorMessage("Error, not enough arguments:\n "+opt); }
 		
-		
-		
-		optList[1][0] = ' ';
-		double tmpRadius = StrToDouble(optList[1]);
+		string coulombRadiusStr = optList[1];
+		coulombRadiusStr[0] = ' ';
+		double tmpRadius = StrToDouble(coulombRadiusStr);
 		if( tmpRadius > radius){
 			 ErrorMessage("Error, in operation:\n "+opt
 						  +"\n the given radius,~"+DoubleToStr(tmpRadius)+", "
@@ -598,7 +595,7 @@ public:
 		}
 	}
 	
-	void		addPairingS		(string opt, deque<string> optList, deque<string> varList)	{
+	void		addPairingS		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
@@ -661,7 +658,7 @@ public:
 			}
 		}
 	}
-	void		addPairingU		(string opt, deque<string> optList, deque<string> varList)	{
+	void		addPairingU		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
@@ -716,7 +713,7 @@ public:
 			if(	(iterI.first == "Bu" and iterJ.first == "Au")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
 		}
 	}
-	void		addPairingD		(string opt, deque<string> optList, deque<string> varList)	{
+	void		addPairingD		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
@@ -771,7 +768,7 @@ public:
 			if(	(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
 		}
 	}
-	void		addPairingT		(string opt, deque<string> optList, deque<string> varList)	{
+	void		addPairingT		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
 		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
@@ -830,7 +827,7 @@ public:
 		}
 	}
 
-	void		addFieldB		(string opt, deque<string> optList, deque<string> varList)	{ // svar === " @:cspin * Jse "
+	void		addFieldB		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{ // svar === " @:cspin * Jse "
 		// *******************************
 		// fieldB	> Fe   > [0,0,1] * B
 		// fieldB	> Fe 1 > [0,0,1] * B
@@ -932,7 +929,7 @@ public:
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
-	void		constructTBMHam	(bool withMu = true)		{
+	void			constructTBMHam	(bool withMu = true)		{
 		
 		initHam();
 		
@@ -967,30 +964,30 @@ public:
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
 		hamElementList.clear();
 		while( Lat.iterate() ) {
-			
-			for( auto & iter : Lat.hamParser.getOperationListMap("hundSpin"))	{	addHundSpin		(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("orbital")	)	{	addOrbitalEng	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("site")	)	{	addSiteCouple	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("siteHc")	)	{	addSiteCoupleHc	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("hopping")	)	{	addHoppingInt	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.get<0>(), iter.get<1>(), iter.get<2>());}
-			for( auto & iter : Lat.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.get<0>(), iter.get<1>(), iter.get<2>());}
+			for( auto & iter : Lat.hamParser.getOperationListMap("hundSpin"))	{	addHundSpin		(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("orbital")	)	{	addOrbitalEng	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("site")	)	{	addSiteCouple	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("siteHc")	)	{	addSiteCoupleHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("hopping")	)	{	addHoppingInt	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : Lat.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.opt, iter.optList, iter.varList);}
 			
 			// If space==normal The following part will be ignored.
 			if( Lat.HSpace() == NORMAL) continue;
 			
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingS"))	{	addPairingS	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingU"))	{	addPairingU	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingD"))	{	addPairingD	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingT"))	{	addPairingT	(iter.get<0>(), iter.get<1>(), iter.get<2>()); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingS"))	{	addPairingS		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingU"))	{	addPairingU		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingD"))	{	addPairingD		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : Lat.hamParser.getOperationListMap("pairingT"))	{	addPairingT		(iter.opt, iter.optList, iter.varList); }
+			
 		}
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());
 	}
 
-	EigVec  	HamEvd			(r_mat kp)					{
+	EigVec			HamEvd			(r_mat kp)					{
 		
 		Ham.zerolize();
 		
@@ -1023,7 +1020,7 @@ public:
 		return tmpEigValVec;
 	}
 	
-	x_var		getDensityMatrix		(unsigned index_i, unsigned index_j, double Mu=0){
+	x_var			getDensityMatrix		(unsigned index_i, unsigned index_j, double Mu=0){
 		
 		if( Lat.HSpace() != NORMAL) Mu = 0;
 		
@@ -1047,7 +1044,7 @@ public:
 		return 0;
 	}
 	
-	void		calculate4DensityOrder	()							{
+	void			calculate4DensityOrder	()						{
 		if( Lat.parameter.STR("spin")!="on" ){
 			ErrorMessage("Error, the spin space suld be turned \'on\' for the 4-density calculation");
 		}
@@ -1166,7 +1163,7 @@ public:
 		}
 		order.save();
 	}
-	void		calculateEnergy			()							{
+	void			calculateEnergy			()						{
 
 		double totalE=0;
 		auto Temperature = Lat.parameter.VAR("Temperature", 0.00001).real();
@@ -1188,7 +1185,7 @@ public:
 		}
 	}
 	
-	x_mat		parseSiteString(Atom & at, string svar)			{
+	x_mat			parseSiteString(Atom & at, string svar)			{
 		// @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		
@@ -1217,7 +1214,7 @@ public:
 		return xvar;
 	}
 	
-	x_mat		parseBondString(AtomPair & ap, string svar)		{
+	x_mat			parseBondString(AtomPair & ap, string svar)		{
 		// @:cspin .. Jh .. 1.0 .. [ 1, 2, 3] ...
 		removeSpace(svar);
 		
