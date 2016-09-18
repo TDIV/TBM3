@@ -216,13 +216,17 @@ public:
 						outfile<< "bond  >  ";
 					}
 					
+					string bondOperation =
+					subAtomI_name+":"+subAtomJ_name+":"
+						+DoubleToPMStr( bondIJ[0] )
+						+DoubleToPMStr( bondIJ[1] )
+						+DoubleToPMStr( bondIJ[2] );
 					
-					outfile << subAtomI_name<<":"<<subAtomJ_name<<":"
-							<< DoubleToPMStr( bondIJ[0] )
-							<< DoubleToPMStr( bondIJ[1] )
-							<< DoubleToPMStr( bondIJ[2] )
-							<<" "<<orbI<<":"<<orbJ<< "  >  "
-							<< "("<<varReal<<","<<varImag<<")"
+					string orbitalOperation = orbI+":"+orbJ;
+					
+					outfile << fformat(bondOperation, 44)<<" "
+							<<fformat(orbitalOperation,7)<<"  >  "
+							<<"("<<varReal<<","<<varImag<<")"
 							<<endl;
 				}
 				
