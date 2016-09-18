@@ -570,16 +570,7 @@ public:
 		}
 		outfile.close();
 		
-		// Expand the order parameter.
-		Lattice expLat(filename_expand);
-		expLat.createAtomList();
-		
-		OrderParameter expOrder(expLat);
-		expOrder.setOptList(expandedOptList);
-		expOrder.save();
-		
-		
-        ifstream infile(Lat.FileName()+".tbm");
+		ifstream infile(Lat.FileName()+".tbm");
 		ofstream tbmOutfile(filename_expand+".tbm");
 		if ( infile.is_open() ) {
 			string line = "";
@@ -589,6 +580,17 @@ public:
 		}
 		tbmOutfile.close();
 		infile.close();
+		
+		// Expand the order parameter.
+		Lattice expLat(filename_expand);
+		expLat.createAtomList();
+		
+		OrderParameter expOrder(expLat);
+		expOrder.setOptList(expandedOptList);
+		expOrder.save();
+		
+		
+
 	}
 
 	/* Convert the lattice file formate to VESTA formate. */
@@ -629,9 +631,14 @@ public:
 		outfile<<"STRUC"<<endl;
 		auto atomList = Lat.getAtomList();
 		for(auto & atom: atomList){
+			auto atomName = atom.atomName;
+			
+			replaceAll(atomName, "-", ".");
+			auto atomNameParser = split(atomName, ".");
+			
 			outfile	<<"  "<<fformat(atom.atomIndex+1,5)
-					<<" "<<fformat(atom.atomName,6)
-					<<" "<<fformat(atom.orbitalOriginIndex,2)
+					<<" "<<fformat(atomNameParser[0],6)
+					<<" "<<fformat(atom.atomName+"_"+IntToStr(atom.orbitalOriginIndex),8)
 					<<"  1.0000  ";
 			
 			double pos_a = cdot(curl(atom.pos, AVec[1]), AVec[2])*(1.0/V123);

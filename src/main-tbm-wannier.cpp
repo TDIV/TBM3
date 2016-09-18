@@ -141,6 +141,19 @@ public:
 	void	parseWannierBlock(){
 		using namespace tbm;
 		
+		auto avec = basisVector.getAVec();
+		
+		auto spin = parameter.STR("spin");
+		auto bondN = parameter.VEC("bondN", tbm::xvec(20, 20, 20));
+		double cvarCutoff = abs( parameter.VAR("precision", 0.00001).real() );
+		cout<<"Converting with .."<<endl;
+		cout<<"spin = "<<spin<<endl;
+		cout<<"bondN = "<<bondN<<endl;
+		cout<<"precision = "<<cvarCutoff<<endl<<endl;
+		
+		// ********************************
+		// ***Converting parameter*********
+		// ********************************
 		vector<double> cellVectorDegeneracy;
 		
 		//-- cell N ----------------<PairIndex, cvar  , degeneracy>
@@ -148,13 +161,9 @@ public:
 		set<string>	cellVecPool;
 		
 		unsigned flowControler = 0;
-		
-		auto avec = basisVector.getAVec();
-		
+		// ********************************
+	
 		ofstream outfile(filename+".lat.tbm");
-		
-		double cvarCutoff = abs( parameter.VAR("cutoff", 0.00001).real() );
-		
 		outfile<<"#Hamiltonian"<<endl;
 		for( auto & line: wannierBlockLines ){
 			
@@ -185,6 +194,11 @@ public:
 				double N0, N1, N2, varReal, varImag;
 				unsigned atomOrb_I, atomOrb_J;
 				iss>> N0 >> N1 >> N2 >> atomOrb_I >> atomOrb_J >> varReal >> varImag ;
+				
+				if( abs(N0) > abs(bondN[0].real()) ) continue;
+				if( abs(N1) > abs(bondN[1].real()) ) continue;
+				if( abs(N2) > abs(bondN[2].real()) ) continue;
+				
 				varReal = varReal / degeneracy;
 				varImag = varImag / degeneracy;
 				
@@ -208,7 +222,7 @@ public:
 				
 				zvar val = varReal + Im*varImag;
 				
-				if( abs(val) > cvarCutoff ){
+				if( abs(val) > abs(cvarCutoff) ){
 					if( parameter.STR("spin") == "off"){
 						outfile<< "hopping  >  ";
 					}

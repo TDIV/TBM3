@@ -48,7 +48,7 @@ struct	EigVec{
  This structure will be passed through all future models.
  It can be used to construct all matrix element, for example:
  	orbital		> Fe 1		> 1		%Create the on-site energy for the first orbital of Fe.
- 	hundSpin	> Fe 1		> 1,0,0 %Create a classical spin (x-direction) coupled to orbital 1.
+ 	hundSpin	> Fe 1		> @:cspin * Jh %Create a classical spin (x-direction) coupled to orbital 1.
  
 	site		> Fe 1d:2u	> 1	%Create the on-site correlation for orbital-1 spin-dn and orbital-2 spin-up.
 	siteHc		> Fe 1d:2u	> 1	% Hermitian conjugate operation.
@@ -84,7 +84,7 @@ public:
 	vector<MatrixElement>	hamElementList;	// A list to store all the matrix elements
 	x_mat					Ham;			// The body of the Hamiltonian (matrix).
 	vector<EigVec>			KEigenValVec;	// Calculated K-space dependent eigen value and vectore.
-	//EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
+	EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 	r_var					maxE,	minE;
 	
 	map<string, double>		energyMap;
@@ -103,7 +103,10 @@ public:
 	 -------------------------------------------------*/
 
 	void		addHundSpin		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/* Site operation: "Fe 1".	(operate for only a single orbital) */
+		/*
+		 Site operation: operate for only a single orbital
+		 hund > Fe 1 > @:cspin * Jh
+		 */
 		
 		if( Lat.parameter.STR("spin") == "off"){
 			ErrorMessage("Error, 'HundSpin' operation:\n"+opt+"\nCannot be applied for a spin-independent Hamiltonian.");
@@ -175,8 +178,10 @@ public:
 	}
 	void		addOrbitalEng	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
-		 Site operation: "Fe 1".	(operate for only a single orbital)
+		 Site operation: operate for only a single orbital
+		 orbital > Fe 1 > Fe_En
 		 */
+		
 		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
@@ -938,28 +943,31 @@ public:
 		maxE = -10000;
 		minE =  10000;
 		
-		//unsigned iter = 0;
-		//cout<<"Entering debugging view"<<endl;
-		//
-		//auto  pair = Lat.getPair(0, vec(1,0,0)); //***
-		//while(true){
-		//	auto ddd = split("AAA,BBB,CCC,EEE", ",");
-		//	hamElementList.push_back(MatrixElement(0,0,0,vec(0,0,0)));
-		//	iter++;
-		//	cout<<iter<<" "<<hamElementList.size()<<endl;
-		//	if( iter % 2000 == 0){
-		//		hamElementList.clear();
-		//	}
-		//	while( Lat.iterate() ){
-		//		auto atom = Lat.getAtom();
-		//		x_mat	sVec = parseSiteString(atom, "0");
-		//		Lat.vec("+1+0+0#"); //---
-		//		Lat.vec("+1+0+0"); //---
-		//		auto  pair = Lat.getPair(vec(1,0,0)); //***
-		//		x_mat tmpvec = parseBondString(pair, "tdp"); //---
-		//	}
-		//}
-		//cout<<"Leaving debugging view"<<endl;
+		/*
+		 // Performance testing loop
+		 unsigned iter = 0;
+		 cout<<"Entering debugging view"<<endl;
+		 
+		 auto  pair = Lat.getPair(0, vec(1,0,0)); //***
+		 while(true){
+		 	auto ddd = split("AAA,BBB,CCC,EEE", ",");
+		 	hamElementList.push_back(MatrixElement(0,0,0,vec(0,0,0)));
+		 	iter++;
+		 	cout<<iter<<" "<<hamElementList.size()<<endl;
+		 	if( iter % 2000 == 0){
+		 		hamElementList.clear();
+		 	}
+		 	while( Lat.iterate() ){
+		 		auto atom = Lat.getAtom();
+		 		x_mat	sVec = parseSiteString(atom, "0");
+		 		Lat.vec("+1+0+0#"); //---
+		 		Lat.vec("+1+0+0"); //---
+		 		auto  pair = Lat.getPair(vec(1,0,0)); //***
+		 		x_mat tmpvec = parseBondString(pair, "tdp"); //---
+		 	}
+		 }
+		 cout<<"Leaving debugging view"<<endl;
+		*/
 		
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
 		hamElementList.clear();
@@ -987,7 +995,7 @@ public:
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());
 	}
 
-	EigVec			HamEvd			(r_mat kp)					{
+	EigVec	&		HamEvd			(r_mat kp)					{
 		
 		Ham.zerolize();
 		
@@ -1009,7 +1017,7 @@ public:
 		//	cout<<fformat(i)<<fformat(j)<<" "<<Ham(i,j)<<endl;
 		//}
 		
-		EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
+		//EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 		tmpEigValVec.kPoint = kp;
 		
 		tmpEigValVec.message = Ham.evd(tmpEigValVec.eigenValue, tmpEigValVec.eigenVector);
