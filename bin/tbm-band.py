@@ -20,6 +20,10 @@ import matplotlib
 
 class Band:
 	def __init__(self,filename,shift=0):
+
+		if filename[-3:] != "ban":
+			filename = filename+".ban"
+
 		f = open(filename,"r")
 
 		self.pointLabel = []

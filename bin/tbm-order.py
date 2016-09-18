@@ -23,8 +23,6 @@ def MatToStr(valMat):
 	return valStr[0:-1]
 
 
-
-
 class AtomOrder:
 	def __init__(self, atomStringList, _atomInfo):
 		#----------------------------------

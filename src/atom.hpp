@@ -288,12 +288,11 @@ public:
 			bondDelta[i] = atomJ.pos[i] - atomI.pos[i];
 		return bondDelta;
 	}
-	bool withinRange(r_var ratio = 0.2){
+	bool withinRange(r_var valid_radius = 0.001){
 		r_mat distance(1,3);
 		r_mat outputBond = bondIJ();
 		distance = outputBond - inputBond;
 		
-		r_var valid_radius = sqrt(cdot(inputBond,inputBond)) * 0.2;
 		return sqrt(cdot(distance, distance)) < valid_radius;
 	}
 	

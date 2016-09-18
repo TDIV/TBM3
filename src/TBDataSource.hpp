@@ -328,6 +328,7 @@ public:
 		
 		auto pair = Lat.getPair(firstSec[2]);
 		auto bond = pair.bondIJ();
+		
 		if( pair.atomI.atomName != firstSec[0])	return;
 		if( pair.atomJ.atomName != firstSec[1])	return;
 		if( !pair.withinRange() )				return;

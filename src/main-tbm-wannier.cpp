@@ -153,6 +153,7 @@ public:
 		
 		ofstream outfile(filename+".lat.tbm");
 		
+		double cvarCutoff = abs( parameter.VAR("cutoff", 0.00001).real() );
 		
 		outfile<<"#Hamiltonian"<<endl;
 		for( auto & line: wannierBlockLines ){
@@ -205,20 +206,25 @@ public:
 				auto orbI = subAtomI.get<2>();
 				auto orbJ = subAtomJ.get<2>();
 				
-				if( parameter.STR("spin") == "off"){
-					outfile<< "hopping  >  ";
-				}
-				if( parameter.STR("spin") == "on"){
-					outfile<< "bond  >  ";
-				}
+				zvar val = varReal + Im*varImag;
 				
-				outfile << subAtomI_name<<":"<<subAtomJ_name<<":"
-						<< DoubleToPMStr( bondIJ[0] )
-						<< DoubleToPMStr( bondIJ[1] )
-						<< DoubleToPMStr( bondIJ[2] )
-						<<" "<<orbI<<":"<<orbJ<< "  >  "
-						<< "("<<varReal<<","<<varImag<<")"
-						<<endl;
+				if( abs(val) > cvarCutoff ){
+					if( parameter.STR("spin") == "off"){
+						outfile<< "hopping  >  ";
+					}
+					if( parameter.STR("spin") == "on"){
+						outfile<< "bond  >  ";
+					}
+					
+					
+					outfile << subAtomI_name<<":"<<subAtomJ_name<<":"
+							<< DoubleToPMStr( bondIJ[0] )
+							<< DoubleToPMStr( bondIJ[1] )
+							<< DoubleToPMStr( bondIJ[2] )
+							<<" "<<orbI<<":"<<orbJ<< "  >  "
+							<< "("<<varReal<<","<<varImag<<")"
+							<<endl;
+				}
 				
 			}
 		}
