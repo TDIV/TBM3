@@ -29,12 +29,7 @@ public:
 	Lattice(string _filename):atomIndex(-1),  filename(_filename){
 		open(filename);
 	}
-	Lattice(string _filename, string spin, string space):atomIndex(-1),  filename(_filename){
-		open(filename);
-		parameter.STR("spin") = spin;
-		parameter.STR("space") = space;
-		//createAtomList();
-	}
+
 	~Lattice(){
 		rtree.clear();
 		atomList.clear();
@@ -46,14 +41,8 @@ public:
 	OrbitalProfile		orbitalProfile;
 	AtomStringParser	atomParser;
 	
-	// Read from xxx.lat.tbm
 	Parameter			parameter;
-	KSymmetryPoint		kSymmPointParser;
 	BondVector			bondVector;
-	InitOrder			initOrder;
-	HamiltonianParser	hamParser;
-	CoreCharge			coreCharge;
-	LDOSList			ldosList;
 	
 	void				open(string _filename)					{
 		basisVector.clear();
@@ -89,36 +78,6 @@ public:
 			}
 		}
 		infile.close();
-		
-		TBMImportParser	importParser;
-		importParser.append(_filename+".tbm", _filename);
-		
-		sub_flag = "0";
-		for( auto & line: importParser.tbmLineStorage){
-			
-			deleteComment(line); // Clean the commented words
-			istringstream iss(line);
-			iss >> header;
-			if	( header == parameter())		{flag = header; continue;}
-			if	( header == ldosList())			{flag = header; continue;}
-			if	( header == coreCharge())		{flag = header;	continue;}
-			if	( header == initOrder())		{flag = header;	continue;}
-			if	( header == hamParser())		{flag = header;	continue;}
-			if	( header == kSymmPointParser())	{flag = header; continue;}
-			if	( header == bondVector())			{
-				flag = header;
-				iss>>sub_flag;
-				continue;
-			}
-			
-			if	( flag == parameter())			{ parameter.append(line);	continue; }
-			if	( flag == ldosList())			{ ldosList.append(line);	continue; }
-			if	( flag == coreCharge())			{ coreCharge.append(line);	continue; }
-			if	( flag == initOrder())			{ initOrder.append(line);	continue; }
-			if	( flag == hamParser())			{ hamParser.append(line);	continue; }
-			if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				continue;	}
-			if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	continue;	}
-		}
 		
 	}
 	size_t				latticeSize()							{ return atomList.size(); }
@@ -350,19 +309,18 @@ public:
 			cout<<" List of changed profile "<<endl;
 			atomParser.changeProperty(vbox, atomProfile_old, atomProfile_new);
 			
-			createAtomList();
+			createAtomList("off", "normal");
 		}
 		
 	}
 
-	void				createAtomList(bool needExpandedAtomList = true)				{
+	void				createAtomList(string spin = "on", string space = "normal", bool needExpandedAtomList = true)				{
 		atomList.clear();
 		Atom::totalIndexSize = 0;
 		index_size = 0;
 		
-		auto	spinDegree	= parameter.STR("spin", "on");
-		auto	hSpace		= parameter.STR("space", "normal");
-		auto	coordinate	= parameter.STR("coordinate", "cartesian");
+		auto	spinDegree	= spin;
+		auto	hSpace		= space;
 		
 		if		( hSpace == "normal")	{ h_space = NORMAL;}
 		else if	( hSpace == "nambu")	{ h_space = NAMBU;}

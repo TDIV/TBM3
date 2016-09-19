@@ -72,7 +72,7 @@ public:
 	/////////////////////////////////////////////////
 	//   The constructor                            /
 	/////////////////////////////////////////////////
-	TBDataSource(Lattice & _lat):Lat(_lat), order(_lat), order_old(_lat)	{	}
+	TBDataSource(Lattice & _lat, TBMParser & _tbm):Lat(_lat), order(_lat), order_old(_lat), tbm(_tbm)	{	}
 	~TBDataSource(){
 		KEigenValVec.clear();
 	}
@@ -80,6 +80,7 @@ public:
 	Lattice &				Lat;
 	OrderParameter			order;
 	OrderParameter			order_old;
+	TBMParser	&			tbm;
 	
 	vector<MatrixElement>	hamElementList;	// A list to store all the matrix elements
 	x_mat					Ham;			// The body of the Hamiltonian (matrix).
@@ -567,7 +568,7 @@ public:
 		for( auto & atomJ: rboxAtoms.second ){
 			auto orderJ = order.findOrder(atomJ, orderKey);
 			
-			double Charge = -Lat.coreCharge.getCharge(atomJ.atomName);
+			double Charge = -tbm.coreCharge.getCharge(atomJ.atomName);
 			if( orderJ.first ){ Charge += orderJ.second[0].real(); }
 			
 			r_mat vecIJ(1,3);
@@ -972,24 +973,24 @@ public:
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
 		hamElementList.clear();
 		while( Lat.iterate() ) {
-			for( auto & iter : Lat.hamParser.getOperationListMap("hundSpin"))	{	addHundSpin		(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("orbital")	)	{	addOrbitalEng	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("site")	)	{	addSiteCouple	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("siteHc")	)	{	addSiteCoupleHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("hopping")	)	{	addHoppingInt	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : Lat.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("hundSpin"))	{	addHundSpin		(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("orbital")	)	{	addOrbitalEng	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("site")	)	{	addSiteCouple	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("siteHc")	)	{	addSiteCoupleHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("hopping")	)	{	addHoppingInt	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.opt, iter.optList, iter.varList);}
 			
 			// If space==normal The following part will be ignored.
 			if( Lat.HSpace() == NORMAL) continue;
 			
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingS"))	{	addPairingS		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingU"))	{	addPairingU		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingD"))	{	addPairingD		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : Lat.hamParser.getOperationListMap("pairingT"))	{	addPairingT		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : tbm.hamParser.getOperationListMap("pairingS"))	{	addPairingS		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : tbm.hamParser.getOperationListMap("pairingU"))	{	addPairingU		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : tbm.hamParser.getOperationListMap("pairingD"))	{	addPairingD		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : tbm.hamParser.getOperationListMap("pairingT"))	{	addPairingT		(iter.opt, iter.optList, iter.varList); }
 			
 		}
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());

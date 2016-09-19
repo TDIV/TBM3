@@ -77,6 +77,7 @@ void ErrorMessage(string errorStr) {
 #include "string_func.hpp"
 #include "math_func.hpp"
 #include "block_parser.hpp"
+#include "import.hpp"
 #include "atom.hpp"
 #include "lattice.hpp"
 #include "order_parameter.hpp"

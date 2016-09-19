@@ -173,10 +173,10 @@ public:
 		while( TBD.Lat.iterate() ){
 			
 			if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("hundSpin"))	addHundCoupling	(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("superEx")	)	addSuperExchange(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("dmEx")	)	addDMExchange	(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.Lat.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("hundSpin"))	addHundCoupling	(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("superEx")	)	addSuperExchange(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("dmEx")	)	addDMExchange	(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.opt, iter.optList, iter.varList);
 		}
 	}
 	
@@ -230,9 +230,9 @@ public:
 	
 	double iterateSpinOrder(OrderParameter & newOrder)		{
 		
-		if( TBD.Lat.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
+		if( TBD.tbm.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
-		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
+		if( TBD.tbm.parameter.VAR("disable_quantum", 0).real() == 0 ){
 			TBD.calculate4DensityOrder();
 		}
 		
@@ -240,7 +240,7 @@ public:
 		map<unsigned, pair<x_mat, string> > Field;
 		
 		// Construct the Field-Term for variational method of HundCoupling.
-		if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+		if( TBD.tbm.parameter.VAR("disable_quantum", 0).real() == 0 )
 		for ( auto & elem :HundCouplingList)	{
 			auto atomI = elem.get<0>();
 			auto si = elem.get<1>();
@@ -334,8 +334,8 @@ public:
 		
 		double max_spin_diff = 0;
 		
-		double variational_dt	= TBD.Lat.parameter.VAR("var_dt", 0.01).real();
-		double LLGdamping		= TBD.Lat.parameter.VAR("LLGdamping", 0.2).real();
+		double variational_dt	= TBD.tbm.parameter.VAR("var_dt", 0.01).real();
+		double LLGdamping		= TBD.tbm.parameter.VAR("LLGdamping", 0.2).real();
 		for( auto & fieldI : Field){
 			auto atomI	= TBD.Lat.getAtom(fieldI.first);
 			auto FI		= fieldI.second.first;
@@ -362,18 +362,6 @@ public:
 				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
 			}
 		}
-		
-		
-		//if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 ){
-		//	while( TBD.Lat.iterate() ){
-		//		auto parameter_old = TBD.order_old.findOrder(TBD.Lat.getAtom(), "@:den");
-		//		auto parameter_new = newOrder.findOrder(TBD.Lat.getAtom(), "@:den");
-		//		if( parameter_old.first and parameter_new.first ){
-		//			auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-		//			if( max_den_diff < den_diff ) max_den_diff = den_diff;
-		//		}
-		//	}
-		//}
 		
 		newOrder.save();
 		

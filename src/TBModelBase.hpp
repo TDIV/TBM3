@@ -31,9 +31,9 @@ class TBModelBase{
 public:
 	TBModelBase(string filename):
 		Lat				(filename),
-		spinNormalLat	(filename, "on", "normal"),
-		TBD				(Lat),
-		spinNormalTBD	(spinNormalLat),
+		spinNormalLat	(filename),
+		TBD				(Lat, tbm),
+		spinNormalTBD	(spinNormalLat, tbm),
 		tbd				(TBD),
 		stbd			(spinNormalTBD	)
 	{
@@ -43,6 +43,16 @@ public:
 protected:
 	Lattice	Lat;
 	Lattice	spinNormalLat;
+	TBMParser tbm;
+	void	loadTBM(){
+		tbm.append(Lat.FileName()+".tbm", Lat.FileName());
+		
+		Lat.parameter	= tbm.parameter;
+		Lat.bondVector	= tbm.bondVector;
+		
+		spinNormalLat.parameter	= tbm.parameter;
+		spinNormalLat.bondVector= tbm.bondVector;
+	}
 	
 private:
 	TBDataSource TBD;
@@ -91,7 +101,7 @@ protected:
 		auto & b2 = B[1]*0.5;
 		auto & b3 = B[2]*0.5;
 			
-		for(auto & kp: Lat.kSymmPointParser.kSymmPointList){
+		for(auto & kp: tbm.kSymmPointParser.kSymmPointList){
 			add_ksymm_point(kp.first, +kp.second[0]*b1 +kp.second[1]*b2 +kp.second[2]*b3);
 		}
 		
@@ -199,7 +209,7 @@ protected:
 		double totalElectron = 0;
 		while(iterate()){
 			auto atomI = Lat.getAtom();
-			totalElectron += Lat.coreCharge.getCharge(atomI.atomName);
+			totalElectron += tbm.coreCharge.getCharge(atomI.atomName);
 		}
 		return totalElectron;
 	}
@@ -318,7 +328,7 @@ protected:
 		cout<<ldos_E<<endl;
 		
 		// Handling the LDOS label for the up coming calculation.
-		for( auto & elem: Lat.ldosList.LDOSSelector ){
+		for( auto & elem: tbm.ldosList.LDOSSelector ){
 			
 			auto isAtom = Lat.getAtom(elem.first);
 			auto & atom = isAtom.second;
@@ -492,7 +502,9 @@ protected:
 public:
 	/* Execute the calculations. */
 	void render				()																{
-		Lat.createAtomList();
+
+		loadTBM();
+		Lat.createAtomList( tbm.parameter.STR("spin", "on"), tbm.parameter.STR("space","normal"));
 		spinNormalLat.createAtomList();
 		
 		run();
@@ -501,7 +513,7 @@ public:
 	/* Expand the lattice into a larger size. */
 	void saveExpandedLattice(unsigned N1, unsigned N2, unsigned N3)							{
 		
-		cout<<"B"<<endl;
+		loadTBM();
 		Lat.createAtomList();
 		
 		auto	parseFilename = split(Lat.FileName(),".");
@@ -596,7 +608,8 @@ public:
 	/* Convert the lattice file formate to VESTA formate. */
 	void convertTo_VESTA	(vector<string> argsForOrder)									{
 		
-		Lat.createAtomList(false);
+		loadTBM();
+		Lat.createAtomList("on", "normal", false);
 		
 		string filename = Lat.FileName()+".vesta";
 		ofstream outfile(filename);
@@ -722,15 +735,14 @@ public:
 	/* Shift the cordinate of each atom. */
 	void shiftXYZ			(double X, double Y, double Z)									{
 		
-		Lat.createAtomList(false);
+		loadTBM();
+		Lat.createAtomList("on", "normal", false);
 		
 		tbd.order.load();
 		Lat.shiftXYZ(X, Y, Z);
 		
 		// Save the expanded file.
 		ofstream outfile(Lat.FileName());
-		//outfile<<Lat.kSymmPointParser.getFileString();
-		//outfile<<Lat.bondVector.getFileString();
 		outfile<<Lat.basisVector.getFileString();
 		outfile<<Lat.orbitalProfile.getFileString();
 		outfile<<Lat.atomParser()<<endl;
@@ -745,7 +757,8 @@ public:
 	/* Change the atom name. */
 	void changeAtom(vector<string> optList)													{
 		
-		Lat.createAtomList(false);
+		loadTBM();
+		Lat.createAtomList("on", "normal", false);
 		
 		tbd.order.load();
 		Lat.changeAtomName(optList);

@@ -29,9 +29,11 @@ public:
 		}
 
 	void	initOrder()		override	{
-		Lat.createAtomList(false);
+		loadTBM();
+		Lat.createAtomList("on","normal", false);
+		
 		tbd.order.clear();
-		tbd.order.load(Lat.initOrder.orderOperationList);
+		tbd.order.load(tbm.initOrder.orderOperationList);
 		tbd.order.save();
 	}
 	void	Hamiltonian()	override	{

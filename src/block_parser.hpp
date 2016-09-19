@@ -9,13 +9,13 @@
 |                                                            |
 |-----------------------------------------------------------*/
 //
-//  read_lat.hpp
+//  block_parser.hpp
 //  TBM^3
 //
 //  Created by Yuan Yen Tai on 7/02/15.
 //
 
-// The ParserBase will be used as a framework to construct for any read-in input header.
+// The ParserBase will be used as a base framework to construct any read-in block header.
 class ParserBase{
 public:
 	ParserBase(string _keyStr): keyString(_keyStr) {}
@@ -153,6 +153,12 @@ public:
 	void		clear()								{
 		A.clear();
 	}
+	
+	BasisVector & operator=(const BasisVector & rhs){
+		A = rhs.A;
+		inputLines = rhs.inputLines;
+		return *this;
+	}
 };
 
 // Read in the OrbitalProfile section
@@ -212,8 +218,12 @@ public:
 	void	clear(){
 		orbitalList.clear();
 	}
+	
+	OrbitalProfile & operator=(const OrbitalProfile & rhs){
+		orbitalList = rhs.orbitalList;
+		return *this;
+	}
 };
-
 
 // Read in the Atoms section
 class AtomStringParser:		public ParserBase{
@@ -257,83 +267,14 @@ public:
 	void	clear()				{
 		atomInfoList.clear();
 	}
-};
-
-/*######################################################
- The following class will combine all the files through
- the #Import blocks.
- ######################################################*/
-// Use the TBMImportParser to setup multiple file with the #Import blocks.
-class TBMImportParser: public ParserBase{
-public:
 	
-	set<string>		tbmFilenameStorage;
-	vector<string>	tbmLineStorage;
-	
-	TBMImportParser(): ParserBase("#Import"){ }
-	
-	void	append(string filename, string upperLevelFilename)	{
-		
-		tbmFilenameStorage.insert(filename);
-		
-        ifstream infile;
-		infile.open(filename);
-		
-		if ( infile.good() ) {
-			string line;
-			string header = "";
-			string flag	= "";
-			
-            while ( getline(infile, line) ) {
-				deleteComment(line);
-				istringstream iss(line);
-				iss >> header;
-				
-				removeSpace(header);
-				
-				if	( header == "#Import")	{ flag = header; continue; }
-				else if(header[0] == '#')	{ flag = header; }
-				
-				if	( flag	== "#Import")		{
-					removeSpaceTopToe(line);
-					if( line[0] != '\"' and line[line.size()-1] != '\"'){
-						continue;
-					}
-					replaceAll(line, "\"", "");
-
-					// Make sure that this filename is not stored inside the pool.
-					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
-						tbmFilenameStorage.insert(line);
-
-						TBMImportParser * importer = new TBMImportParser();
-						importer->append(line, filename);
-
-						for( auto & line: importer->tbmLineStorage){
-							tbmLineStorage.push_back(line);
-						}
-						
-						for( auto & imp_filename: importer->tbmFilenameStorage){
-							tbmFilenameStorage.insert(imp_filename);
-						}
-					}
-					else{
-						ErrorMessage("Error: from \""+filename+"\"\n\""
-										+ line +"\" is multiple imported.\n"
-										+"Please check your file import structure.");
-					}
-				}
-				else{
-					tbmLineStorage.push_back(line);
-				}
-			}
-		}
-		else{
-			ErrorMessage("Error: from "+upperLevelFilename+" \n Cannot find import file: "+ filename);
-		}
-		
-		infile.close();
+	AtomStringParser& operator=(const AtomStringParser & rhs){
+		atomInfoList = rhs.atomInfoList;
+		return *this;
 	}
 };
+
+
 
 /*######################################################
  The following class will be read from xxx.lat.tbm file.
@@ -431,6 +372,14 @@ public:
 		strPool.clear();
 		varPool.clear();
 		vectorPool.clear();
+		inputLines.clear();
+	}
+	Parameter & operator= (const Parameter & rhs){
+		strPool = rhs.strPool;
+		varPool = rhs.varPool;
+		vectorPool = rhs.vectorPool;
+		inputLines = rhs.inputLines;
+		return *this;
 	}
 };
 
@@ -467,6 +416,11 @@ public:
 	}
 	void	clear()				{
 		kSymmPointList.clear();
+	}
+	
+	KSymmetryPoint & operator= (const KSymmetryPoint & rhs){
+		kSymmPointList = rhs.kSymmPointList;
+		return *this;
 	}
 };
 
@@ -519,10 +473,15 @@ public:
 	void	clear(){
 		bondMap.clear();
 	}
+	
+	BondVector & operator= (const BondVector & rhs){
+		bondMap = rhs.bondMap;
+		return *this;
+	}
 };
 
 // Read in the #CoreCharge section
-class CoreCharge:	public ParserBase{
+class CoreCharge:			public ParserBase{
 	map<string, r_var> coreChargeMap;	// Store the input from "xxx.lat.tbm".
 public:
 	CoreCharge(): ParserBase("#CoreCharge")	{ }
@@ -541,10 +500,15 @@ public:
 	void	clear()							{
 		coreChargeMap.clear();
 	}
+	
+	CoreCharge & operator=(const CoreCharge & rhs){
+		coreChargeMap = rhs.coreChargeMap;
+		return *this;
+	}
 };
 
 // Read in the #LDOSList section
-class LDOSList :	public ParserBase{
+class LDOSList :			public ParserBase{
 public:
 	vector<pair<r_mat, vector<string> > > LDOSSelector;	// Store the input from "xxx.lat.tbm".
 	
@@ -571,10 +535,17 @@ public:
 	void	clear()				{
 		LDOSSelector.clear();
 	}
+	
+	LDOSList & operator=(const LDOSList & rhs){
+		LDOSSelector = rhs.LDOSSelector ;
+		return *this;
+	}
 };
 
+
+
 // Read in the #Init section
-class InitOrder:	public ParserBase{
+class InitOrder:			public ParserBase{
 public:
 	vector<pair<string, x_mat> > orderOperationList;	// Store the input from "xxx.lat.tbm".
 	
@@ -590,6 +561,11 @@ public:
 	}
 	void	clear()				{
 		orderOperationList.clear();
+	}
+	
+	InitOrder & operator=(const InitOrder & rhs){
+		orderOperationList = rhs.orderOperationList  ;
+		return *this;
 	}
 };
 
@@ -641,6 +617,12 @@ public:
 			hamOperationMap[strKey] =  vector<OperationStruct>();
 		}
 		return hamOperationMap[strKey];
+	}
+	
+	
+	HamiltonianParser & operator=(const HamiltonianParser & rhs){
+		hamOperationMap = rhs.hamOperationMap;
+		return *this;
 	}
 };
 
