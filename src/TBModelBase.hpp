@@ -743,7 +743,7 @@ public:
 	}
 	
 	/* Change the atom name. */
-	void changeAtom(vector<string> optList)									{
+	void changeAtom(vector<string> optList)													{
 		
 		Lat.createAtomList(false);
 		
@@ -752,8 +752,6 @@ public:
 		
 		// Save the expanded file.
 		ofstream outfile(Lat.FileName());
-		//outfile<<Lat.kSymmPointParser.getFileString();
-		//outfile<<Lat.bondVector.getFileString();
 		outfile<<Lat.basisVector.getFileString();
 		outfile<<Lat.orbitalProfile.getFileString();
 		outfile<<Lat.atomParser()<<endl;

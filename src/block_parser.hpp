@@ -30,6 +30,315 @@ public:
  The following class will be read from xxx.lat file.
  It's full construction is located at Lat.open("xxx.lat");
  ######################################################*/
+// Read in the BasisVector section
+class BasisVector:			public ParserBase{
+	vector<r_mat>	A;
+	r_var	abs(r_mat r){
+		r_var sum = 0;
+		for(unsigned i=0 ; i<r.size() ; i++){
+			sum += r[i]*r[i];
+		}
+		return sqrt(sum);
+		
+	}
+	r_var findMinmalRepeatanceOf(r_var N){
+		vector<r_var>	radiusList;
+		
+		r_var minValue = 10000;
+		if( A.size() == 3){
+			for(int i=-1 ; i<=1 ; i++)
+			for(int j=-1 ; j<=1 ; j++)
+			for(int k=-1 ; k<=1 ; k++){
+				if( i!=0 or j!=0 or k!=0){
+					r_var value = abs( i*N*A[0] +j*N*A[1] +k*N*A[2]);
+					if( minValue > value  ) minValue = value;
+				}
+			}
+		}
+		else if( A.size() == 2){
+			for(int i=-1 ; i<=1 ; i++)
+			for(int j=-1 ; j<=1 ; j++){
+				if( i!=0 or j!=0){
+					r_var value = abs( i*N*A[0] +j*N*A[1]);
+					if( minValue > value  ) minValue = value;
+				}
+			}
+		}
+		else if( A.size() == 1){
+			minValue = abs( N*A[0] );
+		}
+
+		return minValue;
+	}
+	vector<string>		inputLines;
+public:
+	BasisVector():ParserBase("#BasisVector"){  }
+	
+	void			append(string line)		{
+		inputLines.push_back(line);
+		
+		auto lineParser = split(line, " ");
+		
+		if( lineParser.size() == 3){
+			r_mat	a_vec(1, lineParser.size()); // Make a vector of real-matrix type
+			for( unsigned i=0 ; i<lineParser.size() ; i++){
+				a_vec[i] = StrToDouble(lineParser[i]);
+			}
+			A.push_back(a_vec);
+		}
+	}
+	vector<r_mat>	getAVec()	const		{
+		return A;
+	}
+	vector<r_mat>	getBVec()	const		{
+		vector<r_mat> B; //Reciprocal lattice vector
+
+		if (A.size() == 3) { // 3D
+			auto tmpA = A;
+			double AVectorVolume = cdot(tmpA[0], curl(tmpA[1],tmpA[2]));
+			r_mat	b0=curl(tmpA[1], tmpA[2]); b0=b0*(2*pi/AVectorVolume);
+			r_mat	b1=curl(tmpA[2], tmpA[0]); b1=b1*(2*pi/AVectorVolume);
+			r_mat	b2=curl(tmpA[0], tmpA[1]); b2=b2*(2*pi/AVectorVolume);
+			B.push_back(b0);
+			B.push_back(b1);
+			B.push_back(b2);
+		}
+		else if (A.size() == 2) { // 2D
+			r_mat aa=curl(A[0], A[1]);
+			aa = aa*(1/cdot(aa, aa));
+			auto tmpA = A;
+			tmpA.push_back(aa);
+			
+			double AVectorVolume = cdot(tmpA[0], curl(tmpA[1],tmpA[2]));
+			r_mat	b0=curl(tmpA[1], tmpA[2]); b0=b0*(2*pi/AVectorVolume);
+			r_mat	b1=curl(tmpA[2], tmpA[0]); b1=b1*(2*pi/AVectorVolume);
+			r_mat	b2=curl(tmpA[0], tmpA[1]); b2=b2*(2*pi/AVectorVolume);
+			B.push_back(b0);
+			B.push_back(b1);
+		}
+		else if (A.size() == 1) { // 1D
+			auto tmpA = A;
+			double AVectorVolume = cdot(tmpA[0], tmpA[0]);
+			r_mat	b0=tmpA[0]*(2*pi/AVectorVolume);
+			B.push_back(b0);
+		}
+		
+		return B;
+	}
+	
+	unsigned	minRepeatForRadius(double radius)	{
+		unsigned N=1;
+		
+		while( findMinmalRepeatanceOf(N) < radius){ N++; }
+		return N;
+	}
+	string		getFileString(unsigned N1=1, unsigned N2=1, unsigned N3=1)	{
+		string	fileString = keyString +'\n';
+		//for( auto & line: inputLines){ fileString += line+'\n'; }
+		//fileString += '\n';
+		vector<unsigned> N;
+		N.push_back(N1);
+		N.push_back(N2);
+		N.push_back(N3);
+		for( unsigned i=0 ; i<A.size() && i<N.size() ; i++){
+			auto exA = A[i]*N[i];
+			for( unsigned ii=0 ; ii<exA.size() ; ii++){
+				fileString += fformat(exA[ii],15)+" ";
+			}
+			fileString += '\n';
+		}
+		fileString += '\n';
+		return fileString;
+	}
+	void		clear()								{
+		A.clear();
+	}
+};
+
+// Read in the OrbitalProfile section
+class OrbitalProfile:		public ParserBase{
+	vector<deque<string> >	orbitalList;
+	
+	set<string>	validOrbital;
+public:
+	OrbitalProfile(): ParserBase("#OrbitalProfile"){
+		validOrbital.clear();
+		validOrbital.insert("s");
+		validOrbital.insert("px");
+		validOrbital.insert("py");
+		validOrbital.insert("pz");
+		validOrbital.insert("dxy");
+		validOrbital.insert("dxz");
+		validOrbital.insert("dyz");
+		validOrbital.insert("dx2-y2");
+		validOrbital.insert("dz2");
+		
+		//vector<string> vacancy;
+		//vacancy.push_back("VC");
+		//orbitalList.push_back(vacancy);
+	}
+	void	append(string line){
+		auto lineParser = split(line, " ");
+		
+		if( lineParser.size() > 1){
+			for( unsigned i=1; i<lineParser.size() ; i++){
+				if( validOrbital.find(lineParser[i]) == validOrbital.end()){
+					string ErrorMsg = "Error, "+lineParser[i]+" is not a valid orbital type.";
+					ErrorMessage(ErrorMsg);
+				}
+			}
+		}
+		if( lineParser.size() > 0 ) orbitalList.push_back(lineParser);
+	}
+	
+	vector<deque<string> > &	getOrbitalList()	{
+		return	orbitalList;
+	}
+	
+	string	getFileString(){
+		
+		string	fileString = keyString +'\n';
+		for(auto & orbLine: orbitalList){
+			for(auto & elem: orbLine){ fileString += fformat(elem, 10); }
+			fileString += '\n';
+		}
+		fileString += '\n';
+		return fileString;
+	}
+	bool	isValidAtomIndex(unsigned orbitalIndex){
+		
+		return orbitalIndex >= 0 and orbitalIndex < orbitalList.size();
+	}
+	void	clear(){
+		orbitalList.clear();
+	}
+};
+
+
+// Read in the Atoms section
+class AtomStringParser:		public ParserBase{
+public:
+	vector<pair<unsigned, r_mat> >	atomInfoList;
+	
+	AtomStringParser(): ParserBase("#Atoms"){ }
+	
+	void	append(string line)	{
+		auto lineParser = split(line, " ");
+		if( lineParser.size() == 4){
+			r_mat	pos(1,3);
+			unsigned	index	= StrToInt(lineParser[0]);
+			pos[0]	= StrToDouble(lineParser[1]);
+			pos[1]	= StrToDouble(lineParser[2]);
+			pos[2]	= StrToDouble(lineParser[3]);
+			atomInfoList.push_back(make_pair(index, pos));
+		}
+	}
+	void	changeProperty(vector<double> box, unsigned from, unsigned to){
+		
+		unsigned totalAtomChanged = 0;
+		
+		for( auto & atomInfo: atomInfoList){
+			if( atomInfo.first == from ) {
+				
+				if(	atomInfo.second[0] >= box[0] and atomInfo.second[0] <= box[3]	and
+					atomInfo.second[1] >= box[1] and atomInfo.second[1] <= box[4]	and
+					atomInfo.second[2] >= box[2] and atomInfo.second[2] <= box[5]
+				   ){
+					atomInfo.first = to;
+					cout<<from<<" --> "<<atomInfo.first<<" "<<atomInfo.second<<endl;
+					totalAtomChanged++;
+				}
+			}
+		}
+		cout<<"Number of atoms changed: "<<totalAtomChanged<<endl;
+		
+		cout<<endl;
+	}
+	void	clear()				{
+		atomInfoList.clear();
+	}
+};
+
+/*######################################################
+ The following class will combine all the files through
+ the #Import blocks.
+ ######################################################*/
+// Use the TBMImportParser to setup multiple file with the #Import blocks.
+class TBMImportParser: public ParserBase{
+public:
+	
+	set<string>		tbmFilenameStorage;
+	vector<string>	tbmLineStorage;
+	
+	TBMImportParser(): ParserBase("#Import"){ }
+	
+	void	append(string filename, string upperLevelFilename)	{
+		
+		tbmFilenameStorage.insert(filename);
+		
+        ifstream infile;
+		infile.open(filename);
+		
+		if ( infile.good() ) {
+			string line;
+			string header = "";
+			string flag	= "";
+			
+            while ( getline(infile, line) ) {
+				deleteComment(line);
+				istringstream iss(line);
+				iss >> header;
+				
+				removeSpace(header);
+				
+				if	( header == "#Import")	{ flag = header; continue; }
+				else if(header[0] == '#')	{ flag = header; }
+				
+				if	( flag	== "#Import")		{
+					removeSpaceTopToe(line);
+					if( line[0] != '\"' and line[line.size()-1] != '\"'){
+						continue;
+					}
+					replaceAll(line, "\"", "");
+
+					// Make sure that this filename is not stored inside the pool.
+					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
+						tbmFilenameStorage.insert(line);
+
+						TBMImportParser * importer = new TBMImportParser();
+						importer->append(line, filename);
+
+						for( auto & line: importer->tbmLineStorage){
+							tbmLineStorage.push_back(line);
+						}
+						
+						for( auto & imp_filename: importer->tbmFilenameStorage){
+							tbmFilenameStorage.insert(imp_filename);
+						}
+					}
+					else{
+						ErrorMessage("Error: from \""+filename+"\"\n\""
+										+ line +"\" is multiple imported.\n"
+										+"Please check your file import structure.");
+					}
+				}
+				else{
+					tbmLineStorage.push_back(line);
+				}
+			}
+		}
+		else{
+			ErrorMessage("Error: from "+upperLevelFilename+" \n Cannot find import file: "+ filename);
+		}
+		
+		infile.close();
+	}
+};
+
+/*######################################################
+ The following class will be read from xxx.lat.tbm file.
+ It's full construction is located at Lat.open("xxx.lat");
+ ######################################################*/
 // Read in the parameter section
 class Parameter:			public ParserBase{
 	map<string, string>	strPool;
@@ -161,132 +470,7 @@ public:
 	}
 };
 
-// Read in the BasisVector section
-class BasisVector:			public ParserBase{
-	vector<r_mat>	A;
-	r_var	abs(r_mat r){
-		r_var sum = 0;
-		for(unsigned i=0 ; i<r.size() ; i++){
-			sum += r[i]*r[i];
-		}
-		return sqrt(sum);
-		
-	}
-	r_var findMinmalRepeatanceOf(r_var N){
-		vector<r_var>	radiusList;
-		
-		r_var minValue = 10000;
-		if( A.size() == 3){
-			for(int i=-1 ; i<=1 ; i++)
-			for(int j=-1 ; j<=1 ; j++)
-			for(int k=-1 ; k<=1 ; k++){
-				if( i!=0 or j!=0 or k!=0){
-					r_var value = abs( i*N*A[0] +j*N*A[1] +k*N*A[2]);
-					if( minValue > value  ) minValue = value;
-				}
-			}
-		}
-		else if( A.size() == 2){
-			for(int i=-1 ; i<=1 ; i++)
-			for(int j=-1 ; j<=1 ; j++){
-				if( i!=0 or j!=0){
-					r_var value = abs( i*N*A[0] +j*N*A[1]);
-					if( minValue > value  ) minValue = value;
-				}
-			}
-		}
-		else if( A.size() == 1){
-			minValue = abs( N*A[0] );
-		}
-
-		return minValue;
-	}
-	vector<string>		inputLines;
-public:
-	BasisVector():ParserBase("#BasisVector"){  }
-	
-	void			append(string line)		{
-		inputLines.push_back(line);
-		
-		auto lineParser = split(line, " ");
-		
-		if( lineParser.size() == 3){
-			r_mat	a_vec(1, lineParser.size()); // Make a vector of real-matrix type
-			for( unsigned i=0 ; i<lineParser.size() ; i++){
-				a_vec[i] = StrToDouble(lineParser[i]);
-			}
-			A.push_back(a_vec);
-		}
-	}
-	vector<r_mat>	getAVec()	const		{
-		return A;
-	}
-	vector<r_mat>	getBVec()	const		{
-		vector<r_mat> B; //Reciprocal lattice vector
-
-		if (A.size() == 3) { // 3D
-			auto tmpA = A;
-			double AVectorVolume = cdot(tmpA[0], curl(tmpA[1],tmpA[2]));
-			r_mat	b0=curl(tmpA[1], tmpA[2]); b0=b0*(2*pi/AVectorVolume);
-			r_mat	b1=curl(tmpA[2], tmpA[0]); b1=b1*(2*pi/AVectorVolume);
-			r_mat	b2=curl(tmpA[0], tmpA[1]); b2=b2*(2*pi/AVectorVolume);
-			B.push_back(b0);
-			B.push_back(b1);
-			B.push_back(b2);
-		}
-		else if (A.size() == 2) { // 2D
-			r_mat aa=curl(A[0], A[1]);
-			aa = aa*(1/cdot(aa, aa));
-			auto tmpA = A;
-			tmpA.push_back(aa);
-			
-			double AVectorVolume = cdot(tmpA[0], curl(tmpA[1],tmpA[2]));
-			r_mat	b0=curl(tmpA[1], tmpA[2]); b0=b0*(2*pi/AVectorVolume);
-			r_mat	b1=curl(tmpA[2], tmpA[0]); b1=b1*(2*pi/AVectorVolume);
-			r_mat	b2=curl(tmpA[0], tmpA[1]); b2=b2*(2*pi/AVectorVolume);
-			B.push_back(b0);
-			B.push_back(b1);
-		}
-		else if (A.size() == 1) { // 1D
-			auto tmpA = A;
-			double AVectorVolume = cdot(tmpA[0], tmpA[0]);
-			r_mat	b0=tmpA[0]*(2*pi/AVectorVolume);
-			B.push_back(b0);
-		}
-		
-		return B;
-	}
-	
-	unsigned	minRepeatForRadius(double radius)	{
-		unsigned N=1;
-		
-		while( findMinmalRepeatanceOf(N) < radius){ N++; }
-		return N;
-	}
-	string		getFileString(unsigned N1=1, unsigned N2=1, unsigned N3=1)	{
-		string	fileString = keyString +'\n';
-		//for( auto & line: inputLines){ fileString += line+'\n'; }
-		//fileString += '\n';
-		vector<unsigned> N;
-		N.push_back(N1);
-		N.push_back(N2);
-		N.push_back(N3);
-		for( unsigned i=0 ; i<A.size() && i<N.size() ; i++){
-			auto exA = A[i]*N[i];
-			for( unsigned ii=0 ; ii<exA.size() ; ii++){
-				fileString += fformat(exA[ii],15)+" ";
-			}
-			fileString += '\n';
-		}
-		fileString += '\n';
-		return fileString;
-	}
-	void		clear()								{
-		A.clear();
-	}
-};
-
-// Read in the BondVector section
+// Read in the #BondVector section
 class BondVector:			public ParserBase{
 	
 public:
@@ -337,114 +521,6 @@ public:
 	}
 };
 
-// Read in the OrbitalProfile section
-class OrbitalProfile:		public ParserBase{
-	vector<deque<string> >	orbitalList;
-	
-	set<string>	validOrbital;
-public:
-	OrbitalProfile(): ParserBase("#OrbitalProfile"){
-		validOrbital.clear();
-		validOrbital.insert("s");
-		validOrbital.insert("px");
-		validOrbital.insert("py");
-		validOrbital.insert("pz");
-		validOrbital.insert("dxy");
-		validOrbital.insert("dxz");
-		validOrbital.insert("dyz");
-		validOrbital.insert("dx2-y2");
-		validOrbital.insert("dz2");
-		
-		//vector<string> vacancy;
-		//vacancy.push_back("VC");
-		//orbitalList.push_back(vacancy);
-	}
-	void	append(string line){
-		auto lineParser = split(line, " ");
-		
-		if( lineParser.size() > 1){
-			for( unsigned i=1; i<lineParser.size() ; i++){
-				if( validOrbital.find(lineParser[i]) == validOrbital.end()){
-					string ErrorMsg = "Error, "+lineParser[i]+" is not a valid orbital type.";
-					ErrorMessage(ErrorMsg);
-				}
-			}
-		}
-		if( lineParser.size() > 0 ) orbitalList.push_back(lineParser);
-	}
-	
-	vector<deque<string> > &	getOrbitalList()	{
-		return	orbitalList;
-	}
-	
-	string	getFileString(){
-		
-		string	fileString = keyString +'\n';
-		for(auto & orbLine: orbitalList){
-			for(auto & elem: orbLine){ fileString += fformat(elem, 10); }
-			fileString += '\n';
-		}
-		fileString += '\n';
-		return fileString;
-	}
-	bool	isValidAtomIndex(unsigned orbitalIndex){
-		
-		return orbitalIndex >= 0 and orbitalIndex < orbitalList.size();
-	}
-	void	clear(){
-		orbitalList.clear();
-	}
-};
-
-// Read in the Atoms section
-class AtomStringParser:		public ParserBase{
-public:
-	vector<pair<unsigned, r_mat> >	atomInfoList;
-	
-	AtomStringParser(): ParserBase("#Atoms"){ }
-	
-	void	append(string line)	{
-		auto lineParser = split(line, " ");
-		if( lineParser.size() == 4){
-			r_mat	pos(1,3);
-			unsigned	index	= StrToInt(lineParser[0]);
-			pos[0]	= StrToDouble(lineParser[1]);
-			pos[1]	= StrToDouble(lineParser[2]);
-			pos[2]	= StrToDouble(lineParser[3]);
-			atomInfoList.push_back(make_pair(index, pos));
-		}
-	}
-	void	changeProperty(vector<double> box, unsigned from, unsigned to){
-		
-		unsigned totalAtomChanged = 0;
-		
-		for( auto & atomInfo: atomInfoList){
-			if( atomInfo.first == from ) {
-				
-				if(	atomInfo.second[0] >= box[0] and atomInfo.second[0] <= box[3]	and
-					atomInfo.second[1] >= box[1] and atomInfo.second[1] <= box[4]	and
-					atomInfo.second[2] >= box[2] and atomInfo.second[2] <= box[5]
-				   ){
-					atomInfo.first = to;
-					cout<<from<<" --> "<<atomInfo.first<<" "<<atomInfo.second<<endl;
-					totalAtomChanged++;
-				}
-			}
-		}
-		cout<<"Number of atoms changed: "<<totalAtomChanged<<endl;
-		
-		cout<<endl;
-	}
-	void	clear()				{
-		atomInfoList.clear();
-	}
-};
-
-
-/*######################################################
- The following class will be read from xxx.lat.tbm file.
- It's full construction is located at Lat.open("xxx.lat");
- ######################################################*/
 // Read in the #CoreCharge section
 class CoreCharge:	public ParserBase{
 	map<string, r_var> coreChargeMap;	// Store the input from "xxx.lat.tbm".
@@ -567,79 +643,6 @@ public:
 		return hamOperationMap[strKey];
 	}
 };
-
-// Use the TBMImportParser to setup multiple file with the #Import function.
-class TBMImportParser: public ParserBase{
-public:
-	
-	set<string>		tbmFilenameStorage;
-	vector<string>	tbmLineStorage;
-	
-	TBMImportParser(): ParserBase("#Import"){ }
-	
-	void	append(string filename, string upperLevelFilename)	{
-		
-		tbmFilenameStorage.insert(filename);
-		
-        ifstream infile;
-		infile.open(filename);
-		
-		if ( infile.good() ) {
-			string line;
-			string header = "";
-			string flag	= "";
-			
-            while ( getline(infile, line) ) {
-				deleteComment(line);
-				istringstream iss(line);
-				iss >> header;
-				
-				removeSpace(header);
-				
-				if	( header == "#Import")	{ flag = header; continue; }
-				else if(header[0] == '#')	{ flag = header; }
-				
-				if	( flag	== "#Import")		{
-					removeSpaceTopToe(line);
-					if( line[0] != '\"' and line[line.size()-1] != '\"'){
-						continue;
-					}
-					replaceAll(line, "\"", "");
-
-					// Make sure that this filename is not stored inside the pool.
-					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
-						tbmFilenameStorage.insert(line);
-
-						TBMImportParser * importer = new TBMImportParser();
-						importer->append(line, filename);
-
-						for( auto & line: importer->tbmLineStorage){
-							tbmLineStorage.push_back(line);
-						}
-						
-						for( auto & imp_filename: importer->tbmFilenameStorage){
-							tbmFilenameStorage.insert(imp_filename);
-						}
-					}
-					else{
-						ErrorMessage("Error: from \""+filename+"\"\n\""
-										+ line +"\" is multiple imported.\n"
-										+"Please check your file import structure.");
-					}
-				}
-				else{
-					tbmLineStorage.push_back(line);
-				}
-			}
-		}
-		else{
-			ErrorMessage("Error: from "+upperLevelFilename+" \n Cannot find import file: "+ filename);
-		}
-		
-		infile.close();
-	}
-};
-
 
 
 

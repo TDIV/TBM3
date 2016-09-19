@@ -37,7 +37,7 @@ public:
 	
 };
 
-struct	EigVec{
+struct	EigVec		{
 	string	message;
 	r_mat	kPoint;
 	r_mat	eigenValue;
