@@ -41,10 +41,10 @@ public:
 	}
 	
 protected:
-	Lattice	Lat;
-	Lattice	spinNormalLat;
-	TBMParser tbm;
-	void	loadTBM(){
+	Lattice		Lat;
+	Lattice		spinNormalLat;
+	TBMParser	tbm;
+	void		loadTBM(){
 		tbm.append(Lat.FileName()+".tbm", Lat.FileName());
 		
 		Lat.parameter	= tbm.parameter;
