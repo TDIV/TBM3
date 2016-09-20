@@ -181,13 +181,13 @@ public:
 		validOrbital.insert("dx2-y2");
 		validOrbital.insert("dz2");
 		
-		validOrbital.insert("f0");
-		validOrbital.insert("f+1");
-		validOrbital.insert("f-1");
-		validOrbital.insert("f+2");
-		validOrbital.insert("f-2");
-		validOrbital.insert("f+3");
-		validOrbital.insert("f-3");
+		validOrbital.insert("fz3");
+		validOrbital.insert("fxz2");
+		validOrbital.insert("fyz2");
+		validOrbital.insert("fx(x2-3y2)");
+		validOrbital.insert("fy(3x2-y2)");
+		validOrbital.insert("fz(x2-y2)");
+		validOrbital.insert("fxyz");
 	}
 	void	append(string line){
 		auto lineParser = split(line, " ");
@@ -211,7 +211,7 @@ public:
 		
 		string	fileString = keyString +'\n';
 		for(auto & orbLine: orbitalList){
-			for(auto & elem: orbLine){ fileString += fformat(elem, 10); }
+			for(auto & elem: orbLine){ fileString += fformat(elem, 15)+" "; }
 			fileString += '\n';
 		}
 		fileString += '\n';
