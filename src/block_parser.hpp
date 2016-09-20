@@ -170,18 +170,24 @@ public:
 	OrbitalProfile(): ParserBase("#OrbitalProfile"){
 		validOrbital.clear();
 		validOrbital.insert("s");
+		
 		validOrbital.insert("px");
 		validOrbital.insert("py");
 		validOrbital.insert("pz");
+		
 		validOrbital.insert("dxy");
 		validOrbital.insert("dxz");
 		validOrbital.insert("dyz");
 		validOrbital.insert("dx2-y2");
 		validOrbital.insert("dz2");
 		
-		//vector<string> vacancy;
-		//vacancy.push_back("VC");
-		//orbitalList.push_back(vacancy);
+		validOrbital.insert("f0");
+		validOrbital.insert("f+1");
+		validOrbital.insert("f-1");
+		validOrbital.insert("f+2");
+		validOrbital.insert("f-2");
+		validOrbital.insert("f+3");
+		validOrbital.insert("f-3");
 	}
 	void	append(string line){
 		auto lineParser = split(line, " ");
