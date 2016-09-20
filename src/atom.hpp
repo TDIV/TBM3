@@ -104,7 +104,7 @@ public:
 		}
 	}
 	
-	unsigned	index(string strKey)	{
+	unsigned			index(string strKey)		{
 		string	indexKey = strKey;
 		auto	firstParser = split(strKey, ".");
 		
@@ -131,23 +131,20 @@ public:
 		
 		return indexList[ indexMap[indexKey] ].second;
 	}
-	bool		hasOrbital(string orb)	{
+	bool				hasOrbital(string orb)		{
 		if( IsIntStr(orb)){
 			unsigned orbIndex = StrToInt(orb)-1;
 			return ( orbIndex < orbitalLabel.size());
 		}
 		return (orbitalMap.find(orb) != orbitalMap.end());
 	}
-	string		getOrbitalNumber(string orb){
+	string				getOrbitalNumber(string orb){
 		if( IsIntStr(orb))	{ return orb; }
 		else				{ return IntToStr(orbitalMap[orb]+1); }
 	}
 	
-	vector<pair<string, unsigned> > &
-	allIndexList()						{ return indexList; }
-	
-	vector<pair<string, unsigned> >
-	orbitalIndexList(string orb)		{
+	vector<pair<string, unsigned> > &	allIndexList	()					{ return indexList; }
+	vector<pair<string, unsigned> >		orbitalIndexList(string orb)		{
 		vector<pair<string, unsigned> > subIndexList;
 		if(!hasOrbital(orb)){ return subIndexList; }
 		
@@ -191,9 +188,7 @@ public:
 		
 		return subIndexList;
 	}
-	
-	vector<pair<string, unsigned> >
-	spinIndexList(string orbSpin)		{
+	vector<pair<string, unsigned> >		spinIndexList	(string orbSpin)	{
 		vector<pair<string, unsigned> > subIndexList;
 		
 		auto parser = split(orbSpin, ".");
@@ -234,13 +229,12 @@ public:
 		return subIndexList;
 	}
 	
-	void		printIndexLabel()		{
+	void				printIndexLabel()			{
 		for(unsigned i=0 ; i<indexList.size() ; i++){
 			cout<<indexList[i].first<<endl;
 		}
 	}
-	
-	Atom & operator=(const Atom &at)	{
+	Atom &				operator=(const Atom &at)	{
 		orbitalOriginIndex = at.orbitalOriginIndex;
 		orbitalMap		= at.orbitalMap;
 		orbitalLabel	= at.orbitalLabel;
@@ -254,8 +248,7 @@ public:
 		pos				= at.pos;
 		return *this;
 	}
-	
-	string posToStr(){
+	string				posToStr()					{
 		/*
 		 Return a string that contain the orbitalOriginIndex and position of the atom, example:
 		 1		1.0		1.0		1.0

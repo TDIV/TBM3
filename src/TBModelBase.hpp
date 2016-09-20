@@ -44,8 +44,8 @@ protected:
 	Lattice		Lat;
 	Lattice		spinNormalLat;
 	TBMParser	tbm;
-	void		loadTBM(){
-		tbm.append(Lat.FileName()+".tbm", Lat.FileName());
+	void		loadTBM(bool isWithHamiltonianBlock = true){
+		tbm.open(Lat.FileName()+".tbm", Lat.FileName(), isWithHamiltonianBlock);
 		
 		Lat.parameter	= tbm.parameter;
 		Lat.bondVector	= tbm.bondVector;
@@ -513,7 +513,7 @@ public:
 	/* Expand the lattice into a larger size. */
 	void saveExpandedLattice(unsigned N1, unsigned N2, unsigned N3)							{
 		
-		loadTBM();
+		loadTBM(false);
 		Lat.createAtomList();
 		
 		auto	parseFilename = split(Lat.FileName(),".");
@@ -608,7 +608,7 @@ public:
 	/* Convert the lattice file formate to VESTA formate. */
 	void convertTo_VESTA	(vector<string> argsForOrder)									{
 		
-		loadTBM();
+		loadTBM(false);
 		Lat.createAtomList("on", "normal", false);
 		
 		string filename = Lat.FileName()+".vesta";
@@ -735,7 +735,7 @@ public:
 	/* Shift the cordinate of each atom. */
 	void shiftXYZ			(double X, double Y, double Z)									{
 		
-		loadTBM();
+		loadTBM(false);
 		Lat.createAtomList("on", "normal", false);
 		
 		tbd.order.load();
@@ -757,7 +757,7 @@ public:
 	/* Change the atom name. */
 	void changeAtom(vector<string> optList)													{
 		
-		loadTBM();
+		loadTBM(false);
 		Lat.createAtomList("on", "normal", false);
 		
 		tbd.order.load();

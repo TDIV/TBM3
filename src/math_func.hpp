@@ -115,9 +115,6 @@ vector<r_mat> getUnitVectors(vector<r_mat> AVec){
 	return retVec;
 }
 
-r_mat cross(){
-}
-
 #endif
 
 

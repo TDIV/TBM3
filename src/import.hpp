@@ -20,13 +20,13 @@
  the #Import blocks.
  ######################################################*/
 // Use the TBMImportParser to setup multiple file with the #Import blocks.
-class TBMImportParser{
+class TBMImporter{
 public:
 	
 	set<string>		tbmFilenameStorage;
 	vector<string>	tbmLineStorage;
 	
-	TBMImportParser(){ }
+	TBMImporter(){ }
 	
 	void	append(string filename, string upperLevelFilename)	{
 		
@@ -61,7 +61,7 @@ public:
 					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
 						tbmFilenameStorage.insert(line);
 
-						TBMImportParser * importer = new TBMImportParser();
+						TBMImporter * importer = new TBMImporter();
 						importer->append(line, filename);
 
 						for( auto & line: importer->tbmLineStorage){
@@ -95,7 +95,7 @@ public:
 class TBMParser{
 public:
 	
-	set<string>		tbmFilenameStorage;
+	set<string>			tbmFilenameStorage;
 	
 	// Read from xxx.lat.tbm
 	Parameter			parameter;
@@ -113,7 +113,7 @@ public:
 		sub_flag = "0";
 	}
 	
-	void	append(string filename, string upperLevelFilename)	{
+	void	open(string filename, string upperLevelFilename, bool isWithHamiltonianBlock = true)	{
 		
 		tbmFilenameStorage.insert(filename);
 		
@@ -146,25 +146,25 @@ public:
 					if( tbmFilenameStorage.find(line) == tbmFilenameStorage.end() ){
 						tbmFilenameStorage.insert(line);
 
-						TBMImportParser * importer = new TBMImportParser();
+						TBMImporter * importer = new TBMImporter();
 						importer->append(line, filename);
 
 						for( auto & line: importer->tbmLineStorage){
-							parseLine(line);
+							parseLine(line, isWithHamiltonianBlock);
 						}
 						
 						for( auto & imp_filename: importer->tbmFilenameStorage){
 							tbmFilenameStorage.insert(imp_filename);
 						}
 					}
-					else{
+					else{ // If this filename already exist, print an error message.
 						ErrorMessage("Error: from \""+filename+"\"\n\""
 										+ line +"\" is multiple imported.\n"
 										+"Please check your file import structure.");
 					}
 				}
 				else{
-					parseLine(line);
+					parseLine(line, isWithHamiltonianBlock);
 				}
 			}
 		}
@@ -174,6 +174,7 @@ public:
 		
 		infile.close();
 	}
+	
 private:
 	
 	string line;
@@ -181,7 +182,7 @@ private:
 	string flag = "";
 	string sub_flag = "";
 	
-	void	parseLine(string line){
+	void	parseLine(string line, bool withHamiltonianBlock = true){
 		
 		deleteComment(line); // Clean the commented words
 		istringstream iss(line);
@@ -190,21 +191,23 @@ private:
 		if	( header == ldosList())			{flag = header; return;}
 		if	( header == coreCharge())		{flag = header;	return;}
 		if	( header == initOrder())		{flag = header;	return;}
-		if	( header == hamParser())		{flag = header;	return;}
 		if	( header == kSymmPointParser())	{flag = header; return;}
 		if	( header == bondVector())			{
 			flag = header;
 			iss>>sub_flag;
 			return;
 		}
+		if	( header == hamParser())		{flag = header;	return;}
 		
 		if	( flag == parameter())			{ parameter.append(line);	return; }
 		if	( flag == ldosList())			{ ldosList.append(line);	return; }
 		if	( flag == coreCharge())			{ coreCharge.append(line);	return; }
 		if	( flag == initOrder())			{ initOrder.append(line);	return; }
-		if	( flag == hamParser())			{ hamParser.append(line);	return; }
 		if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				return;	}
 		if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	return;	}
+		
+		if	( flag == hamParser() and
+				withHamiltonianBlock)		{ hamParser.append(line);	return; }
 		
 	}
 };

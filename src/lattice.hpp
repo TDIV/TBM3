@@ -414,12 +414,11 @@ private:
 	}
 
 	bgi::rtree< value, bgi::quadratic<16> > rtree;
-	int				atomIndex;
-	vector<Atom>	atomList;
-	vector<Atom>	extendedAtomList;
-	
-	string	filename;
-	H_SPACE	h_space;
+	int					atomIndex;
+	vector<Atom>		atomList;
+	vector<Atom>		extendedAtomList;
+	string				filename;
+	H_SPACE				h_space;
 	
 };
 

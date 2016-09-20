@@ -179,7 +179,6 @@ public:
 			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.opt, iter.optList, iter.varList);
 		}
 	}
-	
 	void	calculateClassicalEnergy()						{
 		
 		x_var SE_Energy = 0, DM_Energy = 0, FB_Energy = 0;
@@ -227,8 +226,7 @@ public:
 		TBD.energyMap["4.DM Eng"] = DM_Energy.real();
 		TBD.energyMap["5.FB Eng"] = FB_Energy.real();
 	}
-	
-	double iterateSpinOrder(OrderParameter & newOrder)		{
+	double	iterateSpinOrder(OrderParameter & newOrder)		{
 		
 		if( TBD.tbm.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
