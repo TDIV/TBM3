@@ -167,7 +167,7 @@ class OrbitalProfile:		public ParserBase{
 	
 	set<string>	validOrbital;
 public:
-	OrbitalProfile(): ParserBase("#OrbitalProfile"){
+	OrbitalProfile(): ParserBase("#OrbitalProfile")	{
 		validOrbital.clear();
 		validOrbital.insert("s");
 		
@@ -189,7 +189,7 @@ public:
 		validOrbital.insert("fz(x2-y2)");
 		validOrbital.insert("fxyz");
 	}
-	void	append(string line){
+	void	append(string line)						{
 		auto lineParser = split(line, " ");
 		
 		if( lineParser.size() > 1){
@@ -202,12 +202,11 @@ public:
 		}
 		if( lineParser.size() > 0 ) orbitalList.push_back(lineParser);
 	}
-	
 	vector<deque<string> > &	getOrbitalList()	{
 		return	orbitalList;
 	}
 	
-	string	getFileString(){
+	string	getFileString()							{
 		
 		string	fileString = keyString +'\n';
 		for(auto & orbLine: orbitalList){
@@ -217,11 +216,11 @@ public:
 		fileString += '\n';
 		return fileString;
 	}
-	bool	isValidAtomIndex(unsigned orbitalIndex){
+	bool	isValidAtomIndex(unsigned orbitalIndex)	{
 		
 		return orbitalIndex >= 0 and orbitalIndex < orbitalList.size();
 	}
-	void	clear(){
+	void	clear()									{
 		orbitalList.clear();
 	}
 	
@@ -236,9 +235,9 @@ class AtomStringParser:		public ParserBase{
 public:
 	vector<pair<unsigned, r_mat> >	atomInfoList;
 	
-	AtomStringParser(): ParserBase("#Atoms"){ }
+	AtomStringParser(): ParserBase("#Atoms")		{ }
 	
-	void	append(string line)	{
+	void	append(string line)						{
 		auto lineParser = split(line, " ");
 		if( lineParser.size() == 4){
 			r_mat	pos(1,3);
@@ -270,10 +269,9 @@ public:
 		
 		cout<<endl;
 	}
-	void	clear()				{
+	void	clear()									{
 		atomInfoList.clear();
 	}
-	
 	AtomStringParser& operator=(const AtomStringParser & rhs){
 		atomInfoList = rhs.atomInfoList;
 		return *this;
@@ -394,8 +392,8 @@ class KSymmetryPoint:		public ParserBase{
 public:
 	vector<pair<string, r_mat> > kSymmPointList;
 	
-	KSymmetryPoint(): ParserBase("#KPointPath")	{ }
-	void	append(string line)	{
+	KSymmetryPoint(): ParserBase("#KPointPath")		{ }
+	void		append(string line)					{
 		auto lineParser = split(line, " ");
 		if( lineParser.size() == 4){
 			r_mat	kpoint(1,3);
@@ -406,8 +404,7 @@ public:
 			kSymmPointList.push_back(make_pair(label, kpoint));
 		}
 	}
-	
-	string	getFileString()		{
+	string		getFileString()						{
 		
 		string	fileString = keyString +'\n';
 		for(auto & kpoint: kSymmPointList){
@@ -420,7 +417,7 @@ public:
 		fileString += '\n';
 		return fileString;
 	}
-	void	clear()				{
+	void		clear()								{
 		kSymmPointList.clear();
 	}
 	
@@ -434,10 +431,10 @@ public:
 class BondVector:			public ParserBase{
 	
 public:
-	BondVector(): ParserBase("#BondVector"){ }
+	BondVector(): ParserBase("#BondVector")			{ }
 	
 	map<unsigned, vector<r_mat> >	bondMap;
-	void	append(unsigned mapKey, string line){
+	void		append(unsigned mapKey, string line){
 		
 		auto it = bondMap.find(mapKey);
 		if( it == bondMap.end() ){
@@ -454,15 +451,14 @@ public:
 			bondMap[mapKey].push_back(a_vec);
 		}
 	}
-	vector<r_mat> &	getBond(unsigned mapKey)	{
+	vector<r_mat> &	getBond(unsigned mapKey)		{
 		auto it = bondMap.find(mapKey);
 		if( it == bondMap.end()){
 			ErrorMessage("Error, cannot find bondVector definition of: #"+IntToStr(mapKey));
 		}
 		return bondMap[mapKey];
 	}
-	
-	string	getFileString(){
+	string		getFileString()						{
 		string fileString = "";
 		for( auto & it: bondMap){
 			fileString += keyString +" "+IntToStr(it.first)+'\n';
@@ -476,11 +472,10 @@ public:
 		}
 		return fileString;
 	}
-	void	clear(){
+	void		clear()								{
 		bondMap.clear();
 	}
-	
-	BondVector & operator= (const BondVector & rhs){
+	BondVector & operator= (const BondVector & rhs)	{
 		bondMap = rhs.bondMap;
 		return *this;
 	}
@@ -492,22 +487,21 @@ class CoreCharge:			public ParserBase{
 public:
 	CoreCharge(): ParserBase("#CoreCharge")	{ }
 	
-	void	append(string line)				{
+	void		append(string line)					{
 		auto parser = split(line, ">");
 		if( parser.size() == 2){
 			removeSpace(parser[0]);
 			coreChargeMap[parser[0]] = StrToDouble(parser[1]);
 		}
 	}
-	r_var	getCharge(string atomName)		{
+	r_var		getCharge(string atomName)			{
 		if( coreChargeMap.find(atomName) == coreChargeMap.end() ) return 0;
 		return coreChargeMap[atomName];
 	}
-	void	clear()							{
+	void		clear()								{
 		coreChargeMap.clear();
 	}
-	
-	CoreCharge & operator=(const CoreCharge & rhs){
+	CoreCharge & operator=(const CoreCharge & rhs)	{
 		coreChargeMap = rhs.coreChargeMap;
 		return *this;
 	}
@@ -518,9 +512,9 @@ class LDOSList :			public ParserBase{
 public:
 	vector<pair<r_mat, vector<string> > > LDOSSelector;	// Store the input from "xxx.lat.tbm".
 	
-	LDOSList(): ParserBase("#LDOSList"){ }
+	LDOSList(): ParserBase("#LDOSList")				{ }
 	
-	void	append(string line)	{
+	void		append(string line)					{
 		auto parser = split(line, " ");
 		
 		if( parser.size() == 0)	return;
@@ -538,11 +532,10 @@ public:
 		
 		LDOSSelector.push_back(make_pair(pos, level));
 	}
-	void	clear()				{
+	void		clear()								{
 		LDOSSelector.clear();
 	}
-	
-	LDOSList & operator=(const LDOSList & rhs){
+	LDOSList &	operator=(const LDOSList & rhs)		{
 		LDOSSelector = rhs.LDOSSelector ;
 		return *this;
 	}
@@ -595,12 +588,12 @@ public:
 	};
 	map< string, vector<OperationStruct> >			hamOperationMap;// Store the input from "xxx.lat.tbm".
 	
-	HamiltonianParser(): ParserBase("#Hamiltonian"){ }
-	~HamiltonianParser(){
+	HamiltonianParser(): ParserBase("#Hamiltonian")	{ }
+	~HamiltonianParser()							{
 		hamOperationMap.clear();
 	}
 	
-	void	append(string line)	{
+	void	append(string line)						{
 		auto parser = split(line, ">");
 		if( parser.size() == 3){
 			
@@ -617,15 +610,12 @@ public:
 			}
 		}
 	}
-	
 	vector<OperationStruct> & getOperationListMap(string strKey){
 		if( hamOperationMap.find(strKey) == hamOperationMap.end() ){
 			hamOperationMap[strKey] =  vector<OperationStruct>();
 		}
 		return hamOperationMap[strKey];
 	}
-	
-	
 	HamiltonianParser & operator=(const HamiltonianParser & rhs){
 		hamOperationMap = rhs.hamOperationMap;
 		return *this;

@@ -207,21 +207,6 @@ public:
 			FB_Energy += cdot(Bi,si).real();
 		}
 		
-		
-		// Calculate the coulomb energy = -\sum_i Coulomb_i * Den_i
-		double coulombEnergy = 0;
-		
-		while( TBD.Lat.iterate() ){
-			
-			auto parameter_den		= TBD.order.findOrder(TBD.Lat.getAtom(),	"@:den");
-			auto parameter_coulomb	= TBD.order.findOrder(TBD.Lat.getAtom(),	"@:coulomb");
-			
-			if( parameter_den.first and parameter_coulomb.first ){
-				coulombEnergy -= parameter_den.second[0].real() * parameter_coulomb.second[0].real();
-			}
-		}
-		
-		TBD.energyMap["2.Coul Eng"] = coulombEnergy;
 		TBD.energyMap["3.SE Eng"] = SE_Energy.real();
 		TBD.energyMap["4.DM Eng"] = DM_Energy.real();
 		TBD.energyMap["5.FB Eng"] = FB_Energy.real();

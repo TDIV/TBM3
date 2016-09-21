@@ -564,12 +564,18 @@ public:
 		//*****************************************************************
 		// Sum ove the coulomb term with the given charges (Z_i + Den_i).
 		//*****************************************************************
+		
+		auto orderI = order.findOrder(atomI, orderKey);
+		auto Z_I = tbm.coreCharge.getCharge(atomI.atomName);
+		double ChargeI = orderI.second[0].real() - Z_I;
+		
 		double sumScreenCoulomb = 0;
 		for( auto & atomJ: rboxAtoms.second ){
 			auto orderJ = order.findOrder(atomJ, orderKey);
+			auto Z_J = tbm.coreCharge.getCharge(atomJ.atomName);
 			
-			double Charge = -tbm.coreCharge.getCharge(atomJ.atomName);
-			if( orderJ.first ){ Charge += orderJ.second[0].real(); }
+			double ChargeJ = -Z_J;
+			if( orderJ.first ){ ChargeJ += orderJ.second[0].real(); }
 			
 			r_mat vecIJ(1,3);
 			for(unsigned i=0 ; i<vecIJ.size() ; i++)
@@ -577,8 +583,12 @@ public:
 			
 			double distIJ = sqrt(cdot(vecIJ,vecIJ));
 			
-			if( distIJ > 0)
-			sumScreenCoulomb += alpha * Charge * exp(-distIJ/radius) / distIJ;
+			if( distIJ > 0){
+				double factor = alpha * exp(-distIJ/radius) / distIJ;
+				sumScreenCoulomb		+= factor * ChargeJ;
+				energyMap["2.Coul Eng"] -= factor * orderI.second[0].real() * orderJ.second[0].real();
+				energyMap["2.Coul Eng"] += factor * Z_I * Z_J;
+			}
 		}
 		
 		//*****************************************************************
@@ -943,6 +953,8 @@ public:
 		
 		maxE = -10000;
 		minE =  10000;
+		
+		energyMap["2.Coul Eng"] = 0;
 		
 		/*
 		 // Performance testing loop

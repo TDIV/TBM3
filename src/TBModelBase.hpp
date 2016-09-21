@@ -97,9 +97,9 @@ protected:
 		}
 		
 		auto B = Lat.basisVector.getBVec();
-		auto & b1 = B[0]*0.5;
-		auto & b2 = B[1]*0.5;
-		auto & b3 = B[2]*0.5;
+		auto & b1 = B[0];
+		auto & b2 = B[1];
+		auto & b3 = B[2];
 			
 		for(auto & kp: tbm.kSymmPointParser.kSymmPointList){
 			add_ksymm_point(kp.first, +kp.second[0]*b1 +kp.second[1]*b2 +kp.second[2]*b3);
@@ -463,9 +463,6 @@ protected:
 		
 		double max_den_diff = 0;
 		
-		// Calculate the coulomb energy = -\sum_i Coulomb_i * Den_i
-		double coulombEnergy = 0;
-		
 		while( iterate() ){
 			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
@@ -485,12 +482,8 @@ protected:
 				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
 			}
 			
-			if( parameter_new.first and parameter_coulomb.first ){
-				coulombEnergy -= parameter_new.second[0].real() * parameter_coulomb.second[0].real();
-			}
 		}
 		
-		tbd.energyMap["2.Coul Eng"] = coulombEnergy;
 		tbd.calculateEnergy();
 		newOrder.save();
 		

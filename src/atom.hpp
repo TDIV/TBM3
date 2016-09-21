@@ -271,8 +271,7 @@ public:
 	Atom atomJ;
 	r_mat inputBond;
 	
-	AtomPair(){
-	}
+	AtomPair(){ }
 	AtomPair(Atom _atomI, Atom _atomJ, r_mat _inputBond):inputBond(_inputBond), atomI(_atomI), atomJ(_atomJ){
 	}
 	r_mat bondIJ(){

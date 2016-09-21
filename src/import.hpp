@@ -176,12 +176,12 @@ public:
 	}
 	
 private:
-	
+
 	string line;
 	string header = "";
 	string flag = "";
 	string sub_flag = "";
-	
+
 	void	parseLine(string line, bool withHamiltonianBlock = true){
 		
 		deleteComment(line); // Clean the commented words
