@@ -112,7 +112,6 @@ public:
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
-	//HamiltonianParser	hamParser;
 	HamiltonianPreprocessor	hamPreprocessor;
 	
 	TBMParser(){
@@ -217,6 +216,7 @@ private:
 			iss>>sub_flag;
 			return;
 		}
+		if	( header == hamPreprocessor())		{flag = header;	return;}
 		
 		if	( flag == parameter())			{ parameter.append(line);	return; }
 		if	( flag == ldosList())			{ ldosList.append(line);	return; }

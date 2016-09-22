@@ -381,7 +381,6 @@ public:
 			}
 		}
 	}
-	
 	void		addScreenCoulomb(const PreprocessorInfo & preInfo)	{
 		/*****************************************
 		 * screenCoulomb > Fe ~2 >  @:den * alpha
@@ -467,7 +466,6 @@ public:
 			}
 		}
 	}
-	
 	void		addFieldB		(const PreprocessorInfo & preInfo)	{ // svar === " @:cspin * Jse "
 		// *******************************
 		// fieldB	> Fe   > [0,0,1] * B
@@ -534,7 +532,6 @@ public:
 			}
 		}
 	}
-
 	void		addPairing		(const PreprocessorInfo & preInfo, string pairingType)	{
 		/*****************************************
 		 * pairing(X)	> Fe 1:1			> 1		% On-site Singlet pairing
@@ -556,13 +553,13 @@ public:
 						 " Up-triplet pairing cannot be applited without exnambu space.");
 		}
 		if(pairingType == "D")
-		if( Lat.HSpace() == EXNAMBU){
+		if( Lat.HSpace() != EXNAMBU){
 			ErrorMessage(preInfo.filename, preInfo.lineNumber,
 						 " \""+preInfo.line+"\"\n"+
 						 " Dn-triplet pairing cannot be applited without exnambu space.");
 		}
 		if(pairingType == "T")
-		if( Lat.HSpace() == EXNAMBU){
+		if( Lat.HSpace() != EXNAMBU){
 			ErrorMessage(preInfo.filename, preInfo.lineNumber,
 						 " \""+preInfo.line+"\"\n"+
 						 " Triplet pairing cannot be applited without exnambu space.");
@@ -783,7 +780,7 @@ public:
 		
 		return tmpEigValVec;
 	}
-	
+
 	x_var			getDensityMatrix		(unsigned index_i, unsigned index_j, double Mu=0){
 		
 		if( Lat.HSpace() != NORMAL) Mu = 0;
