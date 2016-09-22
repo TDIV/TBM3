@@ -275,7 +275,6 @@ public:
 		 * hopping > Fe:O:+1+0+0# 1:2 >  0.5
 		 * hopping > Fe:O:+1+0+0# 1:px >  0.5
 		 *****************************************/
-		
 		auto & optList = preInfo.optList;
 		auto & varList = preInfo.varList;
 		

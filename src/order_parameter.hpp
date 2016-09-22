@@ -254,7 +254,6 @@ public:
 		optList.clear();
 	}
 
-	
 	vector<rmap> &	getOptList()								{ return optList; }
 	void			setOptList(vector<rmap> & optL)				{
 		optList = optL;

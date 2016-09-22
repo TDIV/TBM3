@@ -1,7 +1,7 @@
 #KPointPath
 G      0     0     0    
-M      1  	0     0    
-K      1.333     0.666     0    
+M      0.5	0     0    
+K      0.666     0.333     0    
 G      0     0     0    
 
 #BondVector 0

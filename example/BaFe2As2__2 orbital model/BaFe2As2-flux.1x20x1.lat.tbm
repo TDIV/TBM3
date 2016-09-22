@@ -1,7 +1,7 @@
 #KPointPath
-X      1     0     0    
+X      0.5   0     0    
 G      0     0     0    
-X      1     0     0    
+X      0.5   0     0    
 
 #BondVector 0
  1.0             0               0              
