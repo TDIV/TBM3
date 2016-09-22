@@ -112,7 +112,7 @@ public:
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
 	
-	HamiltonianParser	hamParser;
+	//HamiltonianParser	hamParser;
 	HamiltonianPreprocessor	hamPreprocessor;
 	
 	TBMParser(){
@@ -217,7 +217,6 @@ private:
 			iss>>sub_flag;
 			return;
 		}
-		if	( header == hamParser())		{flag = header;	return;}
 		
 		if	( flag == parameter())			{ parameter.append(line);	return; }
 		if	( flag == ldosList())			{ ldosList.append(line);	return; }
@@ -226,8 +225,7 @@ private:
 		if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				return;	}
 		if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	return;	}
 		
-		if	( flag == hamParser() and withHamiltonianBlock)		{
-			hamParser.append(line);
+		if	( flag == hamPreprocessor() and withHamiltonianBlock)		{
 			hamPreprocessor.append(lineStorage);	return;
 		}
 		

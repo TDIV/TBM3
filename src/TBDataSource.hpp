@@ -535,24 +535,54 @@ public:
 		}
 	}
 
-	void		addPairingS		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe	1:2".		(site only operation)
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
-		 */
-		if( Lat.HSpace() == NORMAL){
-			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
-		}
+	void		addPairing		(const PreprocessorInfo & preInfo, string pairingType)	{
+		/*****************************************
+		 * pairing(X)	> Fe 1:1			> 1		% On-site Singlet pairing
+		 * pairing(X)	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
+		
+		if(pairingType == "S")
 		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " Singlet pairing cannot be applited with spinless-nambu space.");
+		}
+		if(pairingType == "U")
+		if( Lat.HSpace() != EXNAMBU){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " Up-triplet pairing cannot be applited without exnambu space.");
+		}
+		if(pairingType == "D")
+		if( Lat.HSpace() == EXNAMBU){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " Dn-triplet pairing cannot be applited without exnambu space.");
+		}
+		if(pairingType == "T")
+		if( Lat.HSpace() == EXNAMBU){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " Triplet pairing cannot be applited without exnambu space.");
 		}
 		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		auto firstSec	= split(optList[0], ":");
-		auto secondSec	= split(optList[1], ":");
-		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		deque<string> firstSec;
+		deque<string> secondSec;
+		if( optList.size() == 3){
+			firstSec.push_back(optList[0]);
+			secondSec.push_back(optList[1]);
+			secondSec.push_back(optList[2]);
+		}
+		else if( optList.size() == 5){
+			firstSec.push_back(optList[0]);
+			firstSec.push_back(optList[1]);
+			firstSec.push_back(optList[2]);
+			secondSec.push_back(optList[3]);
+			secondSec.push_back(optList[4]);
+		}
 		
 		auto atomI = Lat.getAtom();
 		AtomPair pair(atomI, atomI, vec(0,0,0));
@@ -586,186 +616,51 @@ public:
 			auto & iterI = subIndexI[ii];
 			auto & iterJ = subIndexJ[jj];
 			
-			if(		(iterI.first == "Au" and iterJ.first == "Bd")
-			   or	(iterI.first == "Ad" and iterJ.first == "Bu")){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
-				continue;
+			if( pairingType == "S"){
+				if(		(iterI.first == "Au" and iterJ.first == "Bd")
+				   or	(iterI.first == "Ad" and iterJ.first == "Bu")){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "Bu" and iterJ.first == "Ad")
+				   or	(iterI.first == "Bd" and iterJ.first == "Au")){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
+					continue;
+				}
 			}
-			if(		(iterI.first == "Bu" and iterJ.first == "Ad")
-			   or	(iterI.first == "Bd" and iterJ.first == "Au")){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
-				continue;
+			if( pairingType == "U" or pairingType == "T"){
+				if(		(iterI.first == "Au" and iterJ.first == "Bu")	){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "Bu" and iterJ.first == "Au")	){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
+					continue;
+				}
+			}
+			if( pairingType == "D" or pairingType == "T"){
+				if(		(iterI.first == "Ad" and iterJ.first == "Bd")	){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "Bd" and iterJ.first == "Ad")	){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
+					continue;
+				}
+			}
+			if( pairingType == "T" ){
+				if(		(iterI.first == "A"  and iterJ.first == "B" )){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "B"  and iterJ.first == "A" )){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ()));
+					continue;
+				}
 			}
 		}
 	}
-	void		addPairingU		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe	1:2".		(site only operation)
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
-		 */
-		if( Lat.HSpace() == NORMAL){
-			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
-		}
-		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
-		}
-		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec	= split(optList[0], ":");
-		auto secondSec	= split(optList[1], ":");
-		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto atomI = Lat.getAtom();
-		AtomPair pair(atomI, atomI, vec(0,0,0));
-		if( firstSec.size() == 3 ) { pair = Lat.getPair(firstSec[2]); }
-		if( firstSec.size() == 1 ) { firstSec.push_back(firstSec[0]); }
-		if( firstSec.size() == 3 and !pair.withinRange() )				return;
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
-		
-		x_var val = 0;
-		if( firstSec.size() == 2 ){ // site only pairing
-			val = parseSiteString(atomI, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseSiteString(atomI, varList[i])[0];
-			}
 	
-		}
-		if( firstSec.size() == 3 ){
-			val = parseBondString(pair, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseBondString(pair, varList[i])[0];
-			}
-		}
-		
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++)
-		for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
-			auto & iterI = subIndexI[ii];
-			auto & iterJ = subIndexJ[jj];
-			
-			if(	(iterI.first == "Au" and iterJ.first == "Bu")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));		continue;}
-			if(	(iterI.first == "Bu" and iterJ.first == "Au")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
-		}
-	}
-	void		addPairingD		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe	1:2".		(site only operation)
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
-		 */
-		if( Lat.HSpace() == NORMAL){
-			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
-		}
-		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
-		}
-		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec	= split(optList[0], ":");
-		auto secondSec	= split(optList[1], ":");
-		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto atomI = Lat.getAtom();
-		AtomPair pair(atomI, atomI, vec(0,0,0));
-		if( firstSec.size() == 3 ) { pair = Lat.getPair(firstSec[2]); }
-		if( firstSec.size() == 1 ) { firstSec.push_back(firstSec[0]); }
-		if( firstSec.size() == 3 and !pair.withinRange() )				return;
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
-		
-		x_var val = 0;
-		if( firstSec.size() == 2 ){ // site only pairing
-			val = parseSiteString(atomI, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseSiteString(atomI, varList[i])[0];
-			}
-	
-		}
-		if( firstSec.size() == 3 ){
-			val = parseBondString(pair, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseBondString(pair, varList[i])[0];
-			}
-		}
-		
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++)
-		for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
-			auto & iterI = subIndexI[ii];
-			auto & iterJ = subIndexJ[jj];
-			
-			if(	(iterI.first == "Ad" and iterJ.first == "Bd")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));		continue;}
-			if(	(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));	continue;}
-		}
-	}
-	void		addPairingT		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe	1:2".		(site only operation)
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(bond operation)
-		 */
-		if( Lat.HSpace() == NORMAL){
-			 ErrorMessage("Error, pairing operation:\n"+opt+".\n Cannot be applited with normal space.");
-		}
-		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
-			 ErrorMessage("Error, singlet pairing operation:\n"+opt+".\n Cannot be applited with spinless-nambu space.");
-		}
-		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec	= split(optList[0], ":");
-		auto secondSec	= split(optList[1], ":");
-		if( firstSec.size() != 1 and firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size()!= 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto atomI = Lat.getAtom();
-		AtomPair pair(atomI, atomI, vec(0,0,0));
-		if( firstSec.size() == 3 ) { pair = Lat.getPair(firstSec[2]); }
-		if( firstSec.size() == 1 ) { firstSec.push_back(firstSec[0]); }
-		if( firstSec.size() == 3 and !pair.withinRange() )				return;
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
-		
-		x_var val = 0;
-		if( firstSec.size() == 2 ){ // site only pairing
-			val = parseSiteString(atomI, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseSiteString(atomI, varList[i])[0];
-			}
-	
-		}
-		if( firstSec.size() == 3 ){
-			val = parseBondString(pair, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseBondString(pair, varList[i])[0];
-			}
-		}
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++)
-		for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
-			auto & iterI = subIndexI[ii];
-			auto & iterJ = subIndexJ[jj];
-			
-			if(		(iterI.first == "A"  and iterJ.first == "B" )){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ())); continue;}
-			if(		(iterI.first == "B"  and iterJ.first == "A" )){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ())); continue;}
-			if(		(iterI.first == "Au" and iterJ.first == "Bu")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ())); continue;}
-			if(		(iterI.first == "Bu" and iterJ.first == "Au")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ())); continue;}
-			if(		(iterI.first == "Ad" and iterJ.first == "Bd")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ())); continue;}
-			if(		(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ())); continue;}
-		}
-	}
 	void		addChemicalPotential(r_var mu)				{
 		
 		// Apply the Chemical potential
@@ -849,10 +744,10 @@ public:
 			// If space==normal The following part will be ignored.
 			if( Lat.HSpace() == NORMAL) continue;
 			
-			for( auto & iter : tbm.hamParser.getOperationListMap("pairingS"))	{	addPairingS		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : tbm.hamParser.getOperationListMap("pairingU"))	{	addPairingU		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : tbm.hamParser.getOperationListMap("pairingD"))	{	addPairingD		(iter.opt, iter.optList, iter.varList); }
-			for( auto & iter : tbm.hamParser.getOperationListMap("pairingT"))	{	addPairingT		(iter.opt, iter.optList, iter.varList); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingS)		{	addPairing		(iter,"S"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingU)		{	addPairing		(iter,"U"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingD)		{	addPairing		(iter,"D"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingT)		{	addPairing		(iter,"T"); }
 			
 		}
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());

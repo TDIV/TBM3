@@ -579,59 +579,6 @@ public:
 	}
 };
 
-// Read in the #Hamiltonian section
-class HamiltonianParser:	public ParserBase{
-public:
-
-	struct OperationStruct{
-		string opt;
-		deque<string> optList;
-		deque<string> varList;
-		OperationStruct(string opt, string optListStr, string varListStr){
-			optList = split( optListStr, " ");
-			varList = split( varListStr, "*");
-		}
-		~OperationStruct(){
-			opt.clear();
-			optList.clear();
-			varList.clear();
-		}
-	};
-	map< string, vector<OperationStruct> >			hamOperationMap;// Store the input from "xxx.lat.tbm".
-	
-	HamiltonianParser(): ParserBase("#Hamiltonian")	{ }
-	~HamiltonianParser()							{
-		hamOperationMap.clear();
-	}
-	
-	void	append(string line)						{
-		auto parser = split(line, ">");
-		if( parser.size() == 3){
-			
-			removeSpace(parser[0]);
-			replaceAll(parser[1], "\t", " ");
-			removeSpace(parser[2]);
-			
-			if( hamOperationMap.find(parser[0]) == hamOperationMap.end() ){
-				hamOperationMap[parser[0]] = vector<OperationStruct>();
-				hamOperationMap[parser[0]].push_back(OperationStruct(parser[0], parser[1], parser[2]));
-			}
-			else{
-				hamOperationMap[parser[0]].push_back(OperationStruct(parser[0], parser[1], parser[2]));
-			}
-		}
-	}
-	vector<OperationStruct> & getOperationListMap(string strKey){
-		if( hamOperationMap.find(strKey) == hamOperationMap.end() ){
-			hamOperationMap[strKey] =  vector<OperationStruct>();
-		}
-		return hamOperationMap[strKey];
-	}
-	HamiltonianParser & operator=(const HamiltonianParser & rhs){
-		hamOperationMap = rhs.hamOperationMap;
-		return *this;
-	}
-};
 
 
 

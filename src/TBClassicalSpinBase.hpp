@@ -26,10 +26,12 @@ class TBClassicalSpinBase{
 public:
 	TBClassicalSpinBase(TBDataSource & _tbd): TBD(_tbd)		{ }
 
-	void addHundCoupling	(const string & opt, const deque<string> & optList, const deque<string> & varList)		{
-		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( varList.size() == 0){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+	void addHundCoupling	(const PreprocessorInfo & preInfo)		{
+		/*****************************************
+		* hund > Fe 1 > @:cspin * Jh
+		*****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
 		auto atomI = TBD.Lat.getAtom();
 		
@@ -54,17 +56,17 @@ public:
 		
 		HundCouplingList.push_back(boost::make_tuple(atomI, pspin, Jh, orderKey));
 	}
-	void addSuperExchange	(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jse "
+	void addSuperExchange	(const PreprocessorInfo & preInfo)		{ // svar === " @:cspin * Jse "
+		/*****************************************
+		 * superEx	> Fe:Fe:+1+0+0 > @:cspin * Jse
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
-		if( optList.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		auto pair = TBD.Lat.getPair(optList[2]);
 		
-		auto parser = split(optList[0], ":");
-		if( parser.size() != 3){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto pair = TBD.Lat.getPair(parser[2]);
-		
-		if( pair.atomI.atomName != parser[0])	return;
-		if( pair.atomJ.atomName != parser[1])	return;
+		if( pair.atomI.atomName != optList[0])	return;
+		if( pair.atomJ.atomName != optList[1])	return;
 		if( !pair.withinRange() )				return;
 		
 		
@@ -84,16 +86,17 @@ public:
 		
 		SuperExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Jsx, orderKey));
 	}
-	void addDMExchange		(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jdm "
-		if( optList.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+	void addDMExchange		(const PreprocessorInfo & preInfo)		{ // svar === " @:cspin * Jdm "
+		/*****************************************
+		 * superEx	> Fe:Fe:+1+0+0 > @:cspin * Jse
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
-		auto parser = split(optList[0], ":");
-		if( parser.size() != 3){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		auto pair = TBD.Lat.getPair(optList[2]);
 		
-		auto pair = TBD.Lat.getPair(parser[2]);
-		
-		if( pair.atomI.atomName != parser[0])	return;
-		if( pair.atomJ.atomName != parser[1])	return;
+		if( pair.atomI.atomName != optList[0])	return;
+		if( pair.atomJ.atomName != optList[1])	return;
 		if( !pair.withinRange() )				return;
 		
 		auto orderKey = varList[0];
@@ -120,23 +123,14 @@ public:
 		
 		DMExchangeList.push_back(boost::make_tuple(pair.atomI, ordS_I.second, ordS_J.second, Dij, orderKey));
 	}
-	void addFieldB			(const string & opt, const deque<string> & optList, const deque<string> & varList)		{ // svar === " @:cspin * Jse "
+	void addFieldB			(const PreprocessorInfo & preInfo)		{
 		// *******************************
 		// fieldB	> Fe   > [0,0,1] * B
 		// fieldB	> Fe 1 > [0,0,1] * B
 		// fieldB	> Fe 2 > [0,0,1] * B
 		// *******************************
-		
-		if( optList.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( optList.size() == 2){
-			// This part will not be effective in the classical Hamiltonian, but goes to the quantum spin part.
-			// That handeling the following operations.
-			// fieldB	> Fe   > [0,0,1] * B (ignored)
-			return;
-		}
-		
-		auto parser = split(optList[0], ":");
-		if( parser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
 		auto atomI = TBD.Lat.getAtom();
 		if( atomI.atomName != optList[0])	return;
@@ -173,10 +167,10 @@ public:
 		while( TBD.Lat.iterate() ){
 			
 			if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
-			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("hundSpin"))	addHundCoupling	(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("superEx")	)	addSuperExchange(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("dmEx")	)	addDMExchange	(iter.opt, iter.optList, iter.varList);
-			for( auto & iter : TBD.tbm.hamParser.getOperationListMap("fieldB")	)	addFieldB		(iter.opt, iter.optList, iter.varList);
+			for( auto & iter : TBD.tbm.hamPreprocessor.list_HundSpin)			addHundCoupling	(iter);
+			for( auto & iter : TBD.tbm.hamPreprocessor.list_SuperEx)			addSuperExchange(iter);
+			for( auto & iter : TBD.tbm.hamPreprocessor.list_DMEx)				addDMExchange(iter);
+			for( auto & iter : TBD.tbm.hamPreprocessor.list_ClassicalFieldB)	addFieldB(iter);
 		}
 	}
 	void	calculateClassicalEnergy()						{
