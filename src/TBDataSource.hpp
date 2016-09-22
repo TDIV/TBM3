@@ -103,16 +103,16 @@ public:
 	 Using these methods to construct the "hamElementList".
 	 -------------------------------------------------*/
 
-	void		addHundSpin		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Site operation: operate for only a single orbital
-		 hund > Fe 1 > @:cspin * Jh
-		 */
+	void		addHundSpin		(const PreprocessorInfo & preInfo)	{
+		/*****************************************
+		* hund > Fe 1 > @:cspin * Jh
+		*****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
 		if( Lat.parameter.STR("spin") == "off"){
-			ErrorMessage("Error, 'HundSpin' operation:\n"+opt+"\nCannot be applied for a spin-independent Hamiltonian.");
+			ErrorMessage("Error, 'HundSpin' operation:\n"+preInfo.line+"\nCannot be applied for a spin-independent Hamiltonian.");
 		}
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
 		auto atomI = Lat.getAtom();
 		if( atomI.atomName != optList[0]){ return; } // Name does not match.
@@ -128,7 +128,9 @@ public:
 		x_mat sVec = xvec * Jh;
 	
 		if( sVec.size() != 3 ){
-			ErrorMessage("Error, operation:\n"+opt+".\n Has been applied with a wrong spin-variable with size:"+IntToStr(sVec.size()));
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " Has been applied with a wrong spin-variable with size: " +IntToStr(sVec.size()));
 		}
 		
 		string orbital = optList[1];
@@ -152,9 +154,10 @@ public:
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
 				if( Sx > 0.0001 or Sy > 0.0001){
-					ErrorMessage("Error, spin-flip operation:\n"+
-							 opt+
-							 ".\n Cannot be applied for a spin-depende Nambu space Hamiltonian.");
+					ErrorMessage(preInfo.filename,
+								 preInfo.lineNumber,
+								 " \""+preInfo.line+"\"\n"+
+								 " Cannot be applied for a spin-depende Nambu space Hamiltonian.");
 				}
 				break;
 			}
@@ -177,13 +180,12 @@ public:
 			}
 		}
 	}
-	void		addOrbitalEng	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Site operation: operate for only a single orbital
-		 orbital > Fe 1 > Fe_En
-		 */
-		
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+	void		addOrbitalEng	(const PreprocessorInfo & preInfo)	{
+		/*****************************************
+		 * orbital > Fe 1 > 1
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
 		auto atomI = Lat.getAtom();
 		if( atomI.atomName != optList[0]){ return; } // Name does not match.
@@ -209,136 +211,81 @@ public:
 		}
 	}
 
-	void		addSiteCouple	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Site operation: "Fe 1u:1u".	(operate for only a single orbital)
-		 Site operation: "Fe 1u:2d".	(operate between orbitals and spin)
-		 */
+	void		addSiteCouple	(const PreprocessorInfo & preInfo, bool needHc = false)	{
+		/*****************************************
+		 * site > Fe 1u:2d		> var
+		 * site > Fe px.u:py.d	> var
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
+		
 		if( Lat.parameter.STR("spin") == "off"){
-			ErrorMessage("Error, operation:\n"+opt+".\n Cannot be applied for a spin-independent Hamiltonian.");
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ " Cannot be applied for a spin-independent Hamiltonian.");
 		}
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
 		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 1 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		if( secondSec[0][secondSec[0].size()-1] != secondSec[1][secondSec[1].size()-1] and
+		if( optList[1][optList[1].size()-1] != optList[2][optList[2].size()-1] and
 		   Lat.HSpace() == NAMBU) {
-			ErrorMessage("Error, operation:\n"+opt+".\n Spin-flip term cannot be applied under 'nambu' space.\n Please set the 'space' to 'normal' or 'exnambu'.");
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ " Spin-flip term cannot be applied under 'nambu' space.");
 		}
 		
 		auto atomI = Lat.getAtom();
 		if( optList[0] != atomI.atomName )	return;
+		
+
+		auto spinIndexList_i = atomI.spinIndexList(optList[1]);
+		auto spinIndexList_j = atomI.spinIndexList(optList[2]);
+		
+		if(spinIndexList_i.size() <= 0 or spinIndexList_j.size() <= 0){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ "atom \'"+atomI.atomName+"\' don't have any orbital to operate..");
+		}
 		
 		x_var val = parseSiteString(atomI, varList[0])[0];
 		for( unsigned i=1 ; i<varList.size() ; i++){
 			val = val * parseSiteString(atomI, varList[i])[0];
 		}
 		
-		auto spinIndexList_i = atomI.spinIndexList(secondSec[0]);
-		auto spinIndexList_j = atomI.spinIndexList(secondSec[1]);
-		
-		if(spinIndexList_i.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+atomI.atomName+"' don't have any orbital to operate.");
-		if(spinIndexList_j.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+atomI.atomName+"' don't have any orbital to operate.");
-		
-		if(spinIndexList_i.size() != spinIndexList_j.size()){
-			ErrorMessage("Error, operation:\n"+opt+".\n the 'i' and 'j' spin-operation-list does not match eatch other.");
-		}
-		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & label_i = spinIndexList_i[ii].first;
+			auto & tmpChar = spinIndexList_i[ii].first[0];
+			
 			auto & index_i = spinIndexList_i[ii].second;
 			auto & index_j = spinIndexList_j[ii].second;
 			
-			if( label_i == "n" or label_i == "u" or label_i == "d" or label_i == "A")
+			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, vec(0,0,0)));
-			if( label_i == "B")
-				hamElementList.push_back(MatrixElement(index_i, index_j,-val, vec(0,0,0)));
-		}
-	}
-	void		addSiteCoupleHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Site operation: "Fe 1u:1u".	(operate for only a single orbital)
-		 Site operation: "Fe 1u:2d".	(operate between orbitals and spin)
-		 */
-		if( Lat.parameter.STR("spin") == "off"){
-			ErrorMessage("Error, operation:\n"+opt+".\n Cannot be applied for a spin-independent Hamiltonian.");
-		}
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 1 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		if( secondSec[0][secondSec[0].size()-1] != secondSec[1][secondSec[1].size()-1] and
-		   Lat.HSpace() == NAMBU) {
-			ErrorMessage("Error, operation:\n"+opt+".\n Spin-flip term cannot be applied under 'nambu' space.\n Please set the 'space' to 'normal' or 'exnambu'.");
-		}
-		
-		auto atomI = Lat.getAtom();
-		if( optList[0] != atomI.atomName )	return;
-		
-		x_mat sVec = parseSiteString(atomI, varList[0]);
-		x_var val = sVec[0];
-		for( unsigned i=1 ; i<varList.size() ; i++){
-			val = val * parseSiteString(atomI, varList[i])[0];
-		}
-		
-		auto spinIndexList_i = atomI.spinIndexList(secondSec[0]);
-		auto spinIndexList_j = atomI.spinIndexList(secondSec[1]);
-		
-		if(spinIndexList_i.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+atomI.atomName+"' don't have any orbital to operate.");
-		if(spinIndexList_j.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+atomI.atomName+"' don't have any orbital to operate.");
-		
-		if(spinIndexList_i.size() != spinIndexList_j.size()){
-			ErrorMessage("Error, operation:\n"+opt+".\n the 'i' and 'j' spin-operation-list does not match eatch other.");
-		}
-		
-		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & label_i = spinIndexList_i[ii].first;
-			auto & index_i = spinIndexList_i[ii].second;
-			auto & index_j = spinIndexList_j[ii].second;
-			
-			if( label_i == "n" or label_i == "u" or label_i == "d" or label_i == "A"){
-				hamElementList.push_back(MatrixElement(index_i, index_j, val, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), vec(0,0,0)));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), vec(0,0,0)));
 			}
-			if( label_i == "B"){
+			if(tmpChar == 'A'){
+				hamElementList.push_back(MatrixElement(index_i, index_j, val, vec(0,0,0)));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), vec(0,0,0)));
+			}
+			if(tmpChar == 'B'){
 				hamElementList.push_back(MatrixElement(index_i, index_j,-val, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(index_j, index_i,-conj(val), vec(0,0,0)));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(index_j, index_i,-conj(val), vec(0,0,0)));
 			}
 		}
 	}
-	
-	void		addHoppingInt	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
-		 */
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+	void		addHoppingInt	(const PreprocessorInfo & preInfo, bool needHc = false)	{
+		/*****************************************
+		 * hopping > Fe:O:+1+0+0# 1:2 >  0.5
+		 * hopping > Fe:O:+1+0+0# 1:px >  0.5
+		 *****************************************/
 		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
-		auto pair = Lat.getPair(firstSec[2]);
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
+		auto pair = Lat.getPair(optList[2]);
+		if( pair.atomI.atomName != optList[0])	return;
+		if( pair.atomJ.atomName != optList[1])	return;
 		if( !pair.withinRange() )				return;
 		
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
+		if(!pair.atomI.hasOrbital(optList[3]))return;
+		if(!pair.atomJ.hasOrbital(optList[4]))return;
 		
 		x_mat sVec = parseBondString(pair, varList[0]);
 		x_var val = sVec[0];
@@ -346,41 +293,52 @@ public:
 			val = val * parseBondString(pair, varList[i])[0];
 		}
 		
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
+		auto subIndexI = pair.atomI.orbitalIndexList(optList[3]);
+		auto subIndexJ = pair.atomJ.orbitalIndexList(optList[4]);
 		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
 			auto & iterI = subIndexI[ii];
 			auto & iterJ = subIndexJ[ii];
 			char & tmpChar = iterI.first[0];
 			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
 				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
 			}
 			if(tmpChar == 'A'){
 				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
 			}
 			if(tmpChar == 'B'){
 				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,-val, pair.bondIJ()));
+				if(needHc)
+					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second,conj(-val),	-pair.bondIJ()));
 			}
 		}
 	}
-	void		addHoppingIntHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe:O:+1+0+0 1:2".	(operate for only a single orbital)
-		 */
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
+	void		addBondCouple	(const PreprocessorInfo & preInfo, bool needHc = false)	{
+		/*****************************************
+		 * bond > Fe:O:+1+0+0# 1:1 >  0.5
+		 * bond > Fe:O:+1+0+0# 1:px >  0.5
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto pair = Lat.getPair(firstSec[2]);
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
+		auto pair = Lat.getPair(optList[2]);
+		if( pair.atomI.atomName != optList[0])	return;
+		if( pair.atomJ.atomName != optList[1])	return;
 		if( !pair.withinRange() )				return;
 		
-		if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
+		if( Lat.parameter.STR("spin") == "off"){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ " Cannot be applied for a spin-independent Hamiltonian.");
+		}
+		
+		if( optList[3][optList[3].size()-1] != optList[4][optList[4].size()-1] and
+		   Lat.HSpace() == NAMBU) {
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ " Spin-flip term cannot be applied under 'nambu' space.");
+		}
 		
 		x_mat sVec = parseBondString(pair, varList[0]);
 		x_var val = sVec[0];
@@ -388,66 +346,16 @@ public:
 			val = val * parseBondString(pair, varList[i])[0];
 		}
 		
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
-			auto & iterI = subIndexI[ii];
-			auto & iterJ = subIndexJ[ii];
-			char & tmpChar = iterI.first[0];
-			
-			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val,			pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
-			}
-			if(tmpChar == 'A'){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val,			pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
-			}
-			if(tmpChar == 'B'){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,-val,			pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(iterJ.second, iterI.second,conj(-val),	-pair.bondIJ()));
-			}
+		auto spinIndexList_i = pair.atomI.spinIndexList(optList[3]);
+		auto spinIndexList_j = pair.atomJ.spinIndexList(optList[4]);
+		
+		if(spinIndexList_i.size() <= 0){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ "atom \'"+pair.atomI.atomName+"\' don't have such orbital to operate.");
 		}
-	}
-	
-	void		addBondCouple	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe:Fe:+1+0+0 1u:1u".	(operate for only a single orbital)
-		 Bond operation: "Fe:O:+1+0+0# 1u:2d".	(operate between orbitals and spin)
-		 */
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto pair = Lat.getPair(firstSec[2]);
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
-		if( !pair.withinRange() )				return;
-		
-		//if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		//if(!pair.atomJ.hasOrbital(secondSec[1]))return;
-		
-		x_mat sVec = parseBondString(pair, varList[0]);
-		x_var val = sVec[0];
-		for( unsigned i=1 ; i<varList.size() ; i++){
-			val = val * parseBondString(pair, varList[i])[0];
-		}
-		
-		auto spinIndexList_i = pair.atomI.spinIndexList(secondSec[0]);
-		auto spinIndexList_j = pair.atomJ.spinIndexList(secondSec[1]);
-		
-		if(spinIndexList_i.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+pair.atomI.atomName+"' don't have any orbital to operate.");
-		if(spinIndexList_j.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+pair.atomJ.atomName+"' don't have any orbital to operate.");
-		
-		if(spinIndexList_i.size() != spinIndexList_j.size()){
-			ErrorMessage("Error, operation:\n"+opt+".\n The 'i' and 'j' spin-operation-list does not match eatch other.");
+		if(spinIndexList_j.size() <= 0){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+ "atom \'"+pair.atomJ.atomName+"\' don't have such orbital to operate.");
 		}
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
@@ -458,91 +366,40 @@ public:
 			
 			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
+				if( needHc )
+					hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
 			}
 			if(tmpChar == 'A'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
+				if( needHc )
+					hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
 			}
 			if(tmpChar == 'B'){
 				hamElementList.push_back(MatrixElement(index_i, index_j,-val, pair.bondIJ()));
-			}
-		}
-	}
-	void		addBondCoupleHc	(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
-		/*
-		 Bond operation: "Fe:Fe:+1+0+0 1u:1u".	(operate for only a single orbital)
-		 Bond operation: "Fe:O:+1+0+0# 1u:2d".	(operate between orbitals and spin)
-		 */
-		if( optList.size() != 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto firstSec = split(optList[0], ":");
-		auto secondSec = split(optList[1], ":");
-		if( firstSec.size() != 3 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( secondSec.size() != 2 )	{ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto pair = Lat.getPair(firstSec[2]);
-		if( pair.atomI.atomName != firstSec[0])	return;
-		if( pair.atomJ.atomName != firstSec[1])	return;
-		if( !pair.withinRange() )				return;
-		
-		//if(!pair.atomI.hasOrbital(secondSec[0]))return;
-		//if(!pair.atomJ.hasOrbital(secondSec[1]))return;
-		
-		x_mat sVec = parseBondString(pair, varList[0]);
-		x_var val = sVec[0];
-		for( unsigned i=1 ; i<varList.size() ; i++){
-			val = val * parseBondString(pair, varList[i])[0];
-		}
-		
-		auto spinIndexList_i = pair.atomI.spinIndexList(secondSec[0]);
-		auto spinIndexList_j = pair.atomJ.spinIndexList(secondSec[1]);
-		
-		if(spinIndexList_i.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+pair.atomI.atomName+"' don't have any orbital to operate.");
-		if(spinIndexList_j.size() <= 0)
-			ErrorMessage("Error, in the operation: \n'"+opt+
-						 "'\n atom:'"+pair.atomJ.atomName+"' don't have any orbital to operate.");
-		
-		if(spinIndexList_i.size() != spinIndexList_j.size()){
-			ErrorMessage("Error, operation:\n"+opt+".\n The 'i' and 'j' spin-operation-list does not match eatch other.");
-		}
-		
-		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & tmpChar = spinIndexList_i[ii].first[0];
-			
-			auto & index_i = spinIndexList_i[ii].second;
-			auto & index_j = spinIndexList_j[ii].second;
-			
-			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
-				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
-			}
-			if(tmpChar == 'A'){
-				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
-			}
-			if(tmpChar == 'B'){
-				hamElementList.push_back(MatrixElement(index_i, index_j,-val, pair.bondIJ()));
-				hamElementList.push_back(MatrixElement(index_j, index_i, conj(-val),-pair.bondIJ()));
+				if( needHc )
+					hamElementList.push_back(MatrixElement(index_j, index_i, conj(-val),-pair.bondIJ()));
 			}
 		}
 	}
 	
-	void		addScreenCoulomb(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
+	void		addScreenCoulomb(const PreprocessorInfo & preInfo)	{
+		/*****************************************
+		 * screenCoulomb > Fe ~2 >  @:den * alpha
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
 		double radius = Lat.parameter.VAR("bondRadius", 0).real();
-		
-		if( optList.size()	!= 2)	{ ErrorMessage("Error, not a valid operation:\n "+opt); }
-		if( optList[1][0]	!= '~')	{ ErrorMessage("Error, not a valid operation:\n "+opt); }
-		if( varList.size()	< 2)	{ ErrorMessage("Error, not enough arguments:\n "+opt); }
 		
 		string coulombRadiusStr = optList[1];
 		coulombRadiusStr[0] = ' ';
 		double tmpRadius = StrToDouble(coulombRadiusStr);
 		if( tmpRadius > radius){
-			 ErrorMessage("Error, in operation:\n "+opt
-						  +"\n the given radius,~"+DoubleToStr(tmpRadius)+", "
-						  +"is oarger the 'bondRadius(="+DoubleToStr(radius)+")'.");
+			
+			ErrorMessage(preInfo.filename, preInfo.lineNumber,
+						 " \""+preInfo.line+"\"\n"+
+						 " the given radius "+ DoubleToStr(tmpRadius) +
+						 "is larger the 'bondRadius(="+DoubleToStr(radius)+")'.");
 		}
 		radius = tmpRadius;
 		
@@ -611,6 +468,73 @@ public:
 		}
 	}
 	
+	void		addFieldB		(const PreprocessorInfo & preInfo)	{ // svar === " @:cspin * Jse "
+		// *******************************
+		// fieldB	> Fe   > [0,0,1] * B
+		// fieldB	> Fe 1 > [0,0,1] * B
+		// fieldB	> Fe 2 > [0,0,1] * B
+		// *******************************
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != optList[0])	return;
+		
+		auto vectorB = parseSiteString(atomI, varList[0]);
+		r_var multiplyB = 1.0;
+		if( varList.size() == 2) multiplyB = parseSiteString(atomI, varList[1])[0].real();
+		
+		vectorB = vectorB * multiplyB;
+		
+		string orbital = optList[1];
+		r_var Sx =-vectorB[0].real();
+		r_var Sy =-vectorB[1].real();
+		r_var Sz =-vectorB[2].real();
+		
+		
+		switch( Lat.HSpace() ){
+			case NORMAL: {
+				unsigned indexNu = atomI.index(orbital+"u");
+				unsigned indexNd = atomI.index(orbital+"d");
+				
+				hamElementList.push_back(MatrixElement(indexNu, indexNd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNu, indexNu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNd,-Sz			, vec(0,0,0)));
+				break;
+			}
+			case NAMBU: {
+				unsigned indexAu = atomI.index(orbital+"Au");
+				unsigned indexBd = atomI.index(orbital+"Bd");
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				if( Sx > 0.000001 or Sy > 0.000001){
+					ErrorMessage(preInfo.filename, preInfo.lineNumber,
+								 " \""+preInfo.line+"\"\n"+
+								 " Cannot be applied for a spin-depende Nambu space Hamiltonian.");
+				}
+				break;
+			}
+			case EXNAMBU: {
+				unsigned indexAu = atomI.index(orbital+"Au");
+				unsigned indexAd = atomI.index(orbital+"Ad");
+				unsigned indexBu = atomI.index(orbital+"Bu");
+				unsigned indexBd = atomI.index(orbital+"Bd");
+				
+				hamElementList.push_back(MatrixElement(indexAu, indexAd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
+				
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				break;
+			}
+		}
+	}
+
 	void		addPairingS		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{
 		/*
 		 Bond operation: "Fe	1:2".		(site only operation)
@@ -842,81 +766,6 @@ public:
 			if(		(iterI.first == "Bd" and iterJ.first == "Ad")){ hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ())); continue;}
 		}
 	}
-
-	void		addFieldB		(const string & opt, const deque<string> & optList, const deque<string> & varList)	{ // svar === " @:cspin * Jse "
-		// *******************************
-		// fieldB	> Fe   > [0,0,1] * B
-		// fieldB	> Fe 1 > [0,0,1] * B
-		// fieldB	> Fe 2 > [0,0,1] * B
-		// *******************************
-		
-		if( optList.size() > 2){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		if( optList.size() == 1){
-			// This part will not be effective in the quantum Hamiltonian, but goes to the Classical spin part.
-			// That handeling the following operations.
-			// fieldB	> Fe   > [0,0,1] * B (ignored)
-			return;
-		}
-		
-		auto dummyParser = split(opt, ":");
-		if( dummyParser.size() != 1){ ErrorMessage("Error, not a valid operation:\n"+opt); }
-		
-		auto atomI = Lat.getAtom();
-		if( atomI.atomName != optList[0])	return;
-		
-		auto vectorB = parseSiteString(atomI, varList[0]);
-		r_var multiplyB = 1.0;
-		if( varList.size() == 2) multiplyB = parseSiteString(atomI, varList[1])[0].real();
-		
-		vectorB = vectorB * multiplyB;
-		
-		string orbital = optList[1];
-		r_var Sx =-vectorB[0].real();
-		r_var Sy =-vectorB[1].real();
-		r_var Sz =-vectorB[2].real();
-		switch( Lat.HSpace() ){
-			case NORMAL: {
-				unsigned indexNu = atomI.index(orbital+"u");
-				unsigned indexNd = atomI.index(orbital+"d");
-				
-				hamElementList.push_back(MatrixElement(indexNu, indexNd, Sx-Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexNd, indexNu, Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexNu, indexNu, Sz			, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexNd, indexNd,-Sz			, vec(0,0,0)));
-				break;
-			}
-			case NAMBU: {
-				unsigned indexAu = atomI.index(orbital+"Au");
-				unsigned indexBd = atomI.index(orbital+"Bd");
-				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
-				if( Sx > 0.000001 or Sy > 0.000001){
-					ErrorMessage("Error, spin-flip operation:\n"+
-							 opt+
-							 ".\n Cannot be applied for a spin-depende Nambu space Hamiltonian.");
-				}
-				break;
-			}
-			case EXNAMBU: {
-				unsigned indexAu = atomI.index(orbital+"Au");
-				unsigned indexAd = atomI.index(orbital+"Ad");
-				unsigned indexBu = atomI.index(orbital+"Bu");
-				unsigned indexBd = atomI.index(orbital+"Bd");
-				
-				hamElementList.push_back(MatrixElement(indexAu, indexAd, Sx-Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexAd, indexAu, Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
-				
-				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
-				break;
-			}
-		}
-	}
-	
 	void		addChemicalPotential(r_var mu)				{
 		
 		// Apply the Chemical potential
@@ -985,16 +834,17 @@ public:
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
 		hamElementList.clear();
 		while( Lat.iterate() ) {
-			for( auto & iter : tbm.hamParser.getOperationListMap("hundSpin"))	{	addHundSpin		(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("orbital")	)	{	addOrbitalEng	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("site")	)	{	addSiteCouple	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("siteHc")	)	{	addSiteCoupleHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("hopping")	)	{	addHoppingInt	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("hoppingHc"))	{	addHoppingIntHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("bond")	)	{	addBondCouple	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("bondHc")	)	{	addBondCoupleHc	(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("screenCoulomb")){	addScreenCoulomb(iter.opt, iter.optList, iter.varList);}
-			for( auto & iter : tbm.hamParser.getOperationListMap("fieldB")	)	{	addFieldB		(iter.opt, iter.optList, iter.varList);}
+			for( auto & iter : tbm.hamPreprocessor.list_OrbitalEng)		{	addOrbitalEng	(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_HundSpin)		{	addHundSpin		(iter);}
+			
+			for( auto & iter : tbm.hamPreprocessor.list_SiteCouple)		{	addSiteCouple	(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_SiteCoupleHc)	{	addSiteCouple	(iter,true);}
+			for( auto & iter : tbm.hamPreprocessor.list_HoppingInt)		{	addHoppingInt	(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_HoppingIntHc)	{	addHoppingInt	(iter,true);}
+			for( auto & iter : tbm.hamPreprocessor.list_BondCouple)		{	addBondCouple	(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_BondCoupleHc)	{	addBondCouple	(iter,true);}
+			for( auto & iter : tbm.hamPreprocessor.list_ScreenCoulomb)	{	addScreenCoulomb(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_QuantumFieldB)	{	addFieldB		(iter);}
 			
 			// If space==normal The following part will be ignored.
 			if( Lat.HSpace() == NORMAL) continue;
@@ -1020,8 +870,6 @@ public:
 			auto	exp_IJ=exp(-Im*phase);
 			
 			Ham(elem.I, elem.J) += elem.val * exp_IJ;
-			auto tmp = elem.val*exp_IJ;
-			
 		}
 		//cout<<Ham<<endl<<endl;
 		//for( unsigned i=0 ; i<Ham.cols() ; i++)

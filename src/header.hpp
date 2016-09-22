@@ -73,11 +73,19 @@ void ErrorMessage(string errorStr) {
 	cout<<errorStr<<endl<<endl;
 	exit(0);
 }
+	
+void ErrorMessage(string filename, unsigned lineNumber, string errorStr) {
+	cout<<endl;
+	cout<<"In file: \""<< filename <<"\""<<endl;;
+	cout<<"error in "<< lineNumber <<": ";;
+	cout<<errorStr<<endl<<endl;
+	exit(0);
+}
 
 #include "string_func.hpp"
 #include "math_func.hpp"
 #include "block_parser.hpp"
-#include "HamiltonianPreProcessor.hpp"
+#include "HamiltonianParser.hpp"
 #include "import.hpp"
 #include "atom.hpp"
 #include "lattice.hpp"

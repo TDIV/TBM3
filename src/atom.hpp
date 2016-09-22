@@ -202,8 +202,6 @@ public:
 		string orbStr = parser[0];
 		if( IsIntStr(orbStr) ) orbStr = orbitalLabel[StrToInt(orbStr)-1];
 		
-		//cout<<orbStr<<" "<<parser[1]<<endl;
-		
 		string indexKey = "";
 		switch( h_space){
 		case NORMAL:

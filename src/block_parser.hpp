@@ -15,6 +15,17 @@
 //  Created by Yuan Yen Tai on 7/02/15.
 //
 
+struct LineStorage{
+	string filename;
+	unsigned lineNumber;
+	string line;
+	LineStorage(string & _filename, unsigned & _lineNumber, string & _line){
+		filename = _filename;
+		lineNumber = _lineNumber;
+		line = _line;
+	}
+};
+
 // The ParserBase will be used as a base framework to construct any read-in block header.
 class ParserBase{
 public:

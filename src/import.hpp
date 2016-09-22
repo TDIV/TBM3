@@ -20,13 +20,17 @@
  the #Import blocks.
  ######################################################*/
 // Use the TBMImportParser to setup multiple file with the #Import blocks.
+
 class TBMImporter{
 public:
-	
-	set<string>		tbmFilenameStorage;
-	vector<string>	tbmLineStorage;
+	set<string>			tbmFilenameStorage;
+	vector<LineStorage>	tbmLineStorage;
 	
 	TBMImporter(){ }
+	~TBMImporter(){
+		tbmFilenameStorage.clear();
+		tbmLineStorage.clear();
+	}
 	
 	void	append(string filename, string upperLevelFilename)	{
 		
@@ -39,8 +43,11 @@ public:
 			string line;
 			string header = "";
 			string flag	= "";
+			unsigned lineNumber = 0;
 			
             while ( getline(infile, line) ) {
+				lineNumber++;
+				
 				deleteComment(line);
 				istringstream iss(line);
 				iss >> header;
@@ -64,8 +71,8 @@ public:
 						TBMImporter * importer = new TBMImporter();
 						importer->append(line, filename);
 
-						for( auto & line: importer->tbmLineStorage){
-							tbmLineStorage.push_back(line);
+						for( auto & lineStorage: importer->tbmLineStorage){
+							tbmLineStorage.push_back(lineStorage);
 						}
 						
 						for( auto & imp_filename: importer->tbmFilenameStorage){
@@ -79,7 +86,7 @@ public:
 					}
 				}
 				else{
-					tbmLineStorage.push_back(line);
+					tbmLineStorage.push_back(LineStorage(filename, lineNumber, line));
 				}
 			}
 		}
@@ -102,9 +109,11 @@ public:
 	KSymmetryPoint		kSymmPointParser;
 	BondVector			bondVector;
 	InitOrder			initOrder;
-	HamiltonianParser	hamParser;
 	CoreCharge			coreCharge;
 	LDOSList			ldosList;
+	
+	HamiltonianParser	hamParser;
+	HamiltonianPreprocessor	hamPreprocessor;
 	
 	TBMParser(){
 		line = "";
@@ -124,18 +133,24 @@ public:
 			string line;
 			string header = "";
 			string flag	= "";
+			unsigned mainLineNumber = 0;
 			
             while ( getline(infile, line) ) {
+				mainLineNumber++;
+				
 				deleteComment(line);
 				istringstream iss(line);
 				iss >> header;
 				
 				removeSpace(header);
 				
+				auto mainLineStorage = LineStorage(filename, mainLineNumber, line);
+				
 				if	( header == "#Import")	{ flag = header; continue; }
 				else if(header[0] == '#')	{ flag = header; }
 				
 				if	( flag	== "#Import")		{
+					
 					removeSpaceTopToe(line);
 					if( line[0] != '\"' and line[line.size()-1] != '\"'){
 						continue;
@@ -149,8 +164,8 @@ public:
 						TBMImporter * importer = new TBMImporter();
 						importer->append(line, filename);
 
-						for( auto & line: importer->tbmLineStorage){
-							parseLine(line, isWithHamiltonianBlock);
+						for( auto & importLineStorage: importer->tbmLineStorage){
+							parseLine(importLineStorage, isWithHamiltonianBlock);
 						}
 						
 						for( auto & imp_filename: importer->tbmFilenameStorage){
@@ -164,7 +179,7 @@ public:
 					}
 				}
 				else{
-					parseLine(line, isWithHamiltonianBlock);
+					parseLine(mainLineStorage, isWithHamiltonianBlock);
 				}
 			}
 		}
@@ -182,9 +197,14 @@ private:
 	string flag = "";
 	string sub_flag = "";
 
-	void	parseLine(string line, bool withHamiltonianBlock = true){
+	void	parseLine(LineStorage & lineStorage, bool withHamiltonianBlock = true){
+		
+		auto & line = lineStorage.line;
 		
 		deleteComment(line); // Clean the commented words
+		removeSpaceTopToe(line);
+		if(line.empty()) return;
+		
 		istringstream iss(line);
 		iss >> header;
 		if	( header == parameter())		{flag = header; return;}
@@ -206,8 +226,10 @@ private:
 		if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				return;	}
 		if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	return;	}
 		
-		if	( flag == hamParser() and
-				withHamiltonianBlock)		{ hamParser.append(line);	return; }
+		if	( flag == hamParser() and withHamiltonianBlock)		{
+			hamParser.append(line);
+			hamPreprocessor.append(lineStorage);	return;
+		}
 		
 	}
 };
