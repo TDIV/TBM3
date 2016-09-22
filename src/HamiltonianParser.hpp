@@ -53,6 +53,7 @@ public:
 	vector<PreprocessorInfo>	list_BondCouple;
 	vector<PreprocessorInfo>	list_BondCoupleHc;
 	vector<PreprocessorInfo>	list_ScreenCoulomb;
+	vector<PreprocessorInfo>	list_IntraHubbard;
 	vector<PreprocessorInfo>	list_SuperEx;
 	vector<PreprocessorInfo>	list_DMEx;
 	vector<PreprocessorInfo>	list_ClassicalFieldB;
@@ -112,6 +113,19 @@ public:
 			}
 			
 			list_HundSpin.push_back(PreprocessorInfo(lineStorage, optList, varSept));
+		}
+		else if	(lineSept[0] == "intraHubbard")	{
+			/*****************************************
+			 * intraHubbard > Fe 1 > U
+			 *****************************************/
+			if( optSept.size() != 2){
+				ErrorMessage(lineStorage.filename,
+							 lineStorage.lineNumber,
+							 " \""+lineStorage.line+"\"\n"+
+							 " is not a valid input formate.");
+			}
+			
+			list_IntraHubbard.push_back(PreprocessorInfo(lineStorage, optList, varSept));
 		}
 		else if	(lineSept[0] == "site")		{
 			/*****************************************

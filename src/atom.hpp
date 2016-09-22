@@ -144,6 +144,7 @@ public:
 	}
 	
 	vector<pair<string, unsigned> > &	allIndexList	()					{ return indexList; }
+	deque<string>	&					allOrbitalLabel	()					{ return orbitalLabel; }
 	vector<pair<string, unsigned> >		orbitalIndexList(string orb)		{
 		vector<pair<string, unsigned> > subIndexList;
 		if(!hasOrbital(orb)){ return subIndexList; }

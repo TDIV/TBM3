@@ -13,7 +13,7 @@
 //  TBM^3
 //
 
-#include "tbm3.hpp"
+#include "header.hpp"
 
 #include <iostream>
 #include <random>

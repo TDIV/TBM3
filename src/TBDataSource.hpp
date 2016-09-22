@@ -102,6 +102,30 @@ public:
 	/*------------------------------------------------
 	 Using these methods to construct the "hamElementList".
 	 -------------------------------------------------*/
+	void		addChemicalPotential(r_var mu)				{
+		
+		// Apply the Chemical potential
+		//r_var mu = Lat.parameter.VAR("Mu",0).real();
+		while( Lat.iterate() ){
+			auto atomI = Lat.getAtom();
+			for( auto & index: atomI.allIndexList()){
+				auto labelParser = split(index.first, ".");
+				
+				if( labelParser.size() == 2){
+					string sub_space = labelParser[1];
+					if(sub_space[0] == 'n' or sub_space[0] == 'u' or sub_space[0] == 'd'){
+						hamElementList.push_back(MatrixElement(index.second, index.second,-mu, vec(0,0,0)));
+					}
+					if(sub_space[0] == 'A'){
+						hamElementList.push_back(MatrixElement(index.second, index.second,-mu, vec(0,0,0)));
+					}
+					if(sub_space[0] == 'B'){
+						hamElementList.push_back(MatrixElement(index.second, index.second, mu, vec(0,0,0)));
+					}
+				}
+			}
+		}
+	}
 
 	void		addHundSpin		(const PreprocessorInfo & preInfo)	{
 		/*****************************************
@@ -657,25 +681,106 @@ public:
 		}
 	}
 	
-	void		addChemicalPotential(r_var mu)				{
+	void		addIntraHubbard	(const PreprocessorInfo & preInfo)	{
+		/*****************************************
+		 * intraHubbard > Fe 2 >  U
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
 		
-		// Apply the Chemical potential
-		//r_var mu = Lat.parameter.VAR("Mu",0).real();
-		while( Lat.iterate() ){
-			auto atomI = Lat.getAtom();
-			for( auto & index: atomI.allIndexList()){
-				auto labelParser = split(index.first, ".");
+		if( Lat.parameter.STR("spin") == "off"){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " Hubbard model cannot be constructed under spin-independent space.");
+		}
+		if( Lat.HSpace() == NAMBU ){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " a model for 3-dimensional spin is not applicable with NAMBU space.");
+		}
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != optList[0]){ return; } // Name does not match.
+		if( !atomI.hasOrbital(optList[1])){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " The atom, \'"+atomI.atomName+"\', has no orbital, "+optList[1]+".");
+		}
+
+		string orbitalNumber = atomI.getOrbitalNumber(optList[1]);
+		string orderKey = "@:"+orbitalNumber+":4den";
+		
+		auto orderI = order.findOrder(atomI, orderKey);
+		if( !orderI.first ){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " The 4 density order parameter,"+orderKey+" , was not defined.");
+		}
+		
+		r_var hubbardU = parseSiteString(atomI, varList[0])[0].real();
+		for( unsigned i=1 ; i<varList.size() ; i++){
+			hubbardU = hubbardU * parseSiteString(atomI, varList[i])[0].real();
+		}
+		
+		x_var	cI_uu = hubbardU * 0.5 * (orderI.second[0].real() + orderI.second[3].real());
+		x_var	cI_dd = hubbardU * 0.5 * (orderI.second[0].real() - orderI.second[3].real());
+		x_var	cI_ud = hubbardU * 0.5 * (orderI.second[1].real() - Im * orderI.second[2].real());
+		x_var	cI_du = hubbardU * 0.5 * (orderI.second[1].real() + Im * orderI.second[2].real());
+		//cout<<orderKey<<" "<<cI_uu<<" "<<cI_dd<<" "<<cI_ud<<" "<<cI_du<<endl;
+
+		////*****************************************************************
+		//// Attribute the surrounding Mean-field Coulomb potential to the Hamiltonian.
+		////*****************************************************************
+		
+		auto subIndexI = atomI.orbitalIndexList(optList[1]);
+		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
+			for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
+				auto & iterI = subIndexI[ii];
+				auto & labelI = iterI.first;
+				auto & indexI = iterI.second;
 				
-				if( labelParser.size() == 2){
-					string sub_space = labelParser[1];
-					if(sub_space[0] == 'n' or sub_space[0] == 'u' or sub_space[0] == 'd'){
-						hamElementList.push_back(MatrixElement(index.second, index.second,-mu, vec(0,0,0)));
+				auto & iterJ = subIndexI[jj];
+				auto & labelJ = iterJ.first;
+				auto & indexJ = iterJ.second;
+				
+				if( Lat.HSpace() == NORMAL ){
+					// Normal part
+					if( labelI == "u" and labelJ == "u"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
 					}
-					if(sub_space[0] == 'A'){
-						hamElementList.push_back(MatrixElement(index.second, index.second,-mu, vec(0,0,0)));
+					if( labelI == "d" and labelJ == "d"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
 					}
-					if(sub_space[0] == 'B'){
-						hamElementList.push_back(MatrixElement(index.second, index.second, mu, vec(0,0,0)));
+					if( labelI == "u" and labelJ == "d"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
+					}
+					if( labelI == "d" and labelJ == "u"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
+					}
+				}
+				if( Lat.HSpace() == EXNAMBU){
+					// Particle part
+					if( labelI == "Au" and labelJ == "Au"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Ad" and labelJ == "Ad"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Au" and labelJ == "Ad"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Ad" and labelJ == "Au"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
+					}
+					
+					// Hole part
+					if( labelI == "Bu" and labelJ == "Bu"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_dd,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Bd" and labelJ == "Bd"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_uu,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Bu" and labelJ == "Bd"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_du,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Bd" and labelJ == "Bu"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_ud,	vec(0,0,0))); continue;
 					}
 				}
 			}
@@ -735,6 +840,7 @@ public:
 			for( auto & iter : tbm.hamPreprocessor.list_BondCouple)		{	addBondCouple	(iter);}
 			for( auto & iter : tbm.hamPreprocessor.list_BondCoupleHc)	{	addBondCouple	(iter,true);}
 			for( auto & iter : tbm.hamPreprocessor.list_ScreenCoulomb)	{	addScreenCoulomb(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_IntraHubbard)	{	addIntraHubbard	(iter);}
 			for( auto & iter : tbm.hamPreprocessor.list_QuantumFieldB)	{	addFieldB		(iter);}
 			
 			// If space==normal The following part will be ignored.
@@ -818,7 +924,6 @@ public:
 			auto atomI = Lat.getAtom();
 			
 			map<string, x_mat> fourDensity;
-			x_mat	totalDen(1,1);
 			
 			auto & indexLabel= atomI.allIndexList() ;
 			for( unsigned i=0 ; i<indexLabel.size() ; i++)
@@ -834,7 +939,6 @@ public:
 				bool theSame_AB_space = true;
 				if( Lat.HSpace() == EXNAMBU and parser_I[1][0] != parser_J[1][0]) theSame_AB_space = false;
 				
-				
 				if( parser_I[0] == parser_J[0] and theSame_AB_space){
 					
 					if( fourDensity.find(parser_I[0]) == fourDensity.end() ) {
@@ -846,76 +950,69 @@ public:
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen;
 						r4den[3] += tmpDen;
-						totalDen[0] += tmpDen;
 					}
 					if( parser_I[1] == "d" and parser_J[1] == "d"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen;
 						r4den[3] -= tmpDen;
-						totalDen[0] += tmpDen;
 					}
 					if( parser_I[1] == "u" and parser_J[1] == "d"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real();
-						r4den[2] -= tmpDen.imag();
+						r4den[2] += tmpDen.imag();
 					}
 					if( parser_I[1] == "d" and parser_J[1] == "u"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real();
-						r4den[2] += tmpDen.imag();
+						r4den[2] -= tmpDen.imag();
 					}
 					
 					if( parser_I[1] == "Au" and parser_J[1] == "Au"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen*0.5;
 						r4den[3] += tmpDen*0.5;
-						totalDen[0] += tmpDen*0.5;
 					}
 					if( parser_I[1] == "Ad" and parser_J[1] == "Ad"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += tmpDen*0.5;
 						r4den[3] -= tmpDen*0.5;
-						totalDen[0] += tmpDen*0.5;
-					}                     
+					}
 					if( parser_I[1] == "Au" and parser_J[1] == "Ad"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real()*0.5;
-						r4den[2] -= tmpDen.imag()*0.5;
+						r4den[2] += tmpDen.imag()*0.5;
 					}                            
 					if( parser_I[1] == "Ad" and parser_J[1] == "Au"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real()*0.5;
-						r4den[2] += tmpDen.imag()*0.5;
+						r4den[2] -= tmpDen.imag()*0.5;
 					}                            
 					
 					if( parser_I[1] == "Bu" and parser_J[1] == "Bu"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += 1-tmpDen*0.5;
 						r4den[3] += 1-tmpDen*0.5;
-						totalDen[0] += 1-tmpDen*0.5;
-					}                       
+					}
 					if( parser_I[1] == "Bd" and parser_J[1] == "Bd"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[0] += 1-tmpDen*0.5;
 						r4den[3] -= 1-tmpDen*0.5;
-						totalDen[0] += 1-tmpDen*0.5;
-					}                       
+					}
 					if( parser_I[1] == "Bu" and parser_J[1] == "Bd"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += -tmpDen.real()*0.5;
-						r4den[2] -= -tmpDen.imag()*0.5;
+						r4den[2] += -tmpDen.imag()*0.5;
 					}                             
 					if( parser_I[1] == "Bd" and parser_J[1] == "Bu"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += -tmpDen.real()*0.5;
-						r4den[2] += -tmpDen.imag()*0.5;
+						r4den[2] -= -tmpDen.imag()*0.5;
 					}
 					for( unsigned ii=0 ; ii<r4den.size() ; ii++)
 						if( abs(r4den[ii]) < 0.000001 ) r4den[ii] = 0;
 				}
 			}
 			
-			//order(atomI.atomName+" den") = totalDen;
 			
 			for( auto & iter: fourDensity){
 				order(atomI.atomName+" "+iter.first+":4den") = iter.second;

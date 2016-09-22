@@ -466,22 +466,50 @@ protected:
 		while( iterate() ){
 			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
-			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
+			auto parameter_new = tbd.order.findOrder(Lat.getAtom(),"@:den");
 			
 			if( parameter_old.first and parameter_new.first ){
 				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
 				if( max_den_diff < den_diff ) max_den_diff = den_diff;
+				
+				auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
+				newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
 			}
 			
-			auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
-			
-			newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
-			
-			auto parameter_coulomb = stbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
+			auto parameter_coulomb = tbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
 			if( parameter_coulomb.first ){
 				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
 			}
 			
+		}
+		
+		if( tbd.Lat.parameter.STR("spin") == "on" )
+		while( iterate() ){
+			auto atom = Lat.getAtom();
+			auto orbitals = atom.allOrbitalLabel();
+			
+			for( auto orb: orbitals ){
+				string orbN = atom.getOrbitalNumber(orb);
+				string orderKey = "@:"+orbN+":4den";
+				
+				auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	orderKey);
+				auto parameter_new = tbd.order.findOrder(Lat.getAtom(),orderKey);
+			
+				if( parameter_old.first and parameter_new.first ){
+					auto vdiff = parameter_old.second - parameter_new.second;
+					auto den_diff0 = abs(vdiff[0]);
+					auto den_diff1 = abs(vdiff[1]);
+					auto den_diff2 = abs(vdiff[2]);
+					auto den_diff3 = abs(vdiff[3]);
+					if( max_den_diff < den_diff0 ) max_den_diff = den_diff0;
+					if( max_den_diff < den_diff1 ) max_den_diff = den_diff1;
+					if( max_den_diff < den_diff2 ) max_den_diff = den_diff2;
+					if( max_den_diff < den_diff3 ) max_den_diff = den_diff3;
+					
+					auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
+					newOrder.setNew(Lat.getAtom().atomIndex, orderKey, mixOrder);
+				}
+			}
 		}
 		
 		tbd.calculateEnergy();
