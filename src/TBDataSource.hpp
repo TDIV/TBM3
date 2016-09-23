@@ -270,6 +270,8 @@ public:
 		for( unsigned i=1 ; i<varList.size() ; i++){
 			val = val * parseSiteString(atomI, varList[i])[0];
 		}
+		cout<<varList[0]<<endl;
+		cout<<val<<endl;
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
 			auto & tmpChar = spinIndexList_i[ii].first[0];
@@ -1056,6 +1058,11 @@ public:
 			replaceAll(svar, "[", "");
 			replaceAll(svar, "]", "");
 			xvar = StrToXVec(svar);
+		}
+		else if( svar[0] == '(' and svar[svar.size()-1] == ')'){ // Complex type
+			x_mat tmp(1,1);
+			tmp[0] = StrToComplex(svar);
+			xvar = tmp;
 		}
 		else if( IsFloatStr(svar)){ // a number
 			x_mat tmp(1,1);
