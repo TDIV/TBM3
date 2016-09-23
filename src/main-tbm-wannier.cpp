@@ -12,6 +12,9 @@
 //  main-tbm-wannier.cpp
 //  TBM^3
 //
+//
+//  Created by Yuan Yen Tai on 9/17/16.
+//
 
 #include "header.hpp"
 
@@ -211,10 +214,13 @@ public:
 				auto subAtomJ_name = subAtomJ.get<0>();
 				
 				// ****** Get bondIJ of sub atoms pair
-				r_mat posI(1,3), posJ(1,3);
+				r_mat posI(1,3), posJ(1,3), bondIJ(1,3);
 				posI = subAtomI.get<1>();
 				posJ = N0 * avec[0] + N1 * avec[1] + N2 * avec[2] + subAtomJ.get<1>();
-				auto bondIJ = posJ - posI;
+				
+				for( unsigned i=0 ; i<bondIJ.size() ; i++){
+					bondIJ[i] = posJ[i] - posI[i];
+				}
 				
 				// ****** Get orbitals(spins) of sub atoms pair
 				auto orbI = subAtomI.get<2>();
