@@ -4,13 +4,14 @@
 |                                                            |
 | This file is distributed under the terms of the BSD        |
 | Berkeley Software Distribution. See the file `LICENSE' in  |
-| the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| the root directory of the present distribution.            |
 |                                                            |
 |-----------------------------------------------------------*/
 //
 //  atom.hpp
 //  TBM^3
+//
+//  Created by Yuan Yen Tai on 7/19/16.
 //
 
 namespace bg = boost::geometry;

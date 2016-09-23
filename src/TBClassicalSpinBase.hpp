@@ -4,14 +4,16 @@
 |                                                            |
 | This file is distributed under the terms of the BSD        |
 | Berkeley Software Distribution. See the file `LICENSE' in  |
-| the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| the root directory of the present distribution.            |
 |                                                            |
 |-----------------------------------------------------------*/
 //
 //  TBClassicalSpinBase.hpp
 //  TBM^3
 //
+//  Created by Yuan Yen Tai on 7/19/16.
+//
+
 /*
  This structure will be passed through all future models.
  It can be used to construct most of the classical spin interactions for total energy/LLG dynamic calculation:

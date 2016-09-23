@@ -4,13 +4,14 @@
 |                                                            |
 | This file is distributed under the terms of the BSD        |
 | Berkeley Software Distribution. See the file `LICENSE' in  |
-| the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| the root directory of the present distribution.            |
 |                                                            |
 |-----------------------------------------------------------*/
 //
 //  TBModelBase.hpp
 //  TBM^3
+//
+//  Created by Yuan Yen Tai on 7/19/16.
 //
 
 // -----------------------------------
@@ -253,6 +254,8 @@ protected:
 		return totalDen;
 	}
 	void	calculateChemicalPotential	(bool printResult = false)							{
+		
+		stbd.order  = tbd.order;
 
 		KHamEvd(stbd, false);
 		double	destDen = countTotalElectron();
@@ -466,7 +469,7 @@ protected:
 		while( iterate() ){
 			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
-			auto parameter_new = tbd.order.findOrder(Lat.getAtom(),"@:den");
+			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
 			
 			if( parameter_old.first and parameter_new.first ){
 				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
@@ -476,11 +479,10 @@ protected:
 				newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
 			}
 			
-			auto parameter_coulomb = tbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
+			auto parameter_coulomb = stbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
 			if( parameter_coulomb.first ){
 				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
 			}
-			
 		}
 		
 		if( tbd.Lat.parameter.STR("spin") == "on" )

@@ -4,14 +4,14 @@
 |                                                            |
 | This file is distributed under the terms of the BSD        |
 | Berkeley Software Distribution. See the file `LICENSE' in  |
-| the root directory of the present distribution, or         |
-| https://en.wikipedia.org/wiki/BSD_licenses.                |
+| the root directory of the present distribution.            |
 |                                                            |
 |-----------------------------------------------------------*/
-
 //
 //  TBDataSource.hpp
 //  TBM^3
+//
+//  Created by Yuan Yen Tai on 7/19/16.
 //
 
 struct	MatrixElement{
@@ -90,11 +90,11 @@ public:
 	
 	map<string, double>		energyMap;
 
-	void initHam	()		{
+	void		initHam		()		{
 		Ham = x_mat(Lat.indexSize(), Lat.indexSize());
 		initOrder();
 	}
-	void initOrder	()		{
+	void		initOrder	()		{
 		order.clear();
 		order.load();
 	}
