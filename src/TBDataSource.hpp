@@ -270,8 +270,6 @@ public:
 		for( unsigned i=1 ; i<varList.size() ; i++){
 			val = val * parseSiteString(atomI, varList[i])[0];
 		}
-		cout<<varList[0]<<endl;
-		cout<<val<<endl;
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
 			auto & tmpChar = spinIndexList_i[ii].first[0];
