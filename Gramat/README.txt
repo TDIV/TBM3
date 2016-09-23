@@ -1,5 +1,5 @@
 GraMat (Graphic Card Matrix Interface) is a library that
-I developed during my Ph.D study. This library can help
+I (Dr. Yuan-Yen Tai) developed during my Ph.D study. This library can help
 boost the use of the GPU based MAGMA library which solve
 linear algebra equations.
 GraMat integrate single, double, single-complex and double-
