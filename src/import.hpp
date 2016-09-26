@@ -11,7 +11,7 @@
 //  import.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 9/19/16.
+//  Created by Yuan-Yen Tai on 9/19/16.
 //
 
 /*######################################################

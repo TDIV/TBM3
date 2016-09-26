@@ -11,7 +11,7 @@
 //  TBModelBase.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 7/19/16.
+//  Created by Yuan-Yen Tai on 7/19/16.
 //
 
 // -----------------------------------
@@ -466,6 +466,7 @@ protected:
 		
 		double max_den_diff = 0;
 		
+		// Mixing and difference checking for @:den
 		while( iterate() ){
 			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
@@ -475,16 +476,19 @@ protected:
 				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
 				if( max_den_diff < den_diff ) max_den_diff = den_diff;
 				
+				// Set up updated @:den order parameter
 				auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
 				newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
 			}
 			
+			// Set up updated @:coulomb order parameter
 			auto parameter_coulomb = stbd.order.findOrder(Lat.getAtom(),	"@:coulomb");
 			if( parameter_coulomb.first ){
 				newOrder.setNew(Lat.getAtom().atomIndex, "@:coulomb", parameter_coulomb.second);
 			}
 		}
 		
+		// Mixing and difference checking for @:n:4den
 		if( tbd.Lat.parameter.STR("spin") == "on" )
 		while( iterate() ){
 			auto atom = Lat.getAtom();
@@ -508,6 +512,7 @@ protected:
 					if( max_den_diff < den_diff2 ) max_den_diff = den_diff2;
 					if( max_den_diff < den_diff3 ) max_den_diff = den_diff3;
 					
+					// Set up updated @:n:4den order parameter
 					auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
 					newOrder.setNew(Lat.getAtom().atomIndex, orderKey, mixOrder);
 				}

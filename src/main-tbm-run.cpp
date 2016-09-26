@@ -12,7 +12,7 @@
 //  main-tbm-run.cpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 7/19/16.
+//  Created by Yuan-Yen Tai on 7/19/16.
 //
 
 #include "header.hpp"
@@ -46,7 +46,6 @@ public:
 		cudaSetDevice((int)Lat.parameter.VAR("cudaSetDevice", 0).real());
 		
 		cout<<endl<<"Starting..."<<endl<<endl;
-		
 		
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
 			
@@ -102,8 +101,8 @@ public:
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 			
 		double den_diff = 1;
-		double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
-		den_diff_bound = 0.1;
+		//double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
+		double den_diff_bound = Lat.parameter.VAR("den_diff_bound",0.1).real();
 		
 		while( den_diff > den_diff_bound and iterationStepIncr() ){
 			

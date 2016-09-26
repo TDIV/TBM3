@@ -12,11 +12,6 @@
 from numpy import *
 import sys
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import AxesGrid
-
-# The recommended way to use wx with mpl is with the WXAgg backend. 
-import matplotlib
-
 
 class Band:
 	def __init__(self,filename,shift=0):

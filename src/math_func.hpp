@@ -11,7 +11,7 @@
 //  math_func.h
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 9/10/15.
+//  Created by Yuan-Yen Tai on 9/10/15.
 //
 
 #ifndef _math_func_h
