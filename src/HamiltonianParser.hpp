@@ -11,7 +11,7 @@
 //  HamiltonianPreprocessor.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 9/21/16.
+//  Created by Yuan-Yen Tai on 9/21/16.
 //
 struct PreprocessorInfo{
 	

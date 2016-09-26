@@ -11,7 +11,7 @@
 //  string_func.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 7/15/15.
+//  Created by Yuan-Yen Tai on 7/15/15.
 //
 
 #ifndef _string_func_h

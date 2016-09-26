@@ -12,7 +12,10 @@
 from numpy import *
 import sys
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1ef905b1c9bc21b3527efee338376c99b652a033
 
 class Band:
 	def __init__(self,filename,shift=0):

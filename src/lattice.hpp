@@ -11,7 +11,7 @@
 //  lattice.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 7/19/16.
+//  Created by Yuan-Yen Tai on 7/19/16.
 //
 
 // Declare the RTree object.

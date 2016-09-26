@@ -11,7 +11,7 @@
 //  order_parameter.hpp
 //  TBM^3
 //
-//  Created by Yuan Yen Tai on 7/19/16.
+//  Created by Yuan-Yen Tai on 7/19/16.
 //
 
 // Define the reverse compare map.
