@@ -328,8 +328,9 @@ public:
 				x_mat Force = curl(Si, FI);			// force
 				x_mat dampForce=curl( Force, Si);	// damping force
 				
-				x_mat Snew =Si	+	Force * variational_dt
-								+	dampForce * variational_dt * LLGdamping;
+				x_mat d_Force = Force * variational_dt;
+				x_mat d_dampForce = dampForce * (variational_dt * LLGdamping);
+				x_mat Snew =Si	+	d_Force +	d_dampForce;
 				
 				normalizeXVec(Snew);
 				

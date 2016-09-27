@@ -60,23 +60,31 @@ class BasisVector:			public ParserBase{
 			for(int j=-1 ; j<=1 ; j++)
 			for(int k=-1 ; k<=1 ; k++){
 				if( i!=0 or j!=0 or k!=0){
-					r_var value = abs( i*N*A[0] +j*N*A[1] +k*N*A[2]);
+					r_mat A0 = i*N*A[0];
+					r_mat A1 = j*N*A[1];
+					r_mat A2 = k*N*A[2];
+					r_var value = abs( A0+A1+A2);
 					if( minValue > value  ) minValue = value;
 				}
 			}
 		}
-		else if( A.size() == 2){
-			for(int i=-1 ; i<=1 ; i++)
-			for(int j=-1 ; j<=1 ; j++){
-				if( i!=0 or j!=0){
-					r_var value = abs( i*N*A[0] +j*N*A[1]);
-					if( minValue > value  ) minValue = value;
-				}
-			}
+		else{
+			ErrorMessage("Error, should be given a 3D basis vector.");
 		}
-		else if( A.size() == 1){
-			minValue = abs( N*A[0] );
-		}
+		//else if( A.size() == 2){
+		//	for(int i=-1 ; i<=1 ; i++)
+		//	for(int j=-1 ; j<=1 ; j++){
+		//		if( i!=0 or j!=0){
+		//			r_mat A0 = i*N*A[0];
+		//			r_mat A1 = i*N*A[1];
+		//			r_var value = abs( A0+A1 );
+		//			if( minValue > value  ) minValue = value;
+		//		}
+		//	}
+		//}
+		//else if( A.size() == 1){
+		//	minValue = abs( N*A[0] );
+		//}
 
 		return minValue;
 	}

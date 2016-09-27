@@ -20,7 +20,9 @@
 vector<r_mat> make_line(r_mat point_a, r_mat point_b, unsigned Nsteps=10){
 	vector<r_mat> ll;
 	for (double t=0; t<1; t+=1.0/Nsteps) {
-		r_mat position= (point_b-point_a)*t+point_a;
+		r_mat position= point_b-point_a;
+		position = position*t;
+		position = position+point_a;
 		ll.push_back(position);
 	}
 	
@@ -103,7 +105,10 @@ protected:
 		auto & b3 = B[2];
 			
 		for(auto & kp: tbm.kSymmPointParser.kSymmPointList){
-			add_ksymm_point(kp.first, +kp.second[0]*b1 +kp.second[1]*b2 +kp.second[2]*b3);
+			r_mat B1 = kp.second[0]*b1;
+			r_mat B2 = kp.second[1]*b2;
+			r_mat B3 = kp.second[2]*b3;
+			add_ksymm_point(kp.first, B1+B2+B3);
 		}
 		
 		vector<pair<string, r_mat> >	highSymmetryLine;
@@ -162,29 +167,29 @@ protected:
 		
 		rtbd.KEigenValVec.clear();
 		
-		if( Nb.size() == 1){
-			auto & b1 = B[0];
-			auto N1 = Nb[0].real();
-			
-			for (double i1=0; i1<N1; i1++){
-				auto kPoint = (i1/N1)*b1;
-				auto  tmpEVV = rtbd.HamEvd(kPoint);
-				if( tmpEVV.message == "Success")
-					rtbd.KEigenValVec.push_back(tmpEVV);
-			}
-		}
-		if( Nb.size() == 2){
-			auto & b1 = B[0];
-			auto & b2 = B[1];
-			auto N1 = Nb[0].real(), N2 = Nb[1].real();
-			for (double i1=0; i1<N1; i1++)
-			for (double i2=0; i2<N2; i2++){
-				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
-				auto  tmpEVV = rtbd.HamEvd(kPoint);
-				if( tmpEVV.message == "Success")
-					rtbd.KEigenValVec.push_back(tmpEVV);
-			}
-		}
+		//if( Nb.size() == 1){
+		//	auto & b1 = B[0];
+		//	auto N1 = Nb[0].real();
+		//	
+		//	for (double i1=0; i1<N1; i1++){
+		//		auto kPoint = (i1/N1)*b1;
+		//		auto  tmpEVV = rtbd.HamEvd(kPoint);
+		//		if( tmpEVV.message == "Success")
+		//			rtbd.KEigenValVec.push_back(tmpEVV);
+		//	}
+		//}
+		//if( Nb.size() == 2){
+		//	auto & b1 = B[0];
+		//	auto & b2 = B[1];
+		//	auto N1 = Nb[0].real(), N2 = Nb[1].real();
+		//	for (double i1=0; i1<N1; i1++)
+		//	for (double i2=0; i2<N2; i2++){
+		//		auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
+		//		auto  tmpEVV = rtbd.HamEvd(kPoint);
+		//		if( tmpEVV.message == "Success")
+		//			rtbd.KEigenValVec.push_back(tmpEVV);
+		//	}
+		//}
 		if( Nb.size() == 3){
 			auto & b1 = B[0];
 			auto & b2 = B[1];
@@ -193,7 +198,10 @@ protected:
 			for (double i1=0; i1<N1; i1++)
 			for (double i2=0; i2<N2; i2++)
 			for (double i3=0; i3<N3; i3++) {
-				auto kPoint = (i1/N1)*b1 + (i2/N2)*b2 + (i3/N3)*b3;
+				r_mat B1 = (i1/N1)*b1;
+				r_mat B2 = (i1/N1)*b2;
+				r_mat B3 = (i1/N1)*b3;
+				auto kPoint = B1+B2+B3;
 				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
 					rtbd.KEigenValVec.push_back(tmpEVV);
@@ -477,7 +485,9 @@ protected:
 				if( max_den_diff < den_diff ) max_den_diff = den_diff;
 				
 				// Set up updated @:den order parameter
-				auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
+				auto para_old = ratio_a * parameter_old.second;
+				auto para_new = ratio_b * parameter_new.second;
+				auto mixOrder = para_old + para_new;
 				newOrder.set(Lat.getAtom().atomIndex, "@:den", mixOrder);
 			}
 			
@@ -513,7 +523,9 @@ protected:
 					if( max_den_diff < den_diff3 ) max_den_diff = den_diff3;
 					
 					// Set up updated @:n:4den order parameter
-					auto mixOrder = ratio_a * parameter_old.second + ratio_b * parameter_new.second;
+					auto para_old = ratio_a * parameter_old.second;
+					auto para_new = ratio_b * parameter_new.second;
+					auto mixOrder = para_old + para_new;
 					newOrder.setNew(Lat.getAtom().atomIndex, orderKey, mixOrder);
 				}
 			}
@@ -570,35 +582,41 @@ public:
 				for(unsigned index=0 ; index<atomList.size() ; index++){
 					Atom tmpAtom;
 					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1] +k*AVec[2];
+					r_mat A0 = i*AVec[0];
+					r_mat A1 = i*AVec[1];
+					r_mat A2 = i*AVec[2];
+					tmpAtom.pos = tmpAtom.pos+ A0 + A1 + A2;
 					expandedAtomList.push_back(tmpAtom);
 					expandedOptList.push_back(optList[index]);
 				}
 			}
 		}
-		else if	( AVec.size() == 2){
-			for( unsigned i = 0 ; i<N1 ; i+=1)
-			for( unsigned j = 0 ; j<N2 ; j+=1){
-				for(unsigned index=0 ; index<atomList.size() ; index++){
-					Atom tmpAtom;
-					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1];
-					expandedAtomList.push_back(tmpAtom);
-					expandedOptList.push_back(optList[index]);
-				}
-			}
+		else{
+			ErrorMessage("Error, should be given a 3D basis vector.");
 		}
-		else if	( AVec.size() == 1){
-			for( unsigned i = 0 ; i<N1 ; i+=1){
-				for(unsigned index=0 ; index<atomList.size() ; index++){
-					Atom tmpAtom;
-					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0];
-					expandedAtomList.push_back(tmpAtom);
-					expandedOptList.push_back(optList[index]);
-				}
-			}
-		}
+		//else if	( AVec.size() == 2){
+		//	for( unsigned i = 0 ; i<N1 ; i+=1)
+		//	for( unsigned j = 0 ; j<N2 ; j+=1){
+		//		for(unsigned index=0 ; index<atomList.size() ; index++){
+		//			Atom tmpAtom;
+		//			tmpAtom = atomList[index];
+		//			tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1];
+		//			expandedAtomList.push_back(tmpAtom);
+		//			expandedOptList.push_back(optList[index]);
+		//		}
+		//	}
+		//}
+		//else if	( AVec.size() == 1){
+		//	for( unsigned i = 0 ; i<N1 ; i+=1){
+		//		for(unsigned index=0 ; index<atomList.size() ; index++){
+		//			Atom tmpAtom;
+		//			tmpAtom = atomList[index];
+		//			tmpAtom.pos = tmpAtom.pos+ i*AVec[0];
+		//			expandedAtomList.push_back(tmpAtom);
+		//			expandedOptList.push_back(optList[index]);
+		//		}
+		//	}
+		//}
 		
 		// Save the expanded file.
 		ofstream outfile(filename_expand);

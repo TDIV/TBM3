@@ -17,6 +17,7 @@
 //
 
 #include "header.hpp"
+using namespace std;
 
 #include <iostream>
 #include <random>
@@ -216,7 +217,10 @@ public:
 				// ****** Get bondIJ of sub atoms pair
 				r_mat posI(1,3), posJ(1,3), bondIJ(1,3);
 				posI = subAtomI.get<1>();
-				posJ = N0 * avec[0] + N1 * avec[1] + N2 * avec[2] + subAtomJ.get<1>();
+				r_mat A0 = N0 * avec[0];
+				r_mat A1 = N1 * avec[1];
+				r_mat A2 = N2 * avec[2];
+				posJ = A0 + A1 + A2 + subAtomJ.get<1>();
 				
 				for( unsigned i=0 ; i<bondIJ.size() ; i++){
 					bondIJ[i] = posJ[i] - posI[i];

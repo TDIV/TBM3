@@ -375,32 +375,18 @@ private:
 				for(unsigned index=0 ; index<atomList.size() ; index++){
 					Atom tmpAtom;
 					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1] +k*AVec[2];
+					r_mat A0 = i*AVec[0];
+					r_mat A1 = j*AVec[1];
+					r_mat A2 = k*AVec[2];
+					tmpAtom.pos = tmpAtom.pos+A0+A1+A2;
 					extendedAtomList.push_back(tmpAtom);
 				}
 			}
 		}
-		else if	( AVec.size() == 2){
-			for( r_var i = -N ; i<=N ; i+=1)
-			for( r_var j = -N ; j<=N ; j+=1){
-				for(unsigned index=0 ; index<atomList.size() ; index++){
-					Atom tmpAtom;
-					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1];
-					extendedAtomList.push_back(tmpAtom);
-				}
-			}
+		else{
+			ErrorMessage("Error, should be given a 3D basis vector.");
 		}
-		else if	( AVec.size() == 1){
-			for( r_var i = -N ; i<=N ; i+=1){
-				for(unsigned index=0 ; index<atomList.size() ; index++){
-					Atom tmpAtom;
-					tmpAtom = atomList[index];
-					tmpAtom.pos = tmpAtom.pos+ i*AVec[0];
-					extendedAtomList.push_back(tmpAtom);
-				}
-			}
-		}
+
 		
 		// -----------------------------------------------------------------------
 		// Create the rtree for atom position search.

@@ -16,6 +16,7 @@
 //
 
 #include "header.hpp"
+using namespace std;
 
 #include <iostream>
 #include <random>
