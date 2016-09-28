@@ -16,7 +16,7 @@ import numpy as np
 
 from scipy import spatial
 
-def fmt(inStr, length=10):
+def fmt(inStr, length=15):
 	while len(inStr) < length:
 		inStr+=" "
 	return inStr
@@ -33,18 +33,22 @@ class	Atom:
 		self.atomPos = map(float, atomStringList[1:])
 
 	def atomString(self):
-		valStr =  fmt(str(self.orbitalProfileIndex))\
-				+ fmt(str(self.atomPos[0]))\
-				+ fmt(str(self.atomPos[1]))\
+		valStr =  fmt(str(self.orbitalProfileIndex),5)+" "\
+				+ fmt(str(self.atomPos[0]))+" "\
+				+ fmt(str(self.atomPos[1]))+" "\
 				+ fmt(str(self.atomPos[2]))
 		return valStr
 
 class   Lattice:
 	def __init__(self, _filename):
 		self.filename = _filename
+		self.basisVector = []
 		self.orbitalProfile = []
 		self.atomList = []
 		self.openLattice(_filename)
+		print
+		print	"Starting Query ..."
+		print
 
 	def openLattice(self, _filename):
 		fileReader = open(self.filename)
@@ -62,20 +66,19 @@ class   Lattice:
 				if		header == "#BasisVector":
 					flag = header
 					continue
-
 				elif	header == "#OrbitalProfile":
 					flag = header
 					continue
-
 				elif	header == "#Atoms":
 					flag = header
 					continue
 
 				# --------------------
 				if		flag == "#BasisVector":
+					self.basisVector.append(line)
 					continue
 				elif	flag == "#OrbitalProfile":
-					self.orbitalProfile.append(spline)
+					self.orbitalProfile.append(line)
 					continue
 				elif	flag == "#Atoms":
 					atom = Atom(spline)
@@ -87,14 +90,37 @@ class   Lattice:
 
 		self.tree3D = spatial.KDTree( np.array(atomPosList) )
 
-		#print self.orbitalProfile
-		#print self.atomList
+	def setOrbitalProfile(self, fromKey, toKey, pos):
+		result = self.tree3D.query(np.array([pos]))
 
-	def setOrbitalProfile(self, ):
+		if result[0] < 0.01 :
+			if self.atomList[result[1]].orbitalProfileIndex == fromKey:
+				print "Query: ",self.atomList[result[1]].atomString(), "changedIndex:", fromKey, "->", toKey
+				self.atomList[result[1]].orbitalProfileIndex = toKey
 
 
+	def save(self):
 
+		f = open(self.filename+".new", 'w')
 
+		f.write("#BasisVector\n")
+		for basisVec in self.basisVector:
+			f.write(basisVec)
+		f.write("\n")
+
+		f.write("#OrbitalProfile\n")
+		for orbitalProf in self.orbitalProfile:
+			f.write(orbitalProf)
+		f.write("\n")
+
+		f.write("#Atoms\n")
+		for atom in self.atomList:
+			f.write(atom.atomString()+"\n")
+
+		print
+		print "New file saved in:\n"+self.filename+".new"
+		print
+		f.close()
 
 
 if __name__ == "__main__":
@@ -120,10 +146,7 @@ foo = imp.load_source('LO', '"""+sys.argv[0]+"""')
 Lat = foo.Lattice("""+inputLatticeFileName+""")
 
 #### Query the correspond order in the given atom position.
-#found, order = Lat.getOrder(key=('Fe','@:cspin'), pos=[0, 0, 0])
-
-#### Setup the correspond order in the given atom position.
-#Lat.setOrder(key=('Fe','@:cspin'), pos=[0.5, 0.5, 0.5,], order=[1,2,3])
+#Lat.setOrbitalProfile(2,3,[x,y,z])
 
 #### Save the order in the original input file.
 #Lat.save()
