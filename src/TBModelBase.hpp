@@ -583,8 +583,8 @@ public:
 					Atom tmpAtom;
 					tmpAtom = atomList[index];
 					r_mat A0 = i*AVec[0];
-					r_mat A1 = i*AVec[1];
-					r_mat A2 = i*AVec[2];
+					r_mat A1 = j*AVec[1];
+					r_mat A2 = k*AVec[2];
 					tmpAtom.pos = tmpAtom.pos+ A0 + A1 + A2;
 					expandedAtomList.push_back(tmpAtom);
 					expandedOptList.push_back(optList[index]);
