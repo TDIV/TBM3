@@ -65,8 +65,6 @@ protected:
 	TBDataSource & tbd;		// A reference to object -> TBD
 	TBDataSource & stbd;	// A reference to object -> spinNormalTBD
 	
-	vector<pair<string,r_mat> >	kSpaceHighSymmetryPoints;
-	
 	bool iterate(){ return Lat.iterate(); }
 	
 	virtual void initOrder()	= 0;
@@ -84,14 +82,8 @@ protected:
 	}
 
 	/*-----------------------------------------------------
-	 A set of operations for the Band structure calculation.
+	 The Band structure calculation.
 	 ------------------------------------------------------*/
-	void	clear_ksymm_point		()														{ kSpaceHighSymmetryPoints.clear(); }
-	void	add_ksymm_point			(string kPointLabel, r_mat kpoint)						{
-		if (kpoint.cols()==1 and kpoint.rows()==3) {
-			kSpaceHighSymmetryPoints.push_back(make_pair(kPointLabel, kpoint));
-		}
-	}
 	void	calculateBandStructure	(TBDataSource & rtbd, unsigned Nsteps=50)				{
 		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
 			cout<< "Warning, due to flag 'disable_quantum' turned on."
@@ -103,12 +95,18 @@ protected:
 		auto & b1 = B[0];
 		auto & b2 = B[1];
 		auto & b3 = B[2];
-			
+		
+		vector<pair<string,r_mat> >	kSpaceHighSymmetryPoints;
 		for(auto & kp: tbm.kSymmPointParser.kSymmPointList){
 			r_mat B1 = kp.second[0]*b1;
 			r_mat B2 = kp.second[1]*b2;
 			r_mat B3 = kp.second[2]*b3;
-			add_ksymm_point(kp.first, B1+B2+B3);
+			r_mat kPoint = B1+B2+B3;
+			
+			if ( kPoint.cols()==1 and kPoint.rows()==3) {
+				kSpaceHighSymmetryPoints.push_back(make_pair(kp.first, kPoint));
+			}
+			
 		}
 		
 		vector<pair<string, r_mat> >	highSymmetryLine;
@@ -131,9 +129,8 @@ protected:
 				
 				if ( j== kSpaceHighSymmetryPoints.size() -1 ){
 					string label = kSpaceHighSymmetryPoints[j].first;
-					highSymmetryLine.push_back(
-						make_pair(label, kSpaceHighSymmetryPoints[j].second)
-					);
+					highSymmetryLine[highSymmetryLine.size()-1] =
+						make_pair(label, kSpaceHighSymmetryPoints[j].second);
 				}
 			}
 		}
@@ -150,6 +147,115 @@ protected:
 		}
 		
 		out.close();
+	}
+	void	calculateKWannierCenter	(TBDataSource & rtbd, unsigned Nsteps=50)				{
+		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
+			cout<< "Warning, due to flag 'disable_quantum' turned on."
+				<< "The Wannier center calculation will be ignored."<<endl;
+			return;
+		}
+		
+		cout<<"Calculate KWannier ..."<<endl;
+		
+		auto B = Lat.basisVector.getBVec();
+		auto & b1 = B[0];
+		auto & b2 = B[1];
+		auto & b3 = B[2];
+		
+		vector<boost::tuple<string, r_mat, unsigned, r_mat, r_mat, unsigned> > kWannierPointList;
+		
+		for(auto & unpacker: tbm.kWannierParser.kWannierPointList){
+			auto label				= unpacker.get<0>();
+			auto nKP				= unpacker.get<1>();
+			
+			r_mat B1 = nKP[0]*b1;
+			r_mat B2 = nKP[1]*b2;
+			r_mat B3 = nKP[2]*b3;
+			r_mat kPoint = B1+B2+B3;
+			
+			auto nBand				= unpacker.get<2>();
+			
+			auto integralFrom		= unpacker.get<3>();
+			r_mat F1 = integralFrom[0]*b1;
+			r_mat F2 = integralFrom[1]*b2;
+			r_mat F3 = integralFrom[2]*b3;
+			r_mat FromPoint = F1+F2+F3;
+			
+			auto integralTo			= unpacker.get<4>();
+			r_mat T1 = integralTo[0]*b1;
+			r_mat T2 = integralTo[1]*b2;
+			r_mat T3 = integralTo[2]*b3;
+			r_mat ToPoint = T1+T2+T3;
+			
+			auto integralSequence	= unpacker.get<5>();
+			
+			if ( kPoint.size() == 3 and FromPoint.size() == 3 and ToPoint.size() == 3) {
+				kWannierPointList.push_back(boost::make_tuple(label, kPoint, nBand, FromPoint, ToPoint, integralSequence));
+			}
+			
+		}
+		
+		vector<boost::tuple<string, r_mat, unsigned, r_mat, r_mat, unsigned> > kWannierHighSymmetryLine;
+		
+		// Construct the k-space high-symmetry-line from kSpaceHighSymmetryPoints.
+		if (kWannierPointList.size()>=2) {
+			
+			for (unsigned i=0; i<kWannierPointList.size()-1; i++) {
+				unsigned j=i+1;
+				
+				auto I_label			= kWannierPointList[i].get<0>();
+				auto I_KP				= kWannierPointList[i].get<1>();
+				auto I_nBand			= kWannierPointList[i].get<2>();
+				auto I_From				= kWannierPointList[i].get<3>();
+				auto I_To				= kWannierPointList[i].get<4>();
+				auto I_Sequence			= kWannierPointList[i].get<5>();
+				
+				auto J_label			= kWannierPointList[j].get<0>();
+				auto J_KP				= kWannierPointList[j].get<1>();
+				auto J_Sequence			= kWannierPointList[j].get<5>();
+				
+				if( I_Sequence == J_Sequence ){
+				
+					auto	partOfHighSymmetryLine = make_line(I_KP, J_KP, Nsteps);
+					
+					for (unsigned ii=0; ii<partOfHighSymmetryLine.size(); ii++) {
+						string label = ii==0 ? I_label : "-";
+						
+						kWannierHighSymmetryLine.push_back(
+							boost::make_tuple(label, partOfHighSymmetryLine[ii], I_nBand, I_From, I_To, I_Sequence)
+						);
+					}
+				
+					if ( j== kWannierPointList.size() -1 ){
+						kWannierHighSymmetryLine[kWannierHighSymmetryLine.size()-1] =
+							boost::make_tuple(J_label, J_KP, I_nBand, I_From, I_To, I_Sequence);
+					}
+				}
+				else{
+					kWannierHighSymmetryLine[kWannierHighSymmetryLine.size()-1] =
+						boost::make_tuple(I_label, I_KP, I_nBand, I_From, I_To, I_Sequence);
+				}
+			}
+		}
+		
+		for( auto & unpacker: kWannierHighSymmetryLine ){
+			cout<<unpacker.get<0>()<<" "<<unpacker.get<1>()<<" "<<unpacker.get<2>()<<" "
+				<<unpacker.get<3>()<<" "<<unpacker.get<4>()<<" "<<unpacker.get<5>()<<endl;
+		}
+		
+		//
+		///* Store the band structure into 'xxx.lat.ban' */
+		//string	filename = Lat.FileName()+".ban";
+		//ofstream out(filename);
+		//
+		//constructHam(rtbd);
+		//for ( auto kp: highSymmetryLine){
+		//	auto evv = rtbd.HamEvd(kp.second);
+		//	evv.eigenVector.setPrintLength(16);
+		//	out<< kp.first<<" "<< kp.second <<" "<<evv.eigenValue<<endl;
+		//}
+		//
+		//out.close();
 	}
 	
 	/*-----------------------------------------------------
@@ -594,29 +700,7 @@ public:
 		else{
 			ErrorMessage("Error, should be given a 3D basis vector.");
 		}
-		//else if	( AVec.size() == 2){
-		//	for( unsigned i = 0 ; i<N1 ; i+=1)
-		//	for( unsigned j = 0 ; j<N2 ; j+=1){
-		//		for(unsigned index=0 ; index<atomList.size() ; index++){
-		//			Atom tmpAtom;
-		//			tmpAtom = atomList[index];
-		//			tmpAtom.pos = tmpAtom.pos+ i*AVec[0] +j*AVec[1];
-		//			expandedAtomList.push_back(tmpAtom);
-		//			expandedOptList.push_back(optList[index]);
-		//		}
-		//	}
-		//}
-		//else if	( AVec.size() == 1){
-		//	for( unsigned i = 0 ; i<N1 ; i+=1){
-		//		for(unsigned index=0 ; index<atomList.size() ; index++){
-		//			Atom tmpAtom;
-		//			tmpAtom = atomList[index];
-		//			tmpAtom.pos = tmpAtom.pos+ i*AVec[0];
-		//			expandedAtomList.push_back(tmpAtom);
-		//			expandedOptList.push_back(optList[index]);
-		//		}
-		//	}
-		//}
+
 		
 		// Save the expanded file.
 		ofstream outfile(filename_expand);
@@ -646,9 +730,6 @@ public:
 		OrderParameter expOrder(expLat);
 		expOrder.setOptList(expandedOptList);
 		expOrder.save();
-		
-		
-
 	}
 
 	/* Convert the lattice file formate to VESTA formate. */

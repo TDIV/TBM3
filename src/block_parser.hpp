@@ -28,9 +28,9 @@ struct LineStorage{
 // The ParserBase will be used as a base framework to construct any read-in block header.
 class ParserBase{
 public:
-	ParserBase(string _keyStr): keyString(_keyStr) {}
+	ParserBase(string _keyStr): keyString(_keyStr)	{	}
 	string keyString;
-	string operator()	(){
+	string operator()	()							{
 		return keyString;
 	}
 	
@@ -45,13 +45,13 @@ class BasisVector:			public ParserBase{
 	vector<r_mat>	A;
 	r_var	abs(r_mat r){
 		r_var sum = 0;
-		for(unsigned i=0 ; i<r.size() ; i++){
+		for(unsigned i=0 ; i<r.size() ; i++)	{
 			sum += r[i]*r[i];
 		}
 		return sqrt(sum);
 		
 	}
-	r_var findMinmalRepeatanceOf(r_var N){
+	r_var findMinmalRepeatanceOf(r_var N)		{
 		vector<r_var>	radiusList;
 		
 		r_var minValue = 10000;
@@ -71,20 +71,7 @@ class BasisVector:			public ParserBase{
 		else{
 			ErrorMessage("Error, should be given a 3D basis vector.");
 		}
-		//else if( A.size() == 2){
-		//	for(int i=-1 ; i<=1 ; i++)
-		//	for(int j=-1 ; j<=1 ; j++){
-		//		if( i!=0 or j!=0){
-		//			r_mat A0 = i*N*A[0];
-		//			r_mat A1 = i*N*A[1];
-		//			r_var value = abs( A0+A1 );
-		//			if( minValue > value  ) minValue = value;
-		//		}
-		//	}
-		//}
-		//else if( A.size() == 1){
-		//	minValue = abs( N*A[0] );
-		//}
+
 
 		return minValue;
 	}
@@ -441,6 +428,69 @@ public:
 	
 	KSymmetryPoint & operator= (const KSymmetryPoint & rhs){
 		kSymmPointList = rhs.kSymmPointList;
+		return *this;
+	}
+};
+
+// Read in the KSymmetryPoint section
+class KWannierParser:		public ParserBase{
+private:
+	string		fileString;
+	unsigned	bandFilling;
+	r_mat		integralFrom;
+	r_mat		integralTo;
+	unsigned	integralSequence;
+public:
+
+	vector<boost::tuple<string, r_mat, unsigned, r_mat, r_mat, unsigned> > kWannierPointList;
+	
+	KWannierParser(): ParserBase("#KWannierPath")	{
+		fileString = "#KWannierPath\n";
+		integralFrom = r_mat(1,3);
+		integralTo = r_mat(1,3);
+		integralSequence = 0;
+	}
+	
+	void		append(string line)					{
+		fileString += line +"\n";
+		auto pathParser = split(line, ">");
+		if( pathParser.size() == 3 ){
+			integralSequence++;
+			
+			bandFilling = StrToInt(pathParser[0]);
+			auto kpStrFrom = split(pathParser[1], " ");
+			integralFrom[0] = StrToDouble(kpStrFrom[0]);
+			integralFrom[1] = StrToDouble(kpStrFrom[1]);
+			integralFrom[2] = StrToDouble(kpStrFrom[2]);
+			
+			auto kpStrTo = split(pathParser[2], " ");
+			integralTo[0] = StrToDouble(kpStrTo[0]);
+			integralTo[1] = StrToDouble(kpStrTo[1]);
+			integralTo[2] = StrToDouble(kpStrTo[2]);
+			
+			//cout<<bandFilling<<" "<<integralFrom<<" "<<integralTo<<endl;
+			return;
+		}
+		
+		auto lineParser = split(line, " ");
+		if( lineParser.size() == 4){
+			string	label = lineParser[0];
+			r_mat	kpoint(1,3);
+			kpoint[0]	= StrToDouble(lineParser[1]);
+			kpoint[1]	= StrToDouble(lineParser[2]);
+			kpoint[2]	= StrToDouble(lineParser[3]);
+			kWannierPointList.push_back(boost::make_tuple(label, kpoint, bandFilling, integralFrom, integralTo, integralSequence));
+		}
+	}
+	string		getFileString()						{
+		return fileString;
+	}
+	void		clear()								{
+		kWannierPointList.clear();
+	}
+	
+	KWannierParser & operator= (const KWannierParser & rhs){
+		kWannierPointList = rhs.kWannierPointList;
 		return *this;
 	}
 };

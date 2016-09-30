@@ -106,6 +106,7 @@ public:
 	// Read from xxx.lat.tbm
 	Parameter			parameter;
 	KSymmetryPoint		kSymmPointParser;
+	KWannierParser		kWannierParser;
 	BondVector			bondVector;
 	InitOrder			initOrder;
 	CoreCharge			coreCharge;
@@ -210,6 +211,7 @@ private:
 		if	( header == coreCharge())		{flag = header;	return;}
 		if	( header == initOrder())		{flag = header;	return;}
 		if	( header == kSymmPointParser())	{flag = header; return;}
+		if	( header == kWannierParser())	{flag = header; return;}
 		if	( header == bondVector())			{
 			flag = header;
 			iss>>sub_flag;
@@ -222,6 +224,7 @@ private:
 		if	( flag == coreCharge())			{ coreCharge.append(line);	return; }
 		if	( flag == initOrder())			{ initOrder.append(line);	return; }
 		if	( flag == kSymmPointParser())	{ kSymmPointParser.append(line);				return;	}
+		if	( flag == kWannierParser())		{ kWannierParser.append(line);					return;	}
 		if	( flag == bondVector())			{ bondVector.append(StrToInt(sub_flag) ,line);	return;	}
 		
 		if	( flag == hamPreprocessor() and withHamiltonianBlock)		{

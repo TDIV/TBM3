@@ -75,6 +75,12 @@ public:
 			calculateBandStructure(tbd, abs( Lat.parameter.VAR("bandPoints", 30).real()) );
 			cout<<endl;
 		}
+		
+		if( Lat.parameter.VAR("isCalculateKWannier", 0).real() == 1 ){
+			cout<<endl<<">> Calculating the K-space Wannier center."<<endl;
+			calculateKWannierCenter(tbd, abs( Lat.parameter.VAR("bandPoints", 30).real()) );
+			cout<<endl;
+		}
 	
 		if( Lat.parameter.VAR("isCalculateLDOS", 0).real() == 1 ){
 			cout<<endl<<">> Calculating LDOS."<<endl;
@@ -103,7 +109,7 @@ public:
 			
 		double den_diff = 1;
 		//double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
-		double den_diff_bound = Lat.parameter.VAR("den_diff_bound",0.1).real();
+		double den_diff_bound = Lat.parameter.VAR("den_diff_bound",0.5).real();
 		
 		while( den_diff > den_diff_bound and iterationStepIncr() ){
 			
