@@ -155,15 +155,15 @@ protected:
 			return;
 		}
 		
-		cout<<"Calculate KWannier ..."<<endl;
+		//cout<<Nsteps<<endl;
 		
 		auto B = Lat.basisVector.getBVec();
 		auto & b1 = B[0];
 		auto & b2 = B[1];
 		auto & b3 = B[2];
 		
+		// Translate the K-Points in the Bravis Vector.
 		vector<boost::tuple<string, r_mat, unsigned, r_mat, r_mat, unsigned> > kWannierPointList;
-		
 		for(auto & unpacker: tbm.kWannierParser.kWannierPointList){
 			auto label				= unpacker.get<0>();
 			auto nKP				= unpacker.get<1>();
@@ -195,9 +195,8 @@ protected:
 			
 		}
 		
+		// Making high symmetry lines throughout high-symmetry points.
 		vector<boost::tuple<string, r_mat, unsigned, r_mat, r_mat, unsigned> > kWannierHighSymmetryLine;
-		
-		// Construct the k-space high-symmetry-line from kSpaceHighSymmetryPoints.
 		if (kWannierPointList.size()>=2) {
 			
 			for (unsigned i=0; i<kWannierPointList.size()-1; i++) {
@@ -238,24 +237,69 @@ protected:
 			}
 		}
 		
+		string	filename = Lat.FileName()+".kwcenter";
+		ofstream out(filename);
+		vector<boost::tuple<string, r_mat, r_mat> > kWannierCenter;
 		for( auto & unpacker: kWannierHighSymmetryLine ){
-			cout<<unpacker.get<0>()<<" "<<unpacker.get<1>()<<" "<<unpacker.get<2>()<<" "
-				<<unpacker.get<3>()<<" "<<unpacker.get<4>()<<" "<<unpacker.get<5>()<<endl;
+			auto &	label	= unpacker.get<0>();
+			auto &	kpoint	= unpacker.get<1>();
+			auto &	nBand	= unpacker.get<2>();
+			auto &	IntFrom	= unpacker.get<3>();
+			auto &	IntTo	= unpacker.get<4>();
+			auto &	Sequence= unpacker.get<5>();
+			
+			auto integralLine = make_line(IntFrom, IntTo, Nsteps);
+			
+			x_mat Dk(nBand,nBand), F(nBand,nBand);
+			for( unsigned i=0 ; i<Dk.cols() ; i++){
+				Dk(i,i) = 1;
+			}
+			
+			x_mat vec0, vecI, vecJ;
+			auto evvI = rtbd.HamEvd(kpoint);
+			vec0 = evvI.eigenVector;
+			vecI = vec0;
+			
+			for( unsigned j=1; j<integralLine.size() ; j++ ){
+				
+				auto kJ = kpoint + integralLine[j];
+				auto evvJ = rtbd.HamEvd(kJ);
+				
+				vecJ = evvJ.eigenVector;
+				if( j==integralLine.size()-1 ){ vecJ = vec0; }
+				
+				for( unsigned m=0 ; m<nBand ; m++)
+				for( unsigned n=0 ; n<nBand ; n++){
+					F(m,n) = 0;
+					for( unsigned ii=0 ; ii<vecI.cols() ; ii++){
+						F(m,n) += conj( vecI(ii,m) ) *  vecJ(ii,n)  ;
+					}
+				}
+				
+				Dk = Dk * F;
+				vecI = vecJ;
+			}
+			x_mat Eig,Vec;
+			Dk.gevd(Eig, Vec);
+			
+			out<<label<<" "<<kpoint<<" ";
+			
+			vector<double> thetaList;
+			for( unsigned i = 0 ; i<Eig.size() ; i++){
+				thetaList.push_back(complexToArg(Eig[i].real(), Eig[i].imag()));
+			}
+			sort(thetaList.begin(), thetaList.end());
+			
+			out<<"[[ ";
+			for( auto & tt: thetaList){
+				out<<fformat(tt)<<" ";
+			}
+			out<<" ]]";
+			out<<endl;
 		}
 		
-		//
-		///* Store the band structure into 'xxx.lat.ban' */
-		//string	filename = Lat.FileName()+".ban";
-		//ofstream out(filename);
-		//
-		//constructHam(rtbd);
-		//for ( auto kp: highSymmetryLine){
-		//	auto evv = rtbd.HamEvd(kp.second);
-		//	evv.eigenVector.setPrintLength(16);
-		//	out<< kp.first<<" "<< kp.second <<" "<<evv.eigenValue<<endl;
-		//}
-		//
-		//out.close();
+		out.close();
+		
 	}
 	
 	/*-----------------------------------------------------

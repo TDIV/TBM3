@@ -78,7 +78,7 @@ public:
 		
 		if( Lat.parameter.VAR("isCalculateKWannier", 0).real() == 1 ){
 			cout<<endl<<">> Calculating the K-space Wannier center."<<endl;
-			calculateKWannierCenter(tbd, abs( Lat.parameter.VAR("bandPoints", 30).real()) );
+			calculateKWannierCenter(tbd, abs( Lat.parameter.VAR("bandPoints", 50).real()) );
 			cout<<endl;
 		}
 	

@@ -114,5 +114,12 @@ vector<r_mat> getUnitVectors(vector<r_mat> AVec){
 	return retVec;
 }
 
+double complexToArg(double re, double im){
+	
+	complex<double> cc(re,im);
+	
+	return arg(cc);
+}
+
 #endif
 
