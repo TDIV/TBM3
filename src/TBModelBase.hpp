@@ -317,29 +317,7 @@ protected:
 		
 		rtbd.KEigenValVec.clear();
 		
-		//if( Nb.size() == 1){
-		//	auto & b1 = B[0];
-		//	auto N1 = Nb[0].real();
-		//	
-		//	for (double i1=0; i1<N1; i1++){
-		//		auto kPoint = (i1/N1)*b1;
-		//		auto  tmpEVV = rtbd.HamEvd(kPoint);
-		//		if( tmpEVV.message == "Success")
-		//			rtbd.KEigenValVec.push_back(tmpEVV);
-		//	}
-		//}
-		//if( Nb.size() == 2){
-		//	auto & b1 = B[0];
-		//	auto & b2 = B[1];
-		//	auto N1 = Nb[0].real(), N2 = Nb[1].real();
-		//	for (double i1=0; i1<N1; i1++)
-		//	for (double i2=0; i2<N2; i2++){
-		//		auto kPoint = (i1/N1)*b1 + (i2/N2)*b2;
-		//		auto  tmpEVV = rtbd.HamEvd(kPoint);
-		//		if( tmpEVV.message == "Success")
-		//			rtbd.KEigenValVec.push_back(tmpEVV);
-		//	}
-		//}
+
 		if( Nb.size() == 3){
 			auto & b1 = B[0];
 			auto & b2 = B[1];
@@ -349,8 +327,8 @@ protected:
 			for (double i2=0; i2<N2; i2++)
 			for (double i3=0; i3<N3; i3++) {
 				r_mat B1 = (i1/N1)*b1;
-				r_mat B2 = (i1/N1)*b2;
-				r_mat B3 = (i1/N1)*b3;
+				r_mat B2 = (i2/N1)*b2;
+				r_mat B3 = (i3/N1)*b3;
 				auto kPoint = B1+B2+B3;
 				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
