@@ -4,6 +4,11 @@ X      0.5   0     0
 M      0.5   0.5   0    
 G      0     0     0    
 
+#KWannierPath
+2 > 0  0  0 > 0  1  0
+X      0.5   0     0    
+G      0     0     0    
+
 #BondVector 0
  1.0             0               0              
  0               1.0             0              
@@ -11,17 +16,21 @@ G      0     0     0
 
 
 #Parameters
-isCalculateMu	= 1
+isCalculateMu	= 0
 isCalculateLDOS	= 0
 isCalculateBand	= 1
+isCalculateKWannier	= 1
 isCalculateVar 	= 0
 isCalculateSpinX= 0
 
+bandPoints	= 100
 max_iter	= 10000
 spin		= "on"
 space		= "normal"
 Nb			= 4,4,1
 bondRadius	= 3
+
+SOLVER = "GPUx2"
 
 Mu			= 0
 Temperature	= 0.0001
@@ -33,7 +42,7 @@ t4			= -0.12
 t5			= -1
 t6			= 0.25
 
-t_AOH		= 0.6
+t_AOH		= 0.1
 
 ldos_Nb	= 30,30,1
 ldos_dE	= 0.005

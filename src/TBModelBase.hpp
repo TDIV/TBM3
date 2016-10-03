@@ -697,6 +697,19 @@ public:
 		Lat.createAtomList( tbm.parameter.STR("spin", "on"), tbm.parameter.STR("space","normal"));
 		spinNormalLat.createAtomList();
 		
+		string solver = tbm.parameter.STR("SOLVER", "GPU");
+		if		( solver == "CPU")		{ gmt::SOLVER = CPU; }
+		else if	( solver == "GPU")		{ gmt::SOLVER = GPU; }
+		else if	( solver == "GPUx2")	{ gmt::SOLVER = GPUx2; }
+		else if	( solver == "GPUx3")	{ gmt::SOLVER = GPUx3; }
+		else if	( solver == "GPUx4")	{ gmt::SOLVER = GPUx4; }
+		else if	( solver == "GPUx5")	{ gmt::SOLVER = GPUx5; }
+		else if	( solver == "GPUx6")	{ gmt::SOLVER = GPUx6; }
+		else if	( solver == "GPUx7")	{ gmt::SOLVER = GPUx7; }
+		else if	( solver == "GPUx8")	{ gmt::SOLVER = GPUx8; }
+		else if	( solver == "GPUx9")	{ gmt::SOLVER = GPUx9; }
+		else if	( solver == "GPUx10")	{ gmt::SOLVER = GPUx10;}
+		
 		run();
 	}
 	

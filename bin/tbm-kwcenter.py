@@ -55,7 +55,7 @@ class Band:
 		x_label = []
 
 		plt.axhline(y=0, linestyle=":", linewidth=1, color='k')
-		plt.ylim([-pi, pi])
+		plt.ylim([-1, 1])
 
 		for i in xrange(1,len(self.arrayKpoin)):
 			kp_0 = self.arrayKpoin[i-1]
@@ -79,8 +79,8 @@ class Band:
 
 		lw=1.5
 		for i in xrange(len(Ek)):
-			ek = array(Ek[i])
-			plt.plot(Kpath,ek,"-",color=(0,0.1,0.5),linewidth=lw)
+			ek = array(array(Ek[i])/pi)
+			plt.plot(Kpath,ek,".",color=(0,0.1,0.5),linewidth=lw)
 
 		for kvlp in KVerticalLinePos:
 			plt.axvline(x=kvlp, linestyle=":",linewidth=1, color='k')
