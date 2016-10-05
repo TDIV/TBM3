@@ -738,47 +738,62 @@ public:
 				auto & labelJ = iterJ.first;
 				auto & indexJ = iterJ.second;
 				
+				
+				// Value "0.5" is to reduce the double counting.
 				if( Lat.HSpace() == NORMAL ){
 					// Normal part
 					if( labelI == "u" and labelJ == "u"){
+						energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "d" and labelJ == "d"){
+						energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "u" and labelJ == "d"){
+						energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
 					}
 					if( labelI == "d" and labelJ == "u"){
+						energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
 					}
 				}
+				// Value "0.25" is to reduce the double counting and the particle/hole part.
 				if( Lat.HSpace() == EXNAMBU){
 					// Particle part
 					if( labelI == "Au" and labelJ == "Au"){
+						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Ad" and labelJ == "Ad"){
+						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Au" and labelJ == "Ad"){
+						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Ad" and labelJ == "Au"){
+						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
 					}
 					
 					// Hole part
 					if( labelI == "Bu" and labelJ == "Bu"){
+						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bd" and labelJ == "Bd"){
+						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bu" and labelJ == "Bd"){
+						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_du,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bd" and labelJ == "Bu"){
+						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_ud,	vec(0,0,0))); continue;
 					}
 				}
@@ -824,52 +839,66 @@ public:
 		
 		intraUJ = 0.5 * intraUJ;
 		
-		x_var	cI_uu = intraUJ * (1-0.5 * (orderI.second[0].real() + orderI.second[3].real()));
-		x_var	cI_dd = intraUJ * (1-0.5 * (orderI.second[0].real() - orderI.second[3].real()));
+		r_var	N  = -intraUJ * orderI.second[0].real();
+		r_var	Sx = -intraUJ * orderI.second[1].real();
+		r_var	Sy = -intraUJ * orderI.second[2].real();
+		r_var	Sz = -intraUJ * orderI.second[3].real();
 		
-		//cout<<orderKey<<" "<<cI_uu<<" "<<cI_dd<<endl;
-
 		////*****************************************************************
-		//// Attribute the on-site Mean-field Dudraev UJ potential to the Hamiltonian.
+		//// Attribute the on-site Mean-field Dudarev UJ potential to the Hamiltonian.
 		////*****************************************************************
-		
-		auto subIndexI = atomI.orbitalIndexList(optList[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
-			for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
-				auto & iterI = subIndexI[ii];
-				auto & labelI = iterI.first;
-				auto & indexI = iterI.second;
+		switch( Lat.HSpace() ){
 				
-				auto & iterJ = subIndexI[jj];
-				auto & labelJ = iterJ.first;
-				auto & indexJ = iterJ.second;
+			case NORMAL: {
+				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
+				unsigned indexNu = atomI.index(orbitalNumber+"u");
+				unsigned indexNd = atomI.index(orbitalNumber+"d");
 				
-				if( Lat.HSpace() == NORMAL ){
-					// Normal part
-					if( labelI == "u" and labelJ == "u"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
-					}
-					if( labelI == "d" and labelJ == "d"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
-					}
+				hamElementList.push_back(MatrixElement(indexNu, indexNd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNu, indexNu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNd,-Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNu, indexNu, intraUJ+N	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexNd, indexNd, intraUJ+N 	, vec(0,0,0)));
+				break;
+			}
+			case NAMBU: {
+				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
+				unsigned indexAu = atomI.index(orbitalNumber+"Au");
+				unsigned indexBd = atomI.index(orbitalNumber+"Bd");
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, intraUJ+N	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd,-intraUJ-N 	, vec(0,0,0)));
+				if( Sx > 0.0001 or Sy > 0.0001){
+					ErrorMessage(preInfo.filename,
+								 preInfo.lineNumber,
+								 " \""+preInfo.line+"\"\n"+
+								 " Cannot be applied for a spin-depende Nambu space Hamiltonian.");
 				}
-				if( Lat.HSpace() == EXNAMBU){
-					// Particle part
-					if( labelI == "Au" and labelJ == "Au"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
-					}
-					if( labelI == "Ad" and labelJ == "Ad"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
-					}
-					
-					// Hole part
-					if( labelI == "Bu" and labelJ == "Bu"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_uu,	vec(0,0,0))); continue;
-					}
-					if( labelI == "Bd" and labelJ == "Bd"){
-						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_dd,	vec(0,0,0))); continue;
-					}
-				}
+				break;
+			}
+			case EXNAMBU: {
+				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
+				unsigned indexAu = atomI.index(orbitalNumber+"Au");
+				unsigned indexAd = atomI.index(orbitalNumber+"Ad");
+				unsigned indexBu = atomI.index(orbitalNumber+"Bu");
+				unsigned indexBd = atomI.index(orbitalNumber+"Bd");
+				
+				hamElementList.push_back(MatrixElement(indexAu, indexAd, Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAu, Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAu, indexAu, intraUJ+N	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexAd, indexAd, intraUJ+N 	, vec(0,0,0)));
+				
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBu,-intraUJ-N	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBd,-intraUJ-N 	, vec(0,0,0)));
+				break;
 			}
 		}
 	}
@@ -888,6 +917,8 @@ public:
 		minE =  10000;
 		
 		energyMap["2.Coul Eng"] = 0;
+		energyMap["3.U Eng"] = 0;
+		energyMap["4.DUJ Eng"] = 0;
 		
 		/*
 		 // Performance testing loop

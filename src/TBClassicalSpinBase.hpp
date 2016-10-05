@@ -203,9 +203,9 @@ public:
 			FB_Energy += cdot(Bi,si).real();
 		}
 		
-		TBD.energyMap["3.SE Eng"] = SE_Energy.real();
-		TBD.energyMap["4.DM Eng"] = DM_Energy.real();
-		TBD.energyMap["5.FB Eng"] = FB_Energy.real();
+		TBD.energyMap["C1.SE Eng"] = SE_Energy.real();
+		TBD.energyMap["C2.DM Eng"] = DM_Energy.real();
+		TBD.energyMap["C3.FB Eng"] = FB_Energy.real();
 	}
 	double	iterateSpinOrder(OrderParameter & newOrder)		{
 		
