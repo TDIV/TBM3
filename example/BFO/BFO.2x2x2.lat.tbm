@@ -1,0 +1,81 @@
+#KPointPath
+G      0     0     0    
+X      0.5   0     0    
+M      0.5   0.5   0    
+O      0.5   0.5   0.5  
+G      0     0     0    
+
+#BondVector 0
+ 0.5             0               0              
+ 0               0.5             0              
+ 0               0               0.5            
+
+#BondVector 1
+ 1               0               0              
+ 0               1               0              
+ 0               0               1              
+
+
+#Parameters
+isCalculateMu	= 1
+isCalculateVar 	= 1
+isCalculateBand	= 1
+isCalculateLDOS = 0
+
+disable_quantum = 0
+
+spin		= "on"
+space		= "normal"
+Nb			= 1,1,1
+var_dt		= 0.01
+spin_diff	= 1.000001
+den_diff	= 0.01
+den_mix		= 0.1
+den_diff_bound = 0.01
+bondRadius	= 4
+max_iter	= 10000
+
+Mu			= 0
+Temperature	= 0.0001
+Jh			= 0
+DUJ			= 4
+U			= 0
+Jse			= 0.0
+Jdm			= 0.0
+OOhop		= 0.5
+alpha		= 0.0
+B			= 0.0
+tdp			= 1.0
+
+SOLVER = "CPU"
+
+ldos_Nb		= 10,10,10
+ldos_dE		= 0.01
+ldos_Gamma  = 0.02
+
+#LDOSList
+0		0		0	1u 2u
+0		0		0	1d 2d
+0.5		0		0	1u
+0.5		0		0	1d
+
+#CoreCharge
+VC	> 0
+Bi	> 3
+LS	> 2.7
+Fe	> 5
+Mn	> 4
+O	> 0
+
+#Init
+Fe		cspin		> 0,1,0
+Fe		den			> 2
+Fe		1:4den		> 1, 0, 0, 0.2
+Fe		2:4den		> 1, 0, 0, 0.2
+Mn		cspin		> 0,0,1
+Mn		den			> 0.7
+O		den			> 1
+Bi		den			> 1
+
+#Import
+"import.tbm"
