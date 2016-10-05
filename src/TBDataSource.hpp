@@ -34,7 +34,6 @@ public:
 		bondVector = _bondVector;
 		return *this;
 	}
-	
 };
 
 struct	EigVec		{
@@ -786,6 +785,95 @@ public:
 			}
 		}
 	}
+	void		addIntraDudarevUJ(const PreprocessorInfo & preInfo)	{
+		/*****************************************
+		 * interU2J > Fe 1:2 >  U2J
+		 *****************************************/
+		auto & optList = preInfo.optList;
+		auto & varList = preInfo.varList;
+		
+		if( Lat.parameter.STR("spin") == "off"){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " Inter orbital U-J Dudarev model cannot be constructed under spin-independent space.");
+		}
+		if( Lat.HSpace() == NAMBU ){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " a model for 3-dimensional spin is not applicable with NAMBU space.");
+		}
+		
+		auto atomI = Lat.getAtom();
+		if( atomI.atomName != optList[0]){ return; } // Name does not match.
+		if( !atomI.hasOrbital(optList[1])){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " The atom, \'"+atomI.atomName+"\', has no orbital, "+optList[1]+".");
+		}
+
+		// Find the first matched orbital .... interU2J > Fe '1':2 > U2J
+		string orbitalNumber = atomI.getOrbitalNumber(optList[1]);
+		string orderKey = "@:"+orbitalNumber+":4den";
+		auto orderI = order.findOrder(atomI, orderKey);
+		if( !orderI.first ){
+			ErrorMessage(preInfo.filename, preInfo.lineNumber, " \""+preInfo.line+"\"\n"+
+						 " The 4 density order parameter,"+orderKey+" , was not defined.");
+		}
+		
+		r_var intraUJ = parseSiteString(atomI, varList[0])[0].real();
+		for( unsigned i=1 ; i<varList.size() ; i++){
+			intraUJ = intraUJ * parseSiteString(atomI, varList[i])[0].real();
+		}
+		
+		intraUJ = 0.5 * intraUJ;
+		
+		x_var	cI_uu = intraUJ * (1-0.5 * (orderI.second[0].real() + orderI.second[3].real()));
+		x_var	cI_dd = intraUJ * (1-0.5 * (orderI.second[0].real() - orderI.second[3].real()));
+		
+		//cout<<orderKey<<" "<<cI_uu<<" "<<cI_dd<<endl;
+
+		////*****************************************************************
+		//// Attribute the on-site Mean-field Dudraev UJ potential to the Hamiltonian.
+		////*****************************************************************
+		
+		auto subIndexI = atomI.orbitalIndexList(optList[1]);
+		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
+			for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
+				auto & iterI = subIndexI[ii];
+				auto & labelI = iterI.first;
+				auto & indexI = iterI.second;
+				
+				auto & iterJ = subIndexI[jj];
+				auto & labelJ = iterJ.first;
+				auto & indexJ = iterJ.second;
+				
+				if( Lat.HSpace() == NORMAL ){
+					// Normal part
+					if( labelI == "u" and labelJ == "u"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
+					}
+					if( labelI == "d" and labelJ == "d"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
+					}
+				}
+				if( Lat.HSpace() == EXNAMBU){
+					// Particle part
+					if( labelI == "Au" and labelJ == "Au"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Ad" and labelJ == "Ad"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
+					}
+					
+					// Hole part
+					if( labelI == "Bu" and labelJ == "Bu"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_uu,	vec(0,0,0))); continue;
+					}
+					if( labelI == "Bd" and labelJ == "Bd"){
+						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_dd,	vec(0,0,0))); continue;
+					}
+				}
+			}
+		}
+	}
+
 	
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
@@ -841,6 +929,7 @@ public:
 			for( auto & iter : tbm.hamPreprocessor.list_BondCoupleHc)	{	addBondCouple	(iter,true);}
 			for( auto & iter : tbm.hamPreprocessor.list_ScreenCoulomb)	{	addScreenCoulomb(iter);}
 			for( auto & iter : tbm.hamPreprocessor.list_IntraHubbard)	{	addIntraHubbard	(iter);}
+			for( auto & iter : tbm.hamPreprocessor.list_IntraDudarevUJ)	{	addIntraDudarevUJ(iter);}
 			for( auto & iter : tbm.hamPreprocessor.list_QuantumFieldB)	{	addFieldB		(iter);}
 			
 			// If space==normal The following part will be ignored.

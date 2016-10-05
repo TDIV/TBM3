@@ -53,6 +53,7 @@ public:
 	vector<PreprocessorInfo>	list_BondCoupleHc;
 	vector<PreprocessorInfo>	list_ScreenCoulomb;
 	vector<PreprocessorInfo>	list_IntraHubbard;
+	vector<PreprocessorInfo>	list_IntraDudarevUJ;
 	vector<PreprocessorInfo>	list_SuperEx;
 	vector<PreprocessorInfo>	list_DMEx;
 	vector<PreprocessorInfo>	list_ClassicalFieldB;
@@ -125,6 +126,19 @@ public:
 			}
 			
 			list_IntraHubbard.push_back(PreprocessorInfo(lineStorage, optList, varSept));
+		}
+		else if	(lineSept[0] == "intraDudarevUJ")	{
+			/*****************************************
+			 * interUJ > Fe 1 > UJ_Dudarev
+			 *****************************************/
+			if( optSept.size() != 2 or optList.size() != 2){
+				ErrorMessage(lineStorage.filename,
+							 lineStorage.lineNumber,
+							 " \""+lineStorage.line+"\"\n"+
+							 " is not a valid input formate.");
+			}
+			
+			list_IntraDudarevUJ.push_back(PreprocessorInfo(lineStorage, optList, varSept));
 		}
 		else if	(lineSept[0] == "site")		{
 			/*****************************************

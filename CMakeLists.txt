@@ -45,7 +45,7 @@ link_directories(/Users/anrris/opt/magma/lib)
 include_directories(SYSTEM /Users/anrris/opt/magma/include)
 
 # --- CUDA -----------------------------------------
-find_package(CUDA 6.5)
+find_package(CUDA 7.5)
 if (CUDA_FOUND)
   message(STATUS "Found CUDA " ${CUDA_VERSION})
   include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})

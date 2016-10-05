@@ -80,7 +80,7 @@ class Band:
 		lw=1.5
 		for i in xrange(len(Ek)):
 			ek = array(array(Ek[i])/pi)
-			plt.plot(Kpath,ek,".",color=(0,0.1,0.5),linewidth=lw)
+			plt.plot(Kpath,ek,"-",color=(0.5,0.1,0.2),linewidth=lw)
 
 		for kvlp in KVerticalLinePos:
 			plt.axvline(x=kvlp, linestyle=":",linewidth=1, color='k')
