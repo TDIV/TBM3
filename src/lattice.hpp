@@ -29,6 +29,11 @@ public:
 	Lattice(string _filename):atomIndex(-1),  filename(_filename){
 		open(filename);
 	}
+	//Lattice(string _filename, string spin, string space):atomIndex(-1),  filename(_filename){
+	//	open(filename);
+	//	parameter.STR("spin") = spin;
+	//	parameter.STR("space") = space;
+	//}
 
 	~Lattice(){
 		rtree.clear();

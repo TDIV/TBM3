@@ -55,6 +55,8 @@ protected:
 		
 		spinNormalLat.parameter	= tbm.parameter;
 		spinNormalLat.bondVector= tbm.bondVector;
+		spinNormalLat.parameter.STR("spin") = "on";
+		spinNormalLat.parameter.STR("space") = "normal";
 	}
 	
 private:
@@ -392,7 +394,7 @@ protected:
 	void	calculateChemicalPotential	(bool printResult = false)							{
 		
 		stbd.order  = tbd.order;
-
+		
 		KHamEvd(stbd, false);
 		double	destDen = countTotalElectron();
 		
@@ -579,7 +581,7 @@ protected:
 
 		out.close();
 	}
-	double	iterateDenOrder				(OrderParameter & newOrder, double mix = 0.1)		{
+	double	iterateMeanFieldOrder		(OrderParameter & newOrder, double mix = 0.1)		{
 		
 		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
 		
@@ -673,7 +675,7 @@ public:
 
 		loadTBM();
 		Lat.createAtomList( tbm.parameter.STR("spin", "on"), tbm.parameter.STR("space","normal"));
-		spinNormalLat.createAtomList();
+		spinNormalLat.createAtomList("on", "normal");
 		
 		string solver = tbm.parameter.STR("SOLVER", "GPU");
 		if		( solver == "CPU")		{ gmt::SOLVER = CPU; }

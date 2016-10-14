@@ -562,38 +562,56 @@ public:
 		auto & optList = preInfo.optList;
 		auto & varList = preInfo.varList;
 		
-		if(pairingType == "S")
-		if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
-			ErrorMessage(preInfo.filename, preInfo.lineNumber,
-						 " \""+preInfo.line+"\"\n"+
-						 " Singlet pairing cannot be applited with spinless-nambu space.");
+		string orderStr = "";
+		string orderDeltaStr = "";
+		if(pairingType == "S"){
+			if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
+				ErrorMessage(preInfo.filename, preInfo.lineNumber,
+							 " \""+preInfo.line+"\"\n"+
+							 " Singlet pairing cannot be applited with spinless-nambu space.");
+			}
+			orderStr = "spair";
+			orderDeltaStr = "sdelta";
 		}
-		if(pairingType == "U")
-		if( Lat.HSpace() != EXNAMBU){
-			ErrorMessage(preInfo.filename, preInfo.lineNumber,
-						 " \""+preInfo.line+"\"\n"+
-						 " Up-triplet pairing cannot be applited without exnambu space.");
+		if(pairingType == "U"){
+			if( Lat.HSpace() != EXNAMBU){
+				ErrorMessage(preInfo.filename, preInfo.lineNumber,
+							 " \""+preInfo.line+"\"\n"+
+							 " Up-triplet pairing cannot be applited without exnambu space.");
+			}
+			orderStr = "upair";
+			orderDeltaStr = "udelta";
 		}
-		if(pairingType == "D")
-		if( Lat.HSpace() != EXNAMBU){
-			ErrorMessage(preInfo.filename, preInfo.lineNumber,
-						 " \""+preInfo.line+"\"\n"+
-						 " Dn-triplet pairing cannot be applited without exnambu space.");
+		if(pairingType == "D"){
+			if( Lat.HSpace() != EXNAMBU){
+				ErrorMessage(preInfo.filename, preInfo.lineNumber,
+							 " \""+preInfo.line+"\"\n"+
+							 " Dn-triplet pairing cannot be applited without exnambu space.");
+			}
+			orderStr = "dpair";
+			orderDeltaStr = "ddelta";
 		}
-		if(pairingType == "T")
-		if( Lat.HSpace() != EXNAMBU){
-			ErrorMessage(preInfo.filename, preInfo.lineNumber,
-						 " \""+preInfo.line+"\"\n"+
-						 " Triplet pairing cannot be applited without exnambu space.");
+		if(pairingType == "T"){
+			if( Lat.HSpace() != EXNAMBU){
+				ErrorMessage(preInfo.filename, preInfo.lineNumber,
+							 " \""+preInfo.line+"\"\n"+
+							 " Triplet pairing cannot be applited without exnambu space.");
+			}
+			orderStr = "tpair";
+			orderDeltaStr = "tdelta";
 		}
 		
 		
+		string orderKey = "";
+		string orderDeltaKey = "";
 		deque<string> firstSec;
 		deque<string> secondSec;
 		if( optList.size() == 3){
 			firstSec.push_back(optList[0]);
 			secondSec.push_back(optList[1]);
 			secondSec.push_back(optList[2]);
+			orderKey = "@:"+optList[1]+":"+optList[2]+":"+orderStr;
+			orderDeltaKey = "@:"+optList[1]+":"+optList[2]+":"+orderDeltaStr;
 		}
 		else if( optList.size() == 5){
 			firstSec.push_back(optList[0]);
@@ -601,6 +619,9 @@ public:
 			firstSec.push_back(optList[2]);
 			secondSec.push_back(optList[3]);
 			secondSec.push_back(optList[4]);
+			r_mat orderVec = Lat.vec(optList[2]);
+			orderKey = vecToStr(orderVec)+":"+optList[3]+":"+optList[4]+":"+orderStr;
+			orderDeltaKey = vecToStr(orderVec)+":"+optList[3]+":"+optList[4]+":"+orderDeltaStr;
 		}
 		
 		auto atomI = Lat.getAtom();
@@ -613,20 +634,22 @@ public:
 		if(!pair.atomI.hasOrbital(secondSec[0]))return;
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
-		x_var val = 0;
-		if( firstSec.size() == 2 ){ // site only pairing
-			val = parseSiteString(atomI, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseSiteString(atomI, varList[i])[0];
-			}
-	
+		
+		r_var pairPotential = parseSiteString(atomI, varList[0])[0].real();
+		for( unsigned i=1 ; i<varList.size() ; i++){
+			pairPotential = pairPotential * parseSiteString(atomI, varList[i])[0].real();
 		}
-		if( firstSec.size() == 3 ){
-			val = parseBondString(pair, varList[0])[0];
-			for( unsigned i=1 ; i<varList.size() ; i++){
-				val = val * parseBondString(pair, varList[i])[0];
-			}
+		
+		// Query the order
+		auto orderI = order.findOrder(atomI, orderKey);
+		
+		x_var val = pairPotential;
+		if( orderI.first ){
+			val = val * orderI.second[0];
 		}
+		//x_mat deltaVal(1,1);
+		//deltaVal[0] = val;
+		//order.setNew(atomI.atomIndex, orderDeltaKey, deltaVal);
 		
 		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
 		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
@@ -635,6 +658,7 @@ public:
 			auto & iterI = subIndexI[ii];
 			auto & iterJ = subIndexJ[jj];
 			
+			// ------------ Singlet Pairing -----------
 			if( pairingType == "S"){
 				if(		(iterI.first == "Au" and iterJ.first == "Bd")
 				   or	(iterI.first == "Ad" and iterJ.first == "Bu")){
@@ -647,6 +671,7 @@ public:
 					continue;
 				}
 			}
+			// ------------ Triplet U Pairing -----------
 			if( pairingType == "U" or pairingType == "T"){
 				if(		(iterI.first == "Au" and iterJ.first == "Bu")	){
 					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
@@ -657,6 +682,7 @@ public:
 					continue;
 				}
 			}
+			// ------------ Triplet D Pairing -----------
 			if( pairingType == "D" or pairingType == "T"){
 				if(		(iterI.first == "Ad" and iterJ.first == "Bd")	){
 					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
@@ -667,12 +693,21 @@ public:
 					continue;
 				}
 			}
+			// ------------ Triplet Pairing -----------
 			if( pairingType == "T" ){
-				if(		(iterI.first == "A"  and iterJ.first == "B" )){
+				if(		(iterI.first == "Au"  and iterJ.first == "Bu" )){
 					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ()));
 					continue;
 				}
-				if(		(iterI.first == "B"  and iterJ.first == "A" )){
+				if(		(iterI.first == "Bu"  and iterJ.first == "Au" )){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "Ad"  and iterJ.first == "Bd" )){
+					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ()));
+					continue;
+				}
+				if(		(iterI.first == "Bd"  and iterJ.first == "Ad" )){
 					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ()));
 					continue;
 				}
@@ -902,7 +937,6 @@ public:
 			}
 		}
 	}
-
 	
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
@@ -1139,6 +1173,14 @@ public:
 			}
 		}
 		order.save();
+	}
+	void			calculatePairingOrder	()						{
+		//while( Lat.iterate() ) {
+		//	for( auto & iter : tbm.hamPreprocessor.list_PairingS)		{	addPairing		(iter,"S"); }
+		//	for( auto & iter : tbm.hamPreprocessor.list_PairingU)		{	addPairing		(iter,"U"); }
+		//	for( auto & iter : tbm.hamPreprocessor.list_PairingD)		{	addPairing		(iter,"D"); }
+		//	for( auto & iter : tbm.hamPreprocessor.list_PairingT)		{	addPairing		(iter,"T"); }
+		//}
 	}
 	void			calculateEnergy			()						{
 

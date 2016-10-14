@@ -55,9 +55,29 @@ public:
 		for(unsigned ii=0 ; ii<Lat.latticeSize() ; ii++) optList.push_back(		rmap()		);
 	}
 
+	/*
+	 Here is the definition of the i/o file formate:
+	 
+	 >>> 0	1	Fe		[[ 0	0	0 ]]
+	  @:cspin				=	1,2,3
+	  @:cspin				=	1,2,3
+	  @:1:pspin				=	1,2,3
+	  @:2:pspin				=	1,2,3
+	  @:1:den				=	1
+	  @:2:den				=	1
+	  +1+0+0:1:2:spair		=	(1,2)
+	  +0+1+0:1:2:spair		=	(1,2)
+	  -1+0+0:1:2:spair		=	(1,2)
+	  +0-1+0:1:2:spair		=	(1,2)
+	  +1+0+0:2:1:spair		=	(1,2)
+	  +0+1+0:2:1:spair		=	(1,2)
+	  -1+0+0:2:1:spair		=	(1,2)
+	  +0-1+0:2:1:spair		=	(1,2)
+	 */
+	
 	x_mat &				operator()(string opt)					{
 		// xxx.order("Fe			cspin") = 1,2,3 (site only operation)
-		// xxx.order("Fe:O:+1+0+0	1:2:pairingS") = xxx (bond operation)
+		// xxx.order("Fe:Fe:+1+0+0	1:2:spair") = xxx (bond operation)
 		empty_mat_for_return = x_mat(1,1);
 		
 		/* -------------------------------------------
@@ -124,6 +144,7 @@ public:
 			optKey += ":"+atomPair.atomJ.getOrbitalNumber(second2[1]);
 			optKey += ":"+second2[2];
 		}
+		//cout<<"|"<<optKey<<"|"<<endl;
 		
 		// Storage for the value.
 		auto  it = optList[atomPair.atomI.atomIndex].find(optKey);
@@ -259,28 +280,9 @@ public:
 		optList = optL;
 	}
 	
-	/*
-	 Here is the definition of the i/o file formate:
-	 
-	 >>> 0	1	Fe		[[ 0	0	0 ]]
-	  @:cspin				=	1,2,3
-	  @:cspin				=	1,2,3
-	  @:1:pspin				=	1,2,3
-	  @:2:pspin				=	1,2,3
-	  @:1:den				=	1
-	  @:2:den				=	1
-	  +1+0+0:1:2:pairingS	=	(1,2)
-	  +0+1+0:1:2:pairingS	=	(1,2)
-	  -1+0+0:1:2:pairingS	=	(1,2)
-	  +0-1+0:1:2:pairingS	=	(1,2)
-	  +1+0+0:2:1:pairingS	=	(1,2)
-	  +0+1+0:2:1:pairingS	=	(1,2)
-	  -1+0+0:2:1:pairingS	=	(1,2)
-	  +0-1+0:2:1:pairingS	=	(1,2)
-	 */
+
 	
 	OrderParameter & operator=( const OrderParameter & order)	{
-		Lat = order.Lat;
 		optList = order.optList;
 		return *this;
 	}

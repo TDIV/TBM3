@@ -33,7 +33,7 @@ public:
 
 	void	initOrder()		override	{
 		loadTBM();
-		Lat.createAtomList("on","normal", false);
+		Lat.createAtomList("on","normal", true);
 		
 		tbd.order.clear();
 		tbd.order.load(tbm.initOrder.orderOperationList);
@@ -116,7 +116,7 @@ public:
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
-			den_diff = iterateDenOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
+			den_diff = iterateMeanFieldOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
 			cout<< gmt::fformat(iteration_steps, 5) <<"  Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
