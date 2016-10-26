@@ -516,7 +516,7 @@ protected:
 			}
 		}
 		
-		/* Store the band structure into 'xxx.lat.ldos' */
+		/* Store the LDOS into 'xxx.lat.ldos' */
 		string	filename = Lat.FileName()+".ldos";
 		ofstream out(filename);
 		
@@ -590,8 +590,14 @@ protected:
 		calculateChemicalPotential(false);
 		// *********************************
 		
+		calculateElectronFilling(tbd);
+		
 		if( tbd.Lat.parameter.STR("spin") == "on" ) {
 			tbd.calculate4DensityOrder();
+		}
+		
+		if( tbd.Lat.parameter.STR("space") != "normal" ) {
+			tbd.calculatePairingOrder();
 		}
 		
 		double ratio_a = 0;
@@ -602,17 +608,16 @@ protected:
 			ratio_b = mix;
 		}
 		
-		double max_den_diff = 0;
+		double max_mf_diff = 0;
 		
 		// Mixing and difference checking for @:den
 		while( iterate() ){
-			
 			auto parameter_old = tbd.order_old.findOrder(Lat.getAtom(),	"@:den");
 			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
 			
 			if( parameter_old.first and parameter_new.first ){
 				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-				if( max_den_diff < den_diff ) max_den_diff = den_diff;
+				if( max_mf_diff < den_diff ) max_mf_diff = den_diff;
 				
 				// Set up updated @:den order parameter
 				auto para_old = ratio_a * parameter_old.second;
@@ -647,10 +652,10 @@ protected:
 					auto den_diff1 = abs(vdiff[1]);
 					auto den_diff2 = abs(vdiff[2]);
 					auto den_diff3 = abs(vdiff[3]);
-					if( max_den_diff < den_diff0 ) max_den_diff = den_diff0;
-					if( max_den_diff < den_diff1 ) max_den_diff = den_diff1;
-					if( max_den_diff < den_diff2 ) max_den_diff = den_diff2;
-					if( max_den_diff < den_diff3 ) max_den_diff = den_diff3;
+					if( max_mf_diff < den_diff0 ) max_mf_diff = den_diff0;
+					if( max_mf_diff < den_diff1 ) max_mf_diff = den_diff1;
+					if( max_mf_diff < den_diff2 ) max_mf_diff = den_diff2;
+					if( max_mf_diff < den_diff3 ) max_mf_diff = den_diff3;
 					
 					// Set up updated @:n:4den order parameter
 					auto para_old = ratio_a * parameter_old.second;
@@ -661,10 +666,25 @@ protected:
 			}
 		}
 		
+		// Mixing and difference checking for pairing order
+		//if( tbd.Lat.parameter.STR("space") != "normal" )
+		//for( auto & elem : tbd.pairElementList ){
+		//	auto parameter_old = tbd.order_old.findOrder(elem.ap.atomI, elem.pairOrder);
+		//	auto parameter_new = tbd.order.findOrder(elem.ap.atomI, elem.pairOrder);
+		//	auto pair_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+		//	if( max_mf_diff < pair_diff ) max_mf_diff = pair_diff;
+		//	
+		//	auto para_old = ratio_a * parameter_old.second;
+		//	auto para_new = ratio_b * parameter_new.second;
+		//	auto mixOrder = para_old + para_new;
+		//	newOrder.setNew(elem.ap.atomI.atomIndex, elem.pairOrder, mixOrder);
+		//}
+
+		
 		tbd.calculateEnergy();
 		newOrder.save();
 		
-		return max_den_diff;
+		return max_mf_diff;
 	}
 	
 	void	calculateSpinSusceptibility	(TBDataSource & rtbd);

@@ -36,6 +36,23 @@ public:
 	}
 };
 
+struct PairingElement{
+public:
+	AtomPair	atomPair;
+	string		orderStr, orderKey;
+	
+	typedef vector<pair<unsigned, unsigned> > PairIndexList;
+	PairIndexList indexList;
+	
+	PairingElement(){}
+	PairingElement(AtomPair ap, string _orderStr, string _orderKey, PairIndexList _indexList){
+		atomPair	= ap;
+		orderStr	= _orderStr;
+		orderKey	= _orderKey;
+		indexList	= _indexList;
+	}
+};
+
 struct	EigVec		{
 	string	message;
 	r_mat	kPoint;
@@ -59,12 +76,12 @@ struct	EigVec		{
  
 	pairingS	> Fe 1:1			> 1		% On-site Singlet pairing
 	pairingS	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
-	pairingU	> Fe 1:1			> 1		% On-site Triplet pairing for 'up' spin
-	pairingU	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing for 'up' spin
-	pairingD	> Fe 1:1			> 1		% On-site Triplet pairing for 'dn' spin
-	pairingD	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing for 'dn' spin
-	pairingT	> Fe 1:1			> 1		% On-site Triplet pairing
-	pairingT	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing
+	pairingUU	> Fe 1:1			> 1		% On-site Triplet pairing for 'up' spin
+	pairingUU	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing for 'up' spin
+	pairingDD	> Fe 1:1			> 1		% On-site Triplet pairing for 'dn' spin
+	pairingDD	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing for 'dn' spin
+	pairingUD	> Fe 1:1			> 1		% On-site Triplet pairing
+	pairingUD	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Triplet pairing
  */
 class TBDataSource{
 public:
@@ -86,7 +103,9 @@ public:
 	vector<EigVec>			KEigenValVec;	// Calculated K-space dependent eigen value and vectore.
 	EigVec					tmpEigValVec;	// A temporary storage of eigen value vector for a specific K-point.
 	r_var					maxE,	minE;
-	
+
+	vector<PairingElement>	pairElementList;	// A list to store all the matrix elements
+
 	map<string, double>		energyMap;
 
 	void		initHam		()		{
@@ -195,8 +214,8 @@ public:
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
 				
-				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx+Im*Sy	, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
 				break;
@@ -271,25 +290,25 @@ public:
 		}
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & tmpChar = spinIndexList_i[ii].first[0];
+			auto & tmpCharI = spinIndexList_i[ii].first[0];
 			
 			auto & index_i = spinIndexList_i[ii].second;
 			auto & index_j = spinIndexList_j[ii].second;
 			
-			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
+			if(tmpCharI == 'n' or tmpCharI == 'u' or tmpCharI == 'd'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, vec(0,0,0)));
 				if(needHc)
 					hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), vec(0,0,0)));
 			}
-			if(tmpChar == 'A'){
+			if(tmpCharI == 'A'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, vec(0,0,0)));
 				if(needHc)
 					hamElementList.push_back(MatrixElement(index_j, index_i,conj(val), vec(0,0,0)));
 			}
-			if(tmpChar == 'B'){
-				hamElementList.push_back(MatrixElement(index_i, index_j,-val, vec(0,0,0)));
+			if(tmpCharI == 'B'){
+				hamElementList.push_back(MatrixElement(index_i, index_j,conj(-val), vec(0,0,0)));
 				if(needHc)
-					hamElementList.push_back(MatrixElement(index_j, index_i,-conj(val), vec(0,0,0)));
+					hamElementList.push_back(MatrixElement(index_j, index_i,-val, vec(0,0,0)));
 			}
 		}
 	}
@@ -320,28 +339,28 @@ public:
 		for( unsigned ii = 0; ii<subIndexI.size() ; ii++){
 			auto & iterI = subIndexI[ii];
 			auto & iterJ = subIndexJ[ii];
-			char & tmpChar = iterI.first[0];
-			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
+			char & tmpCharI = iterI.first[0];
+			if(tmpCharI == 'n' or tmpCharI == 'u' or tmpCharI == 'd'){
 				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
 				if(needHc)
 					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
 			}
-			if(tmpChar == 'A'){
+			if(tmpCharI == 'A'){
 				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
 				if(needHc)
 					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second, conj(val),	-pair.bondIJ()));
 			}
-			if(tmpChar == 'B'){
-				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,-val, pair.bondIJ()));
+			if(tmpCharI == 'B'){
+				hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(-val),-pair.bondIJ()));
 				if(needHc)
-					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second,conj(-val),	-pair.bondIJ()));
+					hamElementList.push_back(MatrixElement(iterJ.second, iterI.second,-val,	 pair.bondIJ()));
 			}
 		}
 	}
 	void		addBondCouple	(const PreprocessorInfo & preInfo, bool needHc = false)	{
 		/*****************************************
-		 * bond > Fe:O:+1+0+0# 1:1 >  0.5
-		 * bond > Fe:O:+1+0+0# 1:px >  0.5
+		 * bond > Fe:O:+1+0+0# 1u:1d >  0.5
+		 * bond > Fe:O:+1+0+0# 1u:px.d >  0.5
 		 *****************************************/
 		auto & optList = preInfo.optList;
 		auto & varList = preInfo.varList;
@@ -381,25 +400,25 @@ public:
 		}
 		
 		for( unsigned ii=0 ; ii<spinIndexList_i.size() ; ii++){
-			auto & tmpChar = spinIndexList_i[ii].first[0];
+			auto & tmpCharI = spinIndexList_i[ii].first[0];
 			
 			auto & index_i = spinIndexList_i[ii].second;
 			auto & index_j = spinIndexList_j[ii].second;
 			
-			if(tmpChar == 'n' or tmpChar == 'u' or tmpChar == 'd'){
+			if(tmpCharI == 'n' or tmpCharI == 'u' or tmpCharI == 'd'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
 				if( needHc )
 					hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
 			}
-			if(tmpChar == 'A'){
+			if(tmpCharI == 'A'){
 				hamElementList.push_back(MatrixElement(index_i, index_j, val, pair.bondIJ()));
 				if( needHc )
 					hamElementList.push_back(MatrixElement(index_j, index_i, conj(val), -pair.bondIJ()));
 			}
-			if(tmpChar == 'B'){
-				hamElementList.push_back(MatrixElement(index_i, index_j,-val, pair.bondIJ()));
+			if(tmpCharI == 'B'){
+				hamElementList.push_back(MatrixElement(index_i, index_j,conj(-val),-pair.bondIJ()));
 				if( needHc )
-					hamElementList.push_back(MatrixElement(index_j, index_i, conj(-val),-pair.bondIJ()));
+					hamElementList.push_back(MatrixElement(index_j, index_i, -val, pair.bondIJ()));
 			}
 		}
 	}
@@ -546,8 +565,8 @@ public:
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexAd, indexAd,-Sz			, vec(0,0,0)));
 				
-				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx+Im*Sy	, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
 				break;
@@ -556,13 +575,19 @@ public:
 	}
 	void		addPairing		(const PreprocessorInfo & preInfo, string pairingType)	{
 		/*****************************************
-		 * pairing(X)	> Fe 1:1			> 1		% On-site Singlet pairing
-		 * pairing(X)	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
+		pairingX	> Fe 1:1			> 1		% On-site  intra-orbital X-pairing
+		pairingX	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site intra-orbital X-pairing
+		pairingX	> Fe 1:2			> 1		% On-site  inter-orbital X-pairing
+		pairingX	> Fe:Fe:+1+0+0 1:2	> 1		% Off-site inter-orbital X-pairing
+		X = S  --> Spin Singlet pairing
+		X = UU --> Up-Up spin	triplet pairing
+		X = DD --> Dn-Dn Spin	triplet pairing
+		X = UD --> UP-Dn Spin	triplet pairing
 		 *****************************************/
 		auto & optList = preInfo.optList;
 		auto & varList = preInfo.varList;
 		
-		string orderStr = "";
+		string orderStr	= "";
 		string orderDeltaStr = "";
 		if(pairingType == "S"){
 			if( Lat.parameter.STR("spin") == "off" and Lat.HSpace() == NAMBU){
@@ -573,35 +598,34 @@ public:
 			orderStr = "spair";
 			orderDeltaStr = "sdelta";
 		}
-		if(pairingType == "U"){
+		if(pairingType == "UU"){
 			if( Lat.HSpace() != EXNAMBU){
 				ErrorMessage(preInfo.filename, preInfo.lineNumber,
 							 " \""+preInfo.line+"\"\n"+
 							 " Up-triplet pairing cannot be applited without exnambu space.");
 			}
-			orderStr = "upair";
+			orderStr = "uupair";
 			orderDeltaStr = "udelta";
 		}
-		if(pairingType == "D"){
+		if(pairingType == "DD"){
 			if( Lat.HSpace() != EXNAMBU){
 				ErrorMessage(preInfo.filename, preInfo.lineNumber,
 							 " \""+preInfo.line+"\"\n"+
 							 " Dn-triplet pairing cannot be applited without exnambu space.");
 			}
-			orderStr = "dpair";
+			orderStr = "ddpair";
 			orderDeltaStr = "ddelta";
 		}
-		if(pairingType == "T"){
+		if(pairingType == "UD"){
 			if( Lat.HSpace() != EXNAMBU){
 				ErrorMessage(preInfo.filename, preInfo.lineNumber,
 							 " \""+preInfo.line+"\"\n"+
-							 " Triplet pairing cannot be applited without exnambu space.");
+							 " Up-triplet pairing cannot be applited without exnambu space.");
 			}
-			orderStr = "tpair";
-			orderDeltaStr = "tdelta";
+			orderStr = "udpair";
+			orderDeltaStr = "uddelta";
 		}
-		
-		
+
 		string orderKey = "";
 		string orderDeltaKey = "";
 		deque<string> firstSec;
@@ -634,6 +658,8 @@ public:
 		if(!pair.atomI.hasOrbital(secondSec[0]))return;
 		if(!pair.atomJ.hasOrbital(secondSec[1]))return;
 		
+		string orb1 = secondSec[0];
+		string orb2 = secondSec[1];
 		
 		r_var pairPotential = parseSiteString(atomI, varList[0])[0].real();
 		for( unsigned i=1 ; i<varList.size() ; i++){
@@ -643,78 +669,119 @@ public:
 		// Query the order
 		auto orderI = order.findOrder(atomI, orderKey);
 		
-		x_var val = pairPotential;
+		x_var val = -pairPotential;
 		if( orderI.first ){
 			val = val * orderI.second[0];
 		}
-		//x_mat deltaVal(1,1);
-		//deltaVal[0] = val;
-		//order.setNew(atomI.atomIndex, orderDeltaKey, deltaVal);
 		
-		auto subIndexI = pair.atomI.orbitalIndexList(secondSec[0]);
-		auto subIndexJ = pair.atomJ.orbitalIndexList(secondSec[1]);
-		for( unsigned ii = 0; ii<subIndexI.size() ; ii++)
-		for( unsigned jj = 0; jj<subIndexI.size() ; jj++){
-			auto & iterI = subIndexI[ii];
-			auto & iterJ = subIndexJ[jj];
-			
-			// ------------ Singlet Pairing -----------
-			if( pairingType == "S"){
-				if(		(iterI.first == "Au" and iterJ.first == "Bd")
-				   or	(iterI.first == "Ad" and iterJ.first == "Bu")){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
-					continue;
-				}
-				if(		(iterI.first == "Bu" and iterJ.first == "Ad")
-				   or	(iterI.first == "Bd" and iterJ.first == "Au")){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
-					continue;
-				}
-			}
-			// ------------ Triplet U Pairing -----------
-			if( pairingType == "U" or pairingType == "T"){
-				if(		(iterI.first == "Au" and iterJ.first == "Bu")	){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
-					continue;
-				}
-				if(		(iterI.first == "Bu" and iterJ.first == "Au")	){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
-					continue;
+		switch( Lat.HSpace() ){
+			case NAMBU: {
+				if( pairingType == "S" ){
+					PairingElement::PairIndexList pIndexList;
+					
+					unsigned indexI1Au = pair.atomI.index(orb1+"Au");
+					unsigned indexJ2Bd = pair.atomJ.index(orb2+"Bd");
+					hamElementList.push_back(MatrixElement(indexI1Au, indexJ2Bd, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Au, indexJ2Bd));
+					
+					unsigned indexI1Bd = pair.atomI.index(orb1+"Bd"); //Conjugate part
+					unsigned indexJ2Au = pair.atomJ.index(orb2+"Au"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bd, indexJ2Au, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bd, indexJ2Au));
+					
+					pairElementList.push_back(PairingElement(pair, orderStr, orderKey, pIndexList));
+					break;
 				}
 			}
-			// ------------ Triplet D Pairing -----------
-			if( pairingType == "D" or pairingType == "T"){
-				if(		(iterI.first == "Ad" and iterJ.first == "Bd")	){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second, val, pair.bondIJ()));
-					continue;
+			case EXNAMBU: {
+				if( pairingType == "S"){
+					PairingElement::PairIndexList pIndexList;
+					
+					unsigned indexI1Au = pair.atomI.index(orb1+"Au");
+					unsigned indexJ2Bd = pair.atomJ.index(orb2+"Bd");
+					hamElementList.push_back(MatrixElement(indexI1Au, indexJ2Bd, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Au, indexJ2Bd));
+					
+					unsigned indexI1Bu = pair.atomI.index(orb1+"Bu"); //Conjugate part
+					unsigned indexJ2Ad = pair.atomJ.index(orb2+"Ad"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bu, indexJ2Ad, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bu, indexJ2Ad));
+					
+					unsigned indexI1Ad = pair.atomI.index(orb1+"Ad");
+					unsigned indexJ2Bu = pair.atomJ.index(orb2+"Bu");
+					hamElementList.push_back(MatrixElement(indexI1Ad, indexJ2Bu,-val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Ad, indexJ2Bu));
+					
+					unsigned indexI1Bd = pair.atomI.index(orb1+"Bd"); //Conjugate part
+					unsigned indexJ2Au = pair.atomJ.index(orb2+"Au"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bd, indexJ2Au, conj(-val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bd, indexJ2Au));
+					
+					pairElementList.push_back(PairingElement(pair, orderStr, orderKey, pIndexList));
+					break;
 				}
-				if(		(iterI.first == "Bd" and iterJ.first == "Ad")	){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val), -pair.bondIJ()));
-					continue;
+				if( pairingType == "UD"){
+					PairingElement::PairIndexList pIndexList;
+					
+					unsigned indexI1Au = pair.atomI.index(orb1+"Au");
+					unsigned indexJ2Bd = pair.atomJ.index(orb2+"Bd");
+					hamElementList.push_back(MatrixElement(indexI1Au, indexJ2Bd, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Au, indexJ2Bd));
+					
+					unsigned indexI1Bu = pair.atomI.index(orb1+"Bu"); //Conjugate part
+					unsigned indexJ2Ad = pair.atomJ.index(orb2+"Ad"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bu, indexJ2Ad, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bu, indexJ2Ad));
+					
+					unsigned indexI1Ad = pair.atomI.index(orb1+"Ad");
+					unsigned indexJ2Bu = pair.atomJ.index(orb2+"Bu");
+					hamElementList.push_back(MatrixElement(indexI1Ad, indexJ2Bu, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Ad, indexJ2Bu));
+					
+					unsigned indexI1Bd = pair.atomI.index(orb1+"Bd"); //Conjugate part
+					unsigned indexJ2Au = pair.atomJ.index(orb2+"Au"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bd, indexJ2Au, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bd, indexJ2Au));
+					
+					pairElementList.push_back(PairingElement(pair, orderStr, orderKey, pIndexList));
+					break;
 				}
-			}
-			// ------------ Triplet Pairing -----------
-			if( pairingType == "T" ){
-				if(		(iterI.first == "Au"  and iterJ.first == "Bu" )){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ()));
-					continue;
+				if( pairingType == "UU" ){
+					PairingElement::PairIndexList pIndexList;
+					
+					unsigned indexI1Au = pair.atomI.index(orb1+"Au");
+					unsigned indexJ2Bu = pair.atomJ.index(orb2+"Bu");
+					hamElementList.push_back(MatrixElement(indexI1Au, indexJ2Bu, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Au, indexJ2Bu));
+					
+					unsigned indexI1Bu = pair.atomI.index(orb1+"Bu"); //Conjugate part
+					unsigned indexJ2Au = pair.atomJ.index(orb2+"Au"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bu, indexJ2Au, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bu, indexJ2Au));
+					
+					pairElementList.push_back(PairingElement(pair, orderStr, orderKey, pIndexList));
+					break;
 				}
-				if(		(iterI.first == "Bu"  and iterJ.first == "Au" )){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ()));
-					continue;
-				}
-				if(		(iterI.first == "Ad"  and iterJ.first == "Bd" )){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,	val,	pair.bondIJ()));
-					continue;
-				}
-				if(		(iterI.first == "Bd"  and iterJ.first == "Ad" )){
-					hamElementList.push_back(MatrixElement(iterI.second, iterJ.second,conj(val),-pair.bondIJ()));
-					continue;
+				if( pairingType == "DD" ){
+					PairingElement::PairIndexList pIndexList;
+					
+					unsigned indexI1Ad = pair.atomI.index(orb1+"Ad");
+					unsigned indexJ2Bd = pair.atomJ.index(orb2+"Bd");
+					hamElementList.push_back(MatrixElement(indexI1Ad, indexJ2Bd, val		, pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Ad, indexJ2Bd));
+					
+					unsigned indexI1Bd = pair.atomI.index(orb1+"Bd"); //Conjugate part
+					unsigned indexJ2Ad = pair.atomJ.index(orb2+"Ad"); //Conjugate part
+					hamElementList.push_back(MatrixElement(indexI1Bd, indexJ2Ad, conj(val)	,-pair.bondIJ()));
+					pIndexList.push_back(make_pair(indexI1Bd, indexJ2Ad));
+					
+					pairElementList.push_back(PairingElement(pair, orderStr, orderKey, pIndexList));
+					break;
 				}
 			}
 		}
 	}
-	
+
 	void		addIntraHubbard	(const PreprocessorInfo & preInfo)	{
 		/*****************************************
 		 * intraHubbard > Fe 2 >  U
@@ -825,11 +892,11 @@ public:
 					}
 					if( labelI == "Bu" and labelJ == "Bd"){
 						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
-						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_du,	vec(0,0,0))); continue;
+						hamElementList.push_back(MatrixElement(indexI, indexJ,conj(-cI_du),	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bd" and labelJ == "Bu"){
 						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
-						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_ud,	vec(0,0,0))); continue;
+						hamElementList.push_back(MatrixElement(indexI, indexJ,conj(-cI_ud),	vec(0,0,0))); continue;
 					}
 				}
 			}
@@ -927,8 +994,8 @@ public:
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, intraUJ+N	, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexAd, indexAd, intraUJ+N 	, vec(0,0,0)));
 				
-				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx+Im*Sy	, vec(0,0,0)));
-				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBu, indexBd,-Sx-Im*Sy	, vec(0,0,0)));
+				hamElementList.push_back(MatrixElement(indexBd, indexBu,-Sx+Im*Sy	, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBu, indexBu,-Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBd, indexBd, Sz			, vec(0,0,0)));
 				hamElementList.push_back(MatrixElement(indexBu, indexBu,-intraUJ-N	, vec(0,0,0)));
@@ -937,7 +1004,6 @@ public:
 			}
 		}
 	}
-	
 	/*------------------------------------------------
 	 Using these methods to construct and diagonalize (in k-space) Hamiltonian.
 	 -------------------------------------------------*/
@@ -982,6 +1048,7 @@ public:
 		
 		/* Construct the hamElementList from Lat.hamParser.hamOperationList from the 'xxx.lat.tbm'. */
 		hamElementList.clear();
+		pairElementList.clear();
 		while( Lat.iterate() ) {
 			for( auto & iter : tbm.hamPreprocessor.list_OrbitalEng)		{	addOrbitalEng	(iter);}
 			for( auto & iter : tbm.hamPreprocessor.list_HundSpin)		{	addHundSpin		(iter);}
@@ -1001,9 +1068,10 @@ public:
 			if( Lat.HSpace() == NORMAL) continue;
 			
 			for( auto & iter : tbm.hamPreprocessor.list_PairingS)		{	addPairing		(iter,"S"); }
-			for( auto & iter : tbm.hamPreprocessor.list_PairingU)		{	addPairing		(iter,"U"); }
-			for( auto & iter : tbm.hamPreprocessor.list_PairingD)		{	addPairing		(iter,"D"); }
-			for( auto & iter : tbm.hamPreprocessor.list_PairingT)		{	addPairing		(iter,"T"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingUU)		{	addPairing		(iter,"UU"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingDD)		{	addPairing		(iter,"DD"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingUD)		{	addPairing		(iter,"UD"); }
+			for( auto & iter : tbm.hamPreprocessor.list_PairingDU)		{	addPairing		(iter,"DU"); }
 			
 		}
 		if( withMu ) addChemicalPotential(Lat.parameter.VAR("Mu").real());
@@ -1063,16 +1131,39 @@ public:
 		
 		return 0;
 	}
+	x_var			getTanhDensity			(unsigned index_i, unsigned index_j){
+		/*
+		 This term returns the sum over energy for the tanh leading pair wised wave function:
+			\sum_n u^{n}_{index_i} v^{n*}_{index_j} tanh(E/2*Kb*T)
+		 */
+		
+		auto Temperature = Lat.parameter.VAR("Temperature", 0.00001);
+		if ( KEigenValVec.size()>0  and index_i < Lat.indexSize() and index_j < Lat.indexSize() ) {
+			x_var tanh_den_ij=0;
+			for (unsigned k=0; k<KEigenValVec.size(); k++) {
+				auto & kEigVal = KEigenValVec[k].eigenValue;
+				auto & kEigVec = KEigenValVec[k].eigenVector;
+    
+				for( int i=0 ; i<kEigVal.size() ; i++ ){
+					double thEn = tanh(0.5*kEigVal[i]/Temperature.real());
+					x_var uI = kEigVec(index_i,i);
+					x_var vJ = kEigVec(index_j,i);
+					tanh_den_ij += uI*conj(vJ)*thEn;
+				}
+			}
+			return tanh_den_ij/KEigenValVec.size();
+		}
+
+		return 0;
+	}
 	
 	void			calculate4DensityOrder	()						{
 		if( Lat.parameter.STR("spin")!="on" ){
 			ErrorMessage("Error, the spin space suld be turned \'on\' for the 4-density calculation");
 		}
-		if( Lat.HSpace()==NAMBU ){
-			ErrorMessage("Error, NAMBU space is not applicable forthe 4-density calculation");
-		}
 		
-		//OrderParameter	newOrder( order );
+		double ratio = 1;
+		if( Lat.HSpace()==EXNAMBU ) ratio = 0.5;
 			
 		while( Lat.iterate() ){
 			auto atomI = Lat.getAtom();
@@ -1110,12 +1201,12 @@ public:
 						r4den[0] += tmpDen;
 						r4den[3] -= tmpDen;
 					}
-					if( parser_I[1] == "u" and parser_J[1] == "d"){
+					if( parser_I[1] == "u" and parser_J[1] == "d" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real();
 						r4den[2] += tmpDen.imag();
 					}
-					if( parser_I[1] == "d" and parser_J[1] == "u"){
+					if( parser_I[1] == "d" and parser_J[1] == "u" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
 						r4den[1] += tmpDen.real();
 						r4den[2] -= tmpDen.imag();
@@ -1123,50 +1214,48 @@ public:
 					
 					if( parser_I[1] == "Au" and parser_J[1] == "Au"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[0] += tmpDen*0.5;
-						r4den[3] += tmpDen*0.5;
+						r4den[0] += tmpDen*ratio;
+						r4den[3] += tmpDen*ratio;
 					}
 					if( parser_I[1] == "Ad" and parser_J[1] == "Ad"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[0] += tmpDen*0.5;
-						r4den[3] -= tmpDen*0.5;
+						r4den[0] += tmpDen*ratio;
+						r4den[3] -= tmpDen*ratio;
 					}
-					if( parser_I[1] == "Au" and parser_J[1] == "Ad"){
+					if( parser_I[1] == "Au" and parser_J[1] == "Ad" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[1] += tmpDen.real()*0.5;
-						r4den[2] += tmpDen.imag()*0.5;
+						r4den[1] += tmpDen.real()*ratio;
+						r4den[2] += tmpDen.imag()*ratio;
 					}                            
-					if( parser_I[1] == "Ad" and parser_J[1] == "Au"){
+					if( parser_I[1] == "Ad" and parser_J[1] == "Au" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[1] += tmpDen.real()*0.5;
-						r4den[2] -= tmpDen.imag()*0.5;
+						r4den[1] += tmpDen.real()*ratio;
+						r4den[2] -= tmpDen.imag()*ratio;
 					}                            
-					
 					if( parser_I[1] == "Bu" and parser_J[1] == "Bu"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[0] += 1-tmpDen*0.5;
-						r4den[3] += 1-tmpDen*0.5;
+						r4den[0] += (1-tmpDen)*ratio;
+						r4den[3] += (1-tmpDen)*ratio;
 					}
 					if( parser_I[1] == "Bd" and parser_J[1] == "Bd"){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[0] += 1-tmpDen*0.5;
-						r4den[3] -= 1-tmpDen*0.5;
+						r4den[0] += (1-tmpDen)*ratio;
+						r4den[3] -= (1-tmpDen)*ratio;
 					}
-					if( parser_I[1] == "Bu" and parser_J[1] == "Bd"){
+					if( parser_I[1] == "Bu" and parser_J[1] == "Bd" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[1] += -tmpDen.real()*0.5;
-						r4den[2] += -tmpDen.imag()*0.5;
+						r4den[1] += -tmpDen.real()*ratio;
+						r4den[2] += -tmpDen.imag()*ratio;
 					}                             
-					if( parser_I[1] == "Bd" and parser_J[1] == "Bu"){
+					if( parser_I[1] == "Bd" and parser_J[1] == "Bu" and Lat.HSpace()!=NAMBU){
 						x_var tmpDen = getDensityMatrix(index_I, index_J);
-						r4den[1] += -tmpDen.real()*0.5;
-						r4den[2] -= -tmpDen.imag()*0.5;
+						r4den[1] += -tmpDen.real()*ratio;
+						r4den[2] -= -tmpDen.imag()*ratio;
 					}
 					for( unsigned ii=0 ; ii<r4den.size() ; ii++)
 						if( abs(r4den[ii]) < 0.000001 ) r4den[ii] = 0;
 				}
 			}
-			
 			
 			for( auto & iter: fourDensity){
 				order(atomI.atomName+" "+iter.first+":4den") = iter.second;
@@ -1175,12 +1264,29 @@ public:
 		order.save();
 	}
 	void			calculatePairingOrder	()						{
-		//while( Lat.iterate() ) {
-		//	for( auto & iter : tbm.hamPreprocessor.list_PairingS)		{	addPairing		(iter,"S"); }
-		//	for( auto & iter : tbm.hamPreprocessor.list_PairingU)		{	addPairing		(iter,"U"); }
-		//	for( auto & iter : tbm.hamPreprocessor.list_PairingD)		{	addPairing		(iter,"D"); }
-		//	for( auto & iter : tbm.hamPreprocessor.list_PairingT)		{	addPairing		(iter,"T"); }
-		//}
+		for( auto & elem : pairElementList ){
+			auto foundOrd = order.findOrder(elem.atomPair.atomI, elem.orderKey);
+			
+			switch( Lat.HSpace() ){
+			case NAMBU:
+				if( elem.orderStr == "spair" ){
+					break;
+				}
+			case EXNAMBU:
+				if( elem.orderStr == "spair" ){
+					break;
+				}
+				if( elem.orderStr == "udpair" ){
+					break;
+				}
+				if( elem.orderStr == "uupair" ){
+					break;
+				}
+				if( elem.orderStr == "ddpair" ){
+					break;
+				}
+			}
+		}
 	}
 	void			calculateEnergy			()						{
 

@@ -60,9 +60,10 @@ public:
 	vector<PreprocessorInfo>	list_QuantumFieldB;
 	
 	vector<PreprocessorInfo>	list_PairingS;
-	vector<PreprocessorInfo>	list_PairingU;
-	vector<PreprocessorInfo>	list_PairingD;
-	vector<PreprocessorInfo>	list_PairingT;
+	vector<PreprocessorInfo>	list_PairingUU;
+	vector<PreprocessorInfo>	list_PairingDD;
+	vector<PreprocessorInfo>	list_PairingUD;
+	vector<PreprocessorInfo>	list_PairingDU;
 	
 	HamiltonianPreprocessor(): ParserBase("#Hamiltonian"){}
 	
@@ -306,17 +307,17 @@ public:
 							 " is not a valid input formate.");
 			}
 		}
-		else if(lineSept[0] == "pairingU")	{
+		else if(lineSept[0] == "pairingUU")	{
 			/*****************************************
 			 * pairingU	> Fe 1:1			> 1		% On-site Singlet pairing
 			 * pairingU	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
 			 *****************************************/
 			
 			if( optSept.size() == 2 and optList.size() == 3){
-				list_PairingU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingUU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else if( optSept.size() == 2 and optList.size() == 5 ){
-				list_PairingU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingUU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else{
 				ErrorMessage(lineStorage.filename,
@@ -325,17 +326,17 @@ public:
 							 " is not a valid input formate.");
 			}
 		}
-		else if(lineSept[0] == "pairingD")	{
+		else if(lineSept[0] == "pairingDD")	{
 			/*****************************************
 			 * pairingD	> Fe 1:1			> 1		% On-site Singlet pairing
 			 * pairingD	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
 			 *****************************************/
 			
 			if( optSept.size() == 2 and optList.size() == 3){
-				list_PairingD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingDD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else if( optSept.size() == 2 and optList.size() == 5 ){
-				list_PairingD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingDD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else{
 				ErrorMessage(lineStorage.filename,
@@ -344,17 +345,36 @@ public:
 							 " is not a valid input formate.");
 			}
 		}
-		else if(lineSept[0] == "pairingT")	{
+		else if(lineSept[0] == "pairingUD")	{ // This function is depricated.
 			/*****************************************
 			 * pairingT	> Fe 1:1			> 1		% On-site Singlet pairing
 			 * pairingT	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
 			 *****************************************/
 			
 			if( optSept.size() == 2 and optList.size() == 3){
-				list_PairingT.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingUD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else if( optSept.size() == 2 and optList.size() == 5 ){
-				list_PairingT.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+				list_PairingUD.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+			}
+			else{
+				ErrorMessage(lineStorage.filename,
+							 lineStorage.lineNumber,
+							 " \""+lineStorage.line+"\"\n"+
+							 " is not a valid input formate.");
+			}
+		}
+			else if(lineSept[0] == "pairingDU")	{ // This function is depricated.
+			/*****************************************
+			 * pairingT	> Fe 1:1			> 1		% On-site Singlet pairing
+			 * pairingT	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
+			 *****************************************/
+			
+			if( optSept.size() == 2 and optList.size() == 3){
+				list_PairingDU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
+			}
+			else if( optSept.size() == 2 and optList.size() == 5 ){
+				list_PairingDU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
 			}
 			else{
 				ErrorMessage(lineStorage.filename,

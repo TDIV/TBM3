@@ -94,7 +94,6 @@ public:
 			calculateSpinSusceptibility(stbd);
 			cout<<endl;
 		}
-	
 		
 	}
 	
