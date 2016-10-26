@@ -168,6 +168,10 @@ public:
 		// ********************************
 	
 		ofstream outfile(filename+".lat.tbm");
+		string tbBondAlphaName = parameter.STR("TB_bond_alpha", "TB_bond_alpha");
+		outfile<<"#Parameters"<<endl;
+		outfile<<tbBondAlphaName<<" = 1.0"<<endl;
+		outfile<<endl;
 		outfile<<"#Hamiltonian"<<endl;
 		for( auto & line: wannierBlockLines ){
 			
@@ -246,12 +250,25 @@ public:
 						+DoubleToPMStr( bondIJ[1] )
 						+DoubleToPMStr( bondIJ[2] );
 					
+					double bondLength = sqrt(bondIJ[0]*bondIJ[0]+
+											 bondIJ[1]*bondIJ[1]+
+											 bondIJ[2]*bondIJ[2]
+											 );
+					
 					string orbitalOperation = orbI+":"+orbJ;
 					
-					outfile << fformat(bondOperation, 44)<<" "
-							<<fformat(orbitalOperation,7)<<"  >  "
-							<<"("<<varReal<<","<<varImag<<")"
-							<<endl;
+					if( bondLength < 0.001 ){
+						outfile << fformat(bondOperation, 44)<<" "
+								<<fformat(orbitalOperation,7)<<"  >  "
+								<<"("<<varReal<<","<<varImag<<")"
+								<<endl;
+					}
+					else {
+						outfile << fformat(bondOperation, 44)<<" "
+								<<fformat(orbitalOperation,7)<<"  >  "
+								<<"("<<varReal<<","<<varImag<<") * "<<tbBondAlphaName
+								<<endl;
+					}
 				}
 				
 			}
