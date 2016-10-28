@@ -179,6 +179,8 @@ int main(int argc, char *argv[]) {
 	/* -------------------------------------------
 	 Organizing/Collect arguments into a container.
 	 ---------------------------------------------*/
+	srand((unsigned)time(NULL));
+	
 	vector<string> args;
 	for (int i=0; i<argc; i++) args.push_back(string(argv[i]));
 	

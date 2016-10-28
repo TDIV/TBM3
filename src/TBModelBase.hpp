@@ -667,18 +667,18 @@ protected:
 		}
 		
 		// Mixing and difference checking for pairing order
-		//if( tbd.Lat.parameter.STR("space") != "normal" )
-		//for( auto & elem : tbd.pairElementList ){
-		//	auto parameter_old = tbd.order_old.findOrder(elem.ap.atomI, elem.pairOrder);
-		//	auto parameter_new = tbd.order.findOrder(elem.ap.atomI, elem.pairOrder);
-		//	auto pair_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-		//	if( max_mf_diff < pair_diff ) max_mf_diff = pair_diff;
-		//	
-		//	auto para_old = ratio_a * parameter_old.second;
-		//	auto para_new = ratio_b * parameter_new.second;
-		//	auto mixOrder = para_old + para_new;
-		//	newOrder.setNew(elem.ap.atomI.atomIndex, elem.pairOrder, mixOrder);
-		//}
+		if( tbd.Lat.parameter.STR("space") != "normal" )
+		for( auto & elem : tbd.pairElementList ){
+			auto parameter_old = tbd.order_old.findOrder(elem.atomPair.atomI, elem.orderKey);
+			auto parameter_new = tbd.order.findOrder(elem.atomPair.atomI, elem.orderKey);
+			auto pair_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+			if( max_mf_diff < pair_diff ) max_mf_diff = pair_diff;
+			
+			auto para_old = ratio_a * parameter_old.second;
+			auto para_new = ratio_b * parameter_new.second;
+			auto mixOrder = para_old + para_new;
+			newOrder.setNew(elem.atomPair.atomI.atomIndex, elem.orderKey, mixOrder);
+		}
 
 		
 		tbd.calculateEnergy();
