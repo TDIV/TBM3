@@ -364,25 +364,7 @@ public:
 							 " is not a valid input formate.");
 			}
 		}
-			else if(lineSept[0] == "pairingDU")	{ // This function is depricated.
-			/*****************************************
-			 * pairingT	> Fe 1:1			> 1		% On-site Singlet pairing
-			 * pairingT	> Fe:Fe:+1+0+0 1:1	> 1		% Off-site Singlet pairing
-			 *****************************************/
-			
-			if( optSept.size() == 2 and optList.size() == 3){
-				list_PairingDU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
-			}
-			else if( optSept.size() == 2 and optList.size() == 5 ){
-				list_PairingDU.push_back(PreprocessorInfo(lineStorage, optList , varSept));
-			}
-			else{
-				ErrorMessage(lineStorage.filename,
-							 lineStorage.lineNumber,
-							 " \""+lineStorage.line+"\"\n"+
-							 " is not a valid input formate.");
-			}
-		}
+
 	}
 
 };
