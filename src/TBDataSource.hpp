@@ -703,15 +703,17 @@ public:
 			// else --> no phase.
 			//
 			// Note that, in the future we could design more sophisticate phase assignment.
-			val = tbm.parameter.VAR("init_pair_magnitude", 0.05);
+			val = tbm.parameter.VAR("init_pair_magnitude", 1.0);
 			
-			string pair_phase_flag = tbm.parameter.STR("pair_phase", "none");
+			string pair_phase_flag = tbm.parameter.STR("init_pair_phase", "none");
 			if( pair_phase_flag == "random"){
 				double phaseTheta = (double)rand()/RAND_MAX;
 				x_var phase = exp(Im * 2 * pi * phaseTheta);
-				val = val * phase;
+				val = val * phase * pairPotential;
 			}
 		}
+		
+		energyMap["5.Pair Eng"] += (conj(val)*val).real() / pairPotential;
 		
 		switch( Lat.HSpace() ){
 			case NAMBU: {
@@ -885,7 +887,11 @@ public:
 		x_var	cI_dd = hubbardU * 0.5 * (orderI.second[0].real() - orderI.second[3].real());
 		x_var	cI_ud = hubbardU * 0.5 * (orderI.second[1].real() - Im * orderI.second[2].real());
 		x_var	cI_du = hubbardU * 0.5 * (orderI.second[1].real() + Im * orderI.second[2].real());
-		//cout<<orderKey<<" "<<cI_uu<<" "<<cI_dd<<" "<<cI_ud<<" "<<cI_du<<endl;
+		
+		energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
+		energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
+		energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
+		energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
 
 		////*****************************************************************
 		//// Attribute the surrounding Mean-field Coulomb potential to the Hamiltonian.
@@ -907,19 +913,15 @@ public:
 				if( Lat.HSpace() == NORMAL ){
 					// Normal part
 					if( labelI == "u" and labelJ == "u"){
-						energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "d" and labelJ == "d"){
-						energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "u" and labelJ == "d"){
-						energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
 					}
 					if( labelI == "d" and labelJ == "u"){
-						energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
 					}
 				}
@@ -927,37 +929,29 @@ public:
 				if( Lat.HSpace() == EXNAMBU){
 					// Particle part
 					if( labelI == "Au" and labelJ == "Au"){
-						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Ad" and labelJ == "Ad"){
-						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Au" and labelJ == "Ad"){
-						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_du,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Ad" and labelJ == "Au"){
-						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ, cI_ud,	vec(0,0,0))); continue;
 					}
 					
 					// Hole part
 					if( labelI == "Bu" and labelJ == "Bu"){
-						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_dd,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bd" and labelJ == "Bd"){
-						energyMap["3.U Eng"] -= (0.25 * cI_uu * cI_dd / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,-cI_uu,	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bu" and labelJ == "Bd"){
-						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,conj(cI_du),	vec(0,0,0))); continue;
 					}
 					if( labelI == "Bd" and labelJ == "Bu"){
-						energyMap["3.U Eng"] += (0.25 * cI_ud * cI_du / hubbardU).real();
 						hamElementList.push_back(MatrixElement(indexI, indexJ,conj(cI_ud),	vec(0,0,0))); continue;
 					}
 				}
@@ -1008,13 +1002,14 @@ public:
 		r_var	Sy = -intraUJ * orderI.second[2].real();
 		r_var	Sz = -intraUJ * orderI.second[3].real();
 		
+		energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
+		
 		////*****************************************************************
 		//// Attribute the on-site Mean-field Dudarev UJ potential to the Hamiltonian.
 		////*****************************************************************
 		switch( Lat.HSpace() ){
 				
 			case NORMAL: {
-				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
 				unsigned indexNu = atomI.index(orbitalNumber+"u");
 				unsigned indexNd = atomI.index(orbitalNumber+"d");
 				
@@ -1027,7 +1022,6 @@ public:
 				break;
 			}
 			case NAMBU: {
-				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
 				unsigned indexAu = atomI.index(orbitalNumber+"Au");
 				unsigned indexBd = atomI.index(orbitalNumber+"Bd");
 				hamElementList.push_back(MatrixElement(indexAu, indexAu, Sz			, vec(0,0,0)));
@@ -1043,7 +1037,6 @@ public:
 				break;
 			}
 			case EXNAMBU: {
-				energyMap["4.DUJ Eng"] -= 0.5 * (N*N+Sx*Sx+Sy*Sy+Sz*Sz) / intraUJ;
 				unsigned indexAu = atomI.index(orbitalNumber+"Au");
 				unsigned indexAd = atomI.index(orbitalNumber+"Ad");
 				unsigned indexBu = atomI.index(orbitalNumber+"Bu");
