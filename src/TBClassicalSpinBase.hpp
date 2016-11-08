@@ -212,7 +212,13 @@ public:
 		if( TBD.tbm.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
 		if( TBD.tbm.parameter.VAR("disable_quantum", 0).real() == 0 ){
-			TBD.calculate4DensityOrder();
+			if( TBD.tbm.parameter.STR("spin") == "on" ) {
+				TBD.calculate4DensityOrder();
+			}
+			
+			if( TBD.tbm.parameter.STR("space") != "normal" ) {
+				TBD.calculatePairingOrder();
+			}
 		}
 		
 		
@@ -310,7 +316,6 @@ public:
 		}
 		
 		// The LLG variational method.
-		
 		double max_spin_diff = 0;
 		
 		double variational_dt	= TBD.tbm.parameter.VAR("var_dt", 0.01).real();

@@ -1074,6 +1074,7 @@ public:
 		energyMap["2.Coul Eng"] = 0;
 		energyMap["3.U Eng"] = 0;
 		energyMap["4.DUJ Eng"] = 0;
+		energyMap["5.Pair Eng"] = 0;
 		
 		/*
 		 // Performance testing loop

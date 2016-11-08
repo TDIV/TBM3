@@ -546,7 +546,12 @@ protected:
 							double delta	= Gamma/(pi*(e_w*e_w + Gamma*Gamma));
 							
 							x_var u_n		= kVec(in.get<2>(), n);
-							ldosIter.second += (conj(u_n)*u_n).real() * delta/tbd.KEigenValVec.size();
+							if( TBD.Lat.HSpace() != EXNAMBU ){
+								ldosIter.second += (conj(u_n)*u_n).real() * delta/tbd.KEigenValVec.size();
+							}
+							else{
+								ldosIter.second += 0.5 * (conj(u_n)*u_n).real() * delta/tbd.KEigenValVec.size();
+							}
 						}
 					}
 				}

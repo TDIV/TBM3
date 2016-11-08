@@ -97,9 +97,11 @@ public:
 		
 	}
 	
-	bool	iterationStepIncr()			{
-		iteration_steps += 1;
+	bool	isMaxStep()			{
 		return iteration_steps <= iteration_max;
+	}
+	void	incrStep()			{
+		iteration_steps += 1;
 	}
 	
 	double	calculateDenMeanField()		{
@@ -110,7 +112,8 @@ public:
 		//double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
 		double den_diff_bound = Lat.parameter.VAR("den_diff_bound",0.5).real();
 		
-		while( den_diff > den_diff_bound and iterationStepIncr() ){
+		while( den_diff > den_diff_bound and isMaxStep() ){
+			incrStep();
 			
 			tbd.order.load();
 			tbd.order.save("previous");
@@ -131,6 +134,7 @@ public:
 		return den_diff;
 	}
 	double	calculateSpinVar()			{
+		incrStep();
 		
 		tbd.order.load();
 		tbd.order.save("previous");
@@ -162,7 +166,7 @@ public:
 				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
 				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
 				)		and
-				iterationStepIncr()){
+				isMaxStep()){
 		
 			den_diff	= calculateDenMeanField();
 			spin_diff	= calculateSpinVar();
