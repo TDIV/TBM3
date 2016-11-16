@@ -888,10 +888,8 @@ public:
 		x_var	cI_ud = hubbardU * 0.5 * (orderI.second[1].real() - Im * orderI.second[2].real());
 		x_var	cI_du = hubbardU * 0.5 * (orderI.second[1].real() + Im * orderI.second[2].real());
 		
-		energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
-		energyMap["3.U Eng"] -= (0.5 * cI_uu * cI_dd / hubbardU).real();
-		energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
-		energyMap["3.U Eng"] += (0.5 * cI_ud * cI_du / hubbardU).real();
+		energyMap["3.U Eng"] -= (cI_uu * cI_dd / hubbardU).real();
+		energyMap["3.U Eng"] += (cI_ud * cI_du / hubbardU).real();
 
 		////*****************************************************************
 		//// Attribute the surrounding Mean-field Coulomb potential to the Hamiltonian.

@@ -168,7 +168,7 @@ public:
 		
 		while( TBD.Lat.iterate() ){
 			
-			if( TBD.Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+			if( TBD.Lat.parameter.VAR("need_MF_iteration", 1).real() == 1 )
 			for( auto & iter : TBD.tbm.hamPreprocessor.list_HundSpin)			addHundCoupling	(iter);
 			for( auto & iter : TBD.tbm.hamPreprocessor.list_SuperEx)			addSuperExchange(iter);
 			for( auto & iter : TBD.tbm.hamPreprocessor.list_DMEx)				addDMExchange(iter);
@@ -211,7 +211,7 @@ public:
 		
 		if( TBD.tbm.parameter.VAR("isCalculateVar", 0).real() == 0 ){ return 0; }
 		
-		if( TBD.tbm.parameter.VAR("disable_quantum", 0).real() == 0 ){
+		if( TBD.tbm.parameter.VAR("need_MF_iteration", 1).real() == 1 ){
 			if( TBD.tbm.parameter.STR("spin") == "on" ) {
 				TBD.calculate4DensityOrder();
 			}
@@ -225,7 +225,7 @@ public:
 		map<unsigned, pair<x_mat, string> > Field;
 		
 		// Construct the Field-Term for variational method of HundCoupling.
-		if( TBD.tbm.parameter.VAR("disable_quantum", 0).real() == 0 )
+		if( TBD.tbm.parameter.VAR("need_MF_iteration", 1).real() == 1 )
 		for ( auto & elem :HundCouplingList)	{
 			auto atomI = elem.get<0>();
 			auto si = elem.get<1>();
@@ -318,7 +318,7 @@ public:
 		// The LLG variational method.
 		double max_spin_diff = 0;
 		
-		double variational_dt	= TBD.tbm.parameter.VAR("var_dt", 0.01).real();
+		double variational_dt	= TBD.tbm.parameter.VAR("LLG_dt", 0.01).real();
 		double LLGdamping		= TBD.tbm.parameter.VAR("LLGdamping", 0.2).real();
 		for( auto & fieldI : Field){
 			auto atomI	= TBD.Lat.getAtom(fieldI.first);

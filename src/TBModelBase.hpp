@@ -76,7 +76,7 @@ protected:
 	void		constructHam	(TBDataSource & rtbd, bool withMu = true)					{
 		// Construct the Hamiltonian from the system-build structure: TBDataSource (tbd).
 		
-		if( Lat.parameter.VAR("disable_quantum", 0).real() == 0 )
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 1 )
 			rtbd.constructTBMHam(withMu);
 		
 		// Construct the customized Hamiltonian.
@@ -87,8 +87,8 @@ protected:
 	 The Band structure calculation.
 	 ------------------------------------------------------*/
 	void	calculateBandStructure	(TBDataSource & rtbd, unsigned Nsteps=50)				{
-		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
-			cout<< "Warning, due to flag 'disable_quantum' turned on."
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
+			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
 				<< "The band structure calculation will be ignored."<<endl;
 			return;
 		}
@@ -151,8 +151,8 @@ protected:
 		out.close();
 	}
 	void	calculateKWannierCenter	(TBDataSource & rtbd, unsigned Nsteps=50)				{
-		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
-			cout<< "Warning, due to flag 'disable_quantum' turned on."
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
+			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
 				<< "The Wannier center calculation will be ignored."<<endl;
 			return;
 		}
@@ -312,7 +312,7 @@ protected:
 		
 		constructHam(rtbd, withMu);
 		
-		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ) return;
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ) return;
 		
 		auto Nb = Lat.parameter.VEC(kMeshSelection, Lat.parameter.VEC("Nb"));
 		auto B = Lat.basisVector.getBVec();
@@ -401,7 +401,7 @@ protected:
 		double minE = stbd.minE;
 		double maxE = stbd.maxE;
 		
-		double		dest_den_diff = 0.01;
+		double		dest_MF_diff = 0.01;
 		double		destMu = 0.5*(minE + maxE);
 		unsigned	printLen = 10;
 		double		n_diff = 1;
@@ -423,21 +423,21 @@ protected:
 				<<" - "<<fmt( destDen-n_diff,printLen )
 				<<" = "<<fmt(n_diff,printLen) <<endl;
 			
-			if (abs(n_diff) > abs(dest_den_diff) ) {
+			if (abs(n_diff) > abs(dest_MF_diff) ) {
 				if (n_diff > 0) { minE = destMu; }
 				if (n_diff < 0) { maxE = destMu; }
 				destMu = (maxE+minE)/2;
 			}
 		
-		}while ( abs(n_diff) > abs(dest_den_diff) );
+		}while ( abs(n_diff) > abs(dest_MF_diff) );
 		
 		
 		Lat.parameter.VAR("Mu") = destMu;
 		spinNormalLat.parameter.VAR("Mu") = destMu;
 	}
 	void	calculateLDOS				(TBDataSource & rtbd)								{
-		if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
-			cout<< "Warning, due to flag 'disable_quantum' turned on."
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
+			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
 				<< "The LDOS calculation will be ignored."<<endl;
 			return;
 		}
@@ -588,7 +588,7 @@ protected:
 	}
 	double	iterateMeanFieldOrder		(OrderParameter & newOrder, double mix = 0.1)		{
 		
-		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){ return 0; }
 		
 		tbd.order_old = tbd.order;
 		// *********************************
@@ -621,8 +621,8 @@ protected:
 			auto parameter_new = stbd.order.findOrder(Lat.getAtom(),"@:den");
 			
 			if( parameter_old.first and parameter_new.first ){
-				auto den_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
-				if( max_mf_diff < den_diff ) max_mf_diff = den_diff;
+				auto MF_diff = abs(parameter_old.second[0].real() - parameter_new.second[0].real());
+				if( max_mf_diff < MF_diff ) max_mf_diff = MF_diff;
 				
 				// Set up updated @:den order parameter
 				auto para_old = ratio_a * parameter_old.second;
@@ -653,14 +653,14 @@ protected:
 			
 				if( parameter_old.first and parameter_new.first ){
 					auto vdiff = parameter_old.second - parameter_new.second;
-					auto den_diff0 = abs(vdiff[0]);
-					auto den_diff1 = abs(vdiff[1]);
-					auto den_diff2 = abs(vdiff[2]);
-					auto den_diff3 = abs(vdiff[3]);
-					if( max_mf_diff < den_diff0 ) max_mf_diff = den_diff0;
-					if( max_mf_diff < den_diff1 ) max_mf_diff = den_diff1;
-					if( max_mf_diff < den_diff2 ) max_mf_diff = den_diff2;
-					if( max_mf_diff < den_diff3 ) max_mf_diff = den_diff3;
+					auto MF_diff0 = abs(vdiff[0]);
+					auto MF_diff1 = abs(vdiff[1]);
+					auto MF_diff2 = abs(vdiff[2]);
+					auto MF_diff3 = abs(vdiff[3]);
+					if( max_mf_diff < MF_diff0 ) max_mf_diff = MF_diff0;
+					if( max_mf_diff < MF_diff1 ) max_mf_diff = MF_diff1;
+					if( max_mf_diff < MF_diff2 ) max_mf_diff = MF_diff2;
+					if( max_mf_diff < MF_diff3 ) max_mf_diff = MF_diff3;
 					
 					// Set up updated @:n:4den order parameter
 					auto para_old = ratio_a * parameter_old.second;

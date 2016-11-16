@@ -50,8 +50,8 @@ public:
 		
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
 			
-			if( Lat.parameter.VAR("disable_quantum", 0).real() != 0 ){
-				cout<< "Warning, due to flag 'disable_quantum' turned on."
+			if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
+				cout<< "Warning, due to flag 'need_MF_iteration' turned off."
 					<< "The chemical potential calculation will be ignored."<<endl<<endl;
 			} else {
 				cout<<">> Calculating the chemical potential, Mu."<<endl;
@@ -97,29 +97,28 @@ public:
 		
 	}
 	
-	bool	isMaxStep()			{
+	bool	isMaxStep()					{
 		return iteration_steps <= iteration_max;
 	}
-	void	incrStep()			{
+	void	incrStep()					{
 		iteration_steps += 1;
 	}
 	
 	double	calculateDenMeanField()		{
-		
-		if( Lat.parameter.VAR("disable_quantum", 1).real() == 1 ){ return 0; }
+		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){ return 0; }
 			
-		double den_diff = 1;
-		//double den_diff_bound = abs(Lat.parameter.VAR("den_diff", 0.001).real());
-		double den_diff_bound = Lat.parameter.VAR("den_diff_bound",0.5).real();
+		double MF_diff = 1;
+		//double MF_diff_bound = abs(Lat.parameter.VAR("MF_diff", 0.001).real());
+		double MF_diff_bound = Lat.parameter.VAR("MF_diff_bound",0.5).real();
 		
-		while( den_diff > den_diff_bound and isMaxStep() ){
+		while( MF_diff > MF_diff_bound and isMaxStep() ){
 			incrStep();
 			
 			tbd.order.load();
 			tbd.order.save("previous");
 			KHamEvd(tbd);
-			den_diff = iterateMeanFieldOrder(tbd.order, Lat.parameter.VAR("den_mix",0.1).real());
-			cout<< gmt::fformat(iteration_steps, 5) <<"  Den-diff>> "<< gmt::fformat(den_diff,16)<<" ";
+			MF_diff = iterateMeanFieldOrder(tbd.order, Lat.parameter.VAR("MF_mix",0.1).real());
+			cout<< gmt::fformat(iteration_steps, 5) <<"  MF-diff>> "<< gmt::fformat(MF_diff,16)<<" ";
 			double TotalE = 0;
 			for( auto & iter: tbd.energyMap ){
 				if( abs(iter.second) > 0.0000001 ){
@@ -131,9 +130,11 @@ public:
 			cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
 			cout<<endl;
 		}
-		return den_diff;
+		return MF_diff;
 	}
 	double	calculateSpinVar()			{
+		if( Lat.parameter.VAR("need_LLG_iteration", 1).real() == 0 ){ return 0; }
+		
 		incrStep();
 		
 		tbd.order.load();
@@ -142,7 +143,7 @@ public:
 		KHamEvd(tbd);
 		auto diff = iterateSpinOrder(tbd.order);
 		
-		cout<< gmt::fformat(iteration_steps, 5) <<" Spin-diff>> "<< gmt::fformat(diff,16)<<" ";
+		cout<< gmt::fformat(iteration_steps, 5) <<" LLG-diff>> "<< gmt::fformat(diff,16)<<" ";
 		
 		double TotalE = 0;
 		for( auto & iter: tbd.energyMap ){
@@ -159,16 +160,16 @@ public:
 	void	calculateVar()				{
 		
 		double spin_diff = 1;
-		double den_diff = 1;
+		double MF_diff = 1;
 		
 		// Self-consistent loop.
 		while(	(
 				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
-				den_diff > abs(Lat.parameter.VAR("den_diff", 0.001).real())
+				MF_diff > abs(Lat.parameter.VAR("MF_diff", 0.001).real())
 				)		and
 				isMaxStep()){
 		
-			den_diff	= calculateDenMeanField();
+			MF_diff	= calculateDenMeanField();
 			spin_diff	= calculateSpinVar();
 		}
 	}
