@@ -1,0 +1,36 @@
+\tocdepth@munge 
+\tocdepth@restore 
+\contentsline {section}{\numberline {I}Introduction}{4}{section.1}
+\contentsline {section}{\numberline {II}Version, License, Citation and Facebook Group}{6}{section.2}
+\contentsline {subsection}{\numberline {A}Document version - 1.0}{6}{subsection.2.1}
+\contentsline {subsection}{\numberline {B}BSD License}{6}{subsection.2.2}
+\contentsline {subsection}{\numberline {C}Citation for publication}{6}{subsection.2.3}
+\contentsline {subsection}{\numberline {D}Facebook group fourm}{6}{subsection.2.4}
+\contentsline {section}{\numberline {III}Compile and installation}{7}{section.3}
+\contentsline {section}{\numberline {IV}TBM$^3$ Tutorial}{8}{section.4}
+\contentsline {subsection}{\numberline {A}Construct single orbital tight-binding model on square lattice}{8}{subsection.4.1}
+\contentsline {subsection}{\numberline {B}Graphene models}{10}{subsection.4.2}
+\contentsline {subsubsection}{\numberline {1}Construct graphene model and its band structure}{10}{subsubsection.4.2.1}
+\contentsline {subsubsection}{\numberline {2}Construct graphene model with open boundary conditions}{11}{subsubsection.4.2.2}
+\contentsline {subsubsection}{\numberline {3}Setup Haldane and Kane \& Mele model for graphene}{12}{subsubsection.4.2.3}
+\contentsline {subsection}{\numberline {C}Construct multi-orbital Kondo lattice model}{14}{subsection.4.3}
+\contentsline {subsection}{\numberline {D}Modeling superconductivity with a given pairing structure}{16}{subsection.4.4}
+\contentsline {subsection}{\numberline {E}Setup the Wannier90 input file as the source of hopping terms}{19}{subsection.4.5}
+\contentsline {subsubsection}{\numberline {1}Pb}{19}{subsubsection.4.5.1}
+\contentsline {subsubsection}{\numberline {2}SrFeO$_3$}{21}{subsubsection.4.5.2}
+\contentsline {subsection}{\numberline {F}Setup model parameters for spin-orbital coupling}{23}{subsection.4.6}
+\contentsline {subsection}{\numberline {G}Identifying $Z_2$ Topological Index in using the Wannier center tecnique}{25}{subsection.4.7}
+\contentsline {section}{\numberline {V}TBM$^3$ Document}{26}{section.5}
+\contentsline {subsection}{\numberline {A}The ``Blocks" notation of lattice \& TBM-script input file}{27}{subsection.5.1}
+\contentsline {subsection}{\numberline {B}Lattice input file structure}{27}{subsection.5.2}
+\contentsline {subsection}{\numberline {C}The \#Import block of the TBM-script}{28}{subsection.5.3}
+\contentsline {subsection}{\numberline {D}The \#Hamiltonian block}{29}{subsection.5.4}
+\contentsline {subsection}{\numberline {E}The \#Init block - initialize the order parameters}{33}{subsection.5.5}
+\contentsline {subsection}{\numberline {F}The order-parameter I/O-file formate}{33}{subsection.5.6}
+\contentsline {subsection}{\numberline {G}The \#CoreCharge block - counting for electrons}{34}{subsection.5.7}
+\contentsline {subsection}{\numberline {H}The \#KPointPath block - preparing for band structure calculations}{34}{subsection.5.8}
+\contentsline {subsection}{\numberline {I}The \#LDOSList block}{35}{subsection.5.9}
+\contentsline {subsection}{\numberline {J}System default parameters}{36}{subsection.5.10}
+\contentsline {subsection}{\numberline {K}Iterations \& Total Energy}{38}{subsection.5.11}
+\contentsline {section}{\numberline {VI}Acknowledgement}{40}{section.6}
+\contentsline {section}{\numberline {}References}{40}{section*.1}

@@ -1,0 +1,34 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Version, License, Citation and Facebook Group}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Document version - 1.0}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{BSD License}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Citation for publication}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Facebook group fourm}{section.2}% 6
+\BOOKMARK [1][-]{section.3}{Compile and installation}{}% 7
+\BOOKMARK [1][-]{section.4}{TBM3 Tutorial}{}% 8
+\BOOKMARK [2][-]{subsection.4.1}{Construct single orbital tight-binding model on square lattice}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.2}{Graphene models}{section.4}% 10
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Construct graphene model and its band structure}{subsection.4.2}% 11
+\BOOKMARK [3][-]{subsubsection.4.2.2}{Construct graphene model with open boundary conditions}{subsection.4.2}% 12
+\BOOKMARK [3][-]{subsubsection.4.2.3}{Setup Haldane and Kane \046 Mele model for graphene}{subsection.4.2}% 13
+\BOOKMARK [2][-]{subsection.4.3}{Construct multi-orbital Kondo lattice model}{section.4}% 14
+\BOOKMARK [2][-]{subsection.4.4}{Modeling superconductivity with a given pairing structure}{section.4}% 15
+\BOOKMARK [2][-]{subsection.4.5}{Setup the Wannier90 input file as the source of hopping terms}{section.4}% 16
+\BOOKMARK [3][-]{subsubsection.4.5.1}{Pb}{subsection.4.5}% 17
+\BOOKMARK [3][-]{subsubsection.4.5.2}{SrFeO3}{subsection.4.5}% 18
+\BOOKMARK [2][-]{subsection.4.6}{Setup model parameters for spin-orbital coupling}{section.4}% 19
+\BOOKMARK [2][-]{subsection.4.7}{Identifying Z2 Topological Index in using the Wannier center tecnique}{section.4}% 20
+\BOOKMARK [1][-]{section.5}{TBM3 Document}{}% 21
+\BOOKMARK [2][-]{subsection.5.1}{The ``Blocks" notation of lattice \046 TBM-script input file}{section.5}% 22
+\BOOKMARK [2][-]{subsection.5.2}{Lattice input file structure}{section.5}% 23
+\BOOKMARK [2][-]{subsection.5.3}{The \043Import block of the TBM-script}{section.5}% 24
+\BOOKMARK [2][-]{subsection.5.4}{The \043Hamiltonian block}{section.5}% 25
+\BOOKMARK [2][-]{subsection.5.5}{The \043Init block - initialize the order parameters}{section.5}% 26
+\BOOKMARK [2][-]{subsection.5.6}{The order-parameter I/O-file formate}{section.5}% 27
+\BOOKMARK [2][-]{subsection.5.7}{The \043CoreCharge block - counting for electrons}{section.5}% 28
+\BOOKMARK [2][-]{subsection.5.8}{The \043KPointPath block - preparing for band structure calculations}{section.5}% 29
+\BOOKMARK [2][-]{subsection.5.9}{The \043LDOSList block}{section.5}% 30
+\BOOKMARK [2][-]{subsection.5.10}{System default parameters}{section.5}% 31
+\BOOKMARK [2][-]{subsection.5.11}{Iterations \046 Total Energy}{section.5}% 32
+\BOOKMARK [1][-]{section.6}{Acknowledgement}{}% 33
+\BOOKMARK [1][-]{section*.1}{References}{}% 34
