@@ -15,6 +15,8 @@
 //
 
 // Declare the RTree object.
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
 typedef bg::model::point<r_var, 3, bg::cs::cartesian> point;
 typedef point bondVec;
 typedef std::pair<point, unsigned> value;

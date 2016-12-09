@@ -14,9 +14,6 @@
 //  Created by Yuan-Yen Tai on 7/19/16.
 //
 
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-
 enum H_SPACE { NORMAL, NAMBU, EXNAMBU };
 
 //----------------------
