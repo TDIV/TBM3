@@ -5,6 +5,7 @@ TBM3 (Tight Binding Model for Materials at Mesoscale) is a C++ based numerical t
 - A general lattice input file with orbital information specified.
 - Providing non-spin polarized and spin polarized calculation with normal (non-superconductive), Nambu and extended Nambu space.
 - Meanfield self-consistence and LLG spin dynamic calculations.
+- Modeling for superconductivities in spin singlet and triplet states of any given symmetry.
 - Simple and minimal input format for the setting of a quantum mechanical model.
 - Simple file formate for the storage of order parameters.
 
@@ -109,15 +110,7 @@ More examples can be found under the `example/` folder.
 We are working on to provide more possible options for different hardward selections.
 
 ## Installation
-
-1. Install the [CUDA](https://developer.nvidia.com/cuda-downloads) library.
-2. Install the [MAGMA](http://icl.cs.utk.edu/magma/) library.
-3. Install the [BOOST](http://www.boost.org) library.
-4. Download and unzip this repository.
-5. Choose and copy one of the `make.inc.xxxxx` to `make.inc` under the same folder.
-6. Modify `make.inc` according to the library path (CUDA, MAGMA, BOOST).
-7. Type `make` to compile. If compile sucessfully, an executable `tbm-run` will be generated under the folder `bin/`
-8. Add the `bin/` folder to your system path.
+Please see the installation guide in the "TBM3-document-1.0.pdf" under the doc folder.
 
 ## License
 
@@ -129,7 +122,6 @@ TBM3 is licensed under the BSD Berkeley Software Distribution.
 - Dr. Jian-Xin Zhu: [Personal web](http://www.lanl.gov/expertise/profiles/view/jianxin-zhu)
 
 ## Under construction
-- Superconductivity self-consistence iteration in real- and k- space.
 - Compile options for Blabs for CPU, GPU-OpenCL and multi-thread-CPU.
 - Charge/Spin susceptibility calculation.
 - Transport calculation.

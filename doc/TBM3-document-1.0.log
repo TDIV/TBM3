@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  14 DEC 2016 11:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  14 DEC 2016 11:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1069,19 +1069,19 @@ Package pdftex.def Info: ./figs/fig02-01.png used on input line 2236.
 [35 <./figs/fig02-01.png>] [36] [37] [38] [39]
 File: TBMCube-LOGO.pdf Graphic file (type pdf)
  <use TBMCube-LOGO.pdf>
-Package pdftex.def Info: TBMCube-LOGO.pdf used on input line 2892.
+Package pdftex.def Info: TBMCube-LOGO.pdf used on input line 2889.
 (pdftex.def)             Requested size: 254.3956pt x 196.57841pt.
 
 <TBMCube.pdf, id=1517, 884.30325pt x 697.00905pt>
 File: TBMCube.pdf Graphic file (type pdf)
  <use TBMCube.pdf>
-Package pdftex.def Info: TBMCube.pdf used on input line 2897.
+Package pdftex.def Info: TBMCube.pdf used on input line 2894.
 (pdftex.def)             Requested size: 265.29301pt x 209.10432pt.
 
 <TBMCube-flow.pdf, id=1518, 652.4375pt x 803.0pt>
 File: TBMCube-flow.pdf Graphic file (type pdf)
  <use TBMCube-flow.pdf>
-Package pdftex.def Info: TBMCube-flow.pdf used on input line 2898.
+Package pdftex.def Info: TBMCube-flow.pdf used on input line 2895.
 (pdftex.def)             Requested size: 228.35654pt x 281.05421pt.
 
 [40]
@@ -1092,15 +1092,15 @@ Missing character: There is no â in font ptmr7t!
 Missing character: There is no € in font ptmr7t!
 Missing character: There is no “ in font ptmr7t!
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 2915.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 2912.
 Missing character: There is no ä in font ptmr7t!
  [41 <./TBMCube.pdf> <./TBMCube-flow.pdf>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2957.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2954.
  [42]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2957.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2954.
  (./TBM3-document-1.0.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2957.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2957.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2954.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2954.
 
 Package rerunfilecheck Info: File `TBM3-document-1.0.out' has not changed.
 (rerunfilecheck)             Checksum: D00088F2BC8263A4553CF2DF88ED93DD;2856.
@@ -1139,7 +1139,7 @@ s/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2015/texmf-dist/fonts/
 type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/
 times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/times/utmr
 i8a.pfb>
-Output written on TBM3-document-1.0.pdf (42 pages, 3041154 bytes).
+Output written on TBM3-document-1.0.pdf (42 pages, 3040870 bytes).
 PDF statistics:
  1885 PDF objects out of 2073 (max. 8388607)
  1710 compressed objects within 18 object streams
