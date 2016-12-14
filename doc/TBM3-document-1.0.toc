@@ -32,6 +32,6 @@
 \contentsline {subsection}{\numberline {I}The \#LDOSList block}{35}{subsection.5.9}
 \contentsline {subsection}{\numberline {J}System default parameters}{36}{subsection.5.10}
 \contentsline {subsection}{\numberline {K}Iterations \& Total Energy}{38}{subsection.5.11}
-\contentsline {section}{\numberline {VI}About the Authors}{40}{section.6}
-\contentsline {section}{\numberline {VII}Acknowledgement}{40}{section.7}
+\contentsline {section}{\numberline {VI}Acknowledgement}{40}{section.6}
+\contentsline {section}{\numberline {VII}Author Contribution}{40}{section.7}
 \contentsline {section}{\numberline {}References}{41}{section*.1}

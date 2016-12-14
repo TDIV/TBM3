@@ -126,6 +126,7 @@ TBM3 is licensed under the BSD Berkeley Software Distribution.
 ## Contact
 
 - Dr. Yuan-Yen Tai: [Personal web](http://dr-tai.net), [Linked In](https://www.linkedin.com/in/yuan-yen-tai-5652ab112)
+- Dr. Jian-Xin Zhu: [Personal web](http://www.lanl.gov/expertise/profiles/view/jianxin-zhu)
 
 ## Under construction
 - Superconductivity self-consistence iteration in real- and k- space.
