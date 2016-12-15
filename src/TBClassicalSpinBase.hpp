@@ -316,7 +316,7 @@ public:
 		}
 		
 		// The LLG variational method.
-		double max_spin_diff = 0;
+		double max_LLG_diff = 0;
 		
 		double variational_dt	= TBD.tbm.parameter.VAR("LLG_dt", 0.01).real();
 		double LLGdamping		= TBD.tbm.parameter.VAR("LLGdamping", 0.2).real();
@@ -340,9 +340,9 @@ public:
 				normalizeXVec(Snew);
 				
 				x_mat Sdiff = Si - Snew;
-				double spin_diff = abs(cdot(Sdiff,Sdiff));
+				double LLG_diff = abs(cdot(Sdiff,Sdiff));
 				
-				if( spin_diff > max_spin_diff ) max_spin_diff = spin_diff;
+				if( LLG_diff > max_LLG_diff ) max_LLG_diff = LLG_diff;
 				
 				newOrder.set(atomI.atomIndex, orderKeyI, Snew);
 			}
@@ -353,7 +353,7 @@ public:
 		calculateClassicalEnergy();
 		TBD.calculateEnergy();
 		
-		return max_spin_diff;
+		return max_LLG_diff;
 	}
 
 private:

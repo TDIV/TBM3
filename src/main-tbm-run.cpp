@@ -159,18 +159,18 @@ public:
 	}
 	void	calculateVar()				{
 		
-		double spin_diff = 1;
+		double LLG_diff = 1;
 		double MF_diff = 1;
 		
 		// Self-consistent loop.
 		while(	(
-				spin_diff > abs(Lat.parameter.VAR("spin_diff", 0.001).real())	or
+				LLG_diff > abs(Lat.parameter.VAR("LLG_diff", 0.001).real())	or
 				MF_diff > abs(Lat.parameter.VAR("MF_diff", 0.001).real())
 				)		and
 				isMaxStep()){
 		
 			MF_diff	= calculateDenMeanField();
-			spin_diff	= calculateSpinVar();
+			LLG_diff	= calculateSpinVar();
 		}
 	}
 	
