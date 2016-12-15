@@ -148,7 +148,7 @@ public:
 		double TotalE = 0;
 		for( auto & iter: tbd.energyMap ){
 			if( abs(iter.second) > 0.0000001 ){
-				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				cout<< gmt::fformat(iter.first+":", 7)<<" "<<gmt::fformat(iter.second, 10)<<" ";
 				TotalE += iter.second;
 			}
 		}
