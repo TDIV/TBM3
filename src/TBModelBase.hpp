@@ -592,7 +592,9 @@ protected:
 		
 		tbd.order_old = tbd.order;
 		// *********************************
-		calculateChemicalPotential(false);
+		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
+			calculateChemicalPotential(false);
+		}
 		// *********************************
 		
 		calculateElectronFilling(tbd);

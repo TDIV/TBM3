@@ -169,8 +169,10 @@ public:
 	
 		ofstream outfile(filename+".lat.tbm");
 		string tbBondAlphaName = parameter.STR("TB_bond_alpha", "TB_bond_alpha");
+		string tbSiteAlphaName = parameter.STR("TB_site_alpha", "TB_site_alpha");
 		outfile<<"#Parameters"<<endl;
 		outfile<<tbBondAlphaName<<" = 1.0"<<endl;
+		outfile<<tbSiteAlphaName<<" = 1.0"<<endl;
 		outfile<<endl;
 		outfile<<"#Hamiltonian"<<endl;
 		for( auto & line: wannierBlockLines ){
@@ -260,7 +262,7 @@ public:
 					if( bondLength < 0.001 ){
 						outfile << fformat(bondOperation, 44)<<" "
 								<<fformat(orbitalOperation,7)<<"  >  "
-								<<"("<<varReal<<","<<varImag<<")"
+								<<"("<<varReal<<","<<varImag<<") *"<<tbSiteAlphaName;
 								<<endl;
 					}
 					else {
