@@ -76,23 +76,16 @@ protected:
 	void		constructHam	(TBDataSource & rtbd, bool withMu = true)					{
 		// Construct the Hamiltonian from the system-build structure: TBDataSource (tbd).
 		
-		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 1 )
-			rtbd.constructTBMHam(withMu);
+		rtbd.constructTBMHam(withMu);
 		
 		// Construct the customized Hamiltonian.
 		Hamiltonian();
 	}
 
 	/*-----------------------------------------------------
-	 The Band structure calculation.
+	 The K-space related calculations.
 	 ------------------------------------------------------*/
 	void	calculateBandStructure	(TBDataSource & rtbd, unsigned Nsteps=50)				{
-		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
-			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
-				<< "The band structure calculation will be ignored."<<endl;
-			return;
-		}
-		
 		auto B = Lat.basisVector.getBVec();
 		auto & b1 = B[0];
 		auto & b2 = B[1];
@@ -151,14 +144,6 @@ protected:
 		out.close();
 	}
 	void	calculateKWannierCenter	(TBDataSource & rtbd, unsigned Nsteps=50)				{
-		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
-			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
-				<< "The Wannier center calculation will be ignored."<<endl;
-			return;
-		}
-		
-		//cout<<Nsteps<<endl;
-		
 		auto B = Lat.basisVector.getBVec();
 		auto & b1 = B[0];
 		auto & b2 = B[1];
@@ -301,7 +286,6 @@ protected:
 		}
 		
 		out.close();
-		
 	}
 	
 	/*-----------------------------------------------------
@@ -311,8 +295,6 @@ protected:
 	void	KHamEvd					(TBDataSource & rtbd, bool withMu = true)				{
 		
 		constructHam(rtbd, withMu);
-		
-		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ) return;
 		
 		auto Nb = Lat.parameter.VEC(kMeshSelection, Lat.parameter.VEC("Nb"));
 		auto B = Lat.basisVector.getBVec();
@@ -436,12 +418,6 @@ protected:
 		spinNormalLat.parameter.VAR("Mu") = destMu;
 	}
 	void	calculateLDOS				(TBDataSource & rtbd)								{
-		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
-			cout<< "Warning, due to flag 'need_MF_iteration' turned off."
-				<< "The LDOS calculation will be ignored."<<endl;
-			return;
-		}
-		
 		double stepE = abs(Lat.parameter.VAR("ldos_dE", 0.01).real());
 		double Gamma = abs(Lat.parameter.VAR("ldos_Gamma", 0.05).real());
 
@@ -592,9 +568,7 @@ protected:
 		
 		tbd.order_old = tbd.order;
 		// *********************************
-		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
-			calculateChemicalPotential(false);
-		}
+		calculateChemicalPotential(false);
 		// *********************************
 		
 		calculateElectronFilling(tbd);
@@ -606,6 +580,7 @@ protected:
 		if( tbd.Lat.parameter.STR("space") != "normal" ) {
 			tbd.calculatePairingOrder();
 		}
+		
 		
 		double ratio_a = 0;
 		double ratio_b = 1;
@@ -687,7 +662,6 @@ protected:
 			newOrder.setNew(elem.atomPair.atomI.atomIndex, elem.orderKey, mixOrder);
 		}
 
-		
 		tbd.calculateEnergy();
 		newOrder.save();
 		

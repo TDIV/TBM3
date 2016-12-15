@@ -49,21 +49,21 @@ public:
 		cout<<endl<<"Starting..."<<endl<<endl;
 		
 		if( Lat.parameter.VAR("isCalculateMu", 0).real() == 1 ){
+			cout<<">> Calculating the chemical potential, Mu."<<endl;
+			TBModelBase::calculateChemicalPotential(true);
 			
-			if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){
-				cout<< "Warning, due to flag 'need_MF_iteration' turned off."
-					<< "The chemical potential calculation will be ignored."<<endl<<endl;
-			} else {
-				cout<<">> Calculating the chemical potential, Mu."<<endl;
-				TBModelBase::calculateChemicalPotential(true);
-				
-				TBModelBase::KHamEvd(tbd);
-				cout<<endl;
-				cout<<"With spin:"<< Lat.parameter.STR("spin")<<endl;
-				cout<<"And space:"<< Lat.parameter.STR("space")<<endl;
-				cout<<"Total electron count: "<<TBModelBase::calculateElectronFilling(tbd);
-				cout<<endl<<endl;
-			}
+			TBModelBase::KHamEvd(tbd);
+			cout<<endl;
+			cout<<"With spin:"<< Lat.parameter.STR("spin")<<endl;
+			cout<<"And space:"<< Lat.parameter.STR("space")<<endl;
+			cout<<"Total electron count: "<<TBModelBase::calculateElectronFilling(tbd);
+			cout<<endl<<endl;
+		}
+		
+		if( Lat.parameter.VAR("isCalculateTotalE", 0).real() == 1 ){
+			cout<<endl<<">> Calculating the Total Energy."<<endl;
+			calculateTotalenergy();
+			cout<<endl;
 		}
 		
 		if( Lat.parameter.VAR("isCalculateVar", 0).real() == 1 ){
@@ -88,12 +88,13 @@ public:
 			cout<<endl;
 		}
 		
-		if( Lat.parameter.VAR("isCalculateSpinX", 0).real() == 1 ){
-			cout<<endl<<">> Calculating Spin susceptibility."<<endl;
-			//calculateSpinSusceptibility(tbd);
-			calculateSpinSusceptibility(stbd);
-			cout<<endl;
-		}
+		// Commented for the future use.
+		//if( Lat.parameter.VAR("isCalculateSpinX", 0).real() == 1 ){
+		//	cout<<endl<<">> Calculating Spin susceptibility."<<endl;
+		//	//calculateSpinSusceptibility(tbd);
+		//	calculateSpinSusceptibility(stbd);
+		//	cout<<endl;
+		//}
 		
 	}
 	
@@ -108,9 +109,8 @@ public:
 		if( Lat.parameter.VAR("need_MF_iteration", 1).real() == 0 ){ return 0; }
 			
 		double MF_diff = 1;
-		//double MF_diff_bound = abs(Lat.parameter.VAR("MF_diff", 0.001).real());
 		double MF_diff_bound = Lat.parameter.VAR("MF_diff_bound",0.5).real();
-		
+
 		while( MF_diff > MF_diff_bound and isMaxStep() ){
 			incrStep();
 			
@@ -172,6 +172,25 @@ public:
 			MF_diff	= calculateDenMeanField();
 			LLG_diff	= calculateSpinVar();
 		}
+	}
+	void	calculateTotalenergy()		{
+		
+		
+		TBModelBase::KHamEvd(tbd);
+		
+		tbd.calculateEnergy();
+		calculateClassicalEnergy();
+		
+		double TotalE = 0;
+		for( auto & iter: tbd.energyMap ){
+			if( abs(iter.second) > 0.0000001 ){
+				cout<< gmt::fformat(iter.first+":", 7)<<" "<< gmt::fformat(iter.second, 10)<<" ";
+				TotalE += iter.second;
+			}
+		}
+		cout<< gmt::fformat("Total:", 7) << gmt::fformat(TotalE,10)<<" ";
+		cout<< gmt::fformat("Mu:", 3)<<" "<< gmt::fformat(tbd.Lat.parameter.VAR("Mu").real());
+		cout<<endl;
 	}
 	
 private:
