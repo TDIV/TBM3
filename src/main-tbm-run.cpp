@@ -88,14 +88,6 @@ public:
 			cout<<endl;
 		}
 		
-		// Commented for the future use.
-		//if( Lat.parameter.VAR("isCalculateSpinX", 0).real() == 1 ){
-		//	cout<<endl<<">> Calculating Spin susceptibility."<<endl;
-		//	//calculateSpinSusceptibility(tbd);
-		//	calculateSpinSusceptibility(stbd);
-		//	cout<<endl;
-		//}
-		
 	}
 	
 	bool	isMaxStep()					{
