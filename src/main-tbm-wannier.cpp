@@ -262,7 +262,7 @@ public:
 					if( bondLength < 0.001 ){
 						outfile << fformat(bondOperation, 44)<<" "
 								<<fformat(orbitalOperation,7)<<"  >  "
-								<<"("<<varReal<<","<<varImag<<") *"<<tbSiteAlphaName;
+								<<"("<<varReal<<","<<varImag<<") *"<<tbSiteAlphaName 
 								<<endl;
 					}
 					else {
