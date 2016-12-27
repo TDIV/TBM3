@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  14 DEC 2016 11:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  27 DEC 2016 10:24
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -770,9 +770,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 169--170
  []
 
 [4] [5]
-Underfull \hbox (badness 1418) in paragraph at lines 197--198
+Underfull \hbox (badness 1622) in paragraph at lines 197--198
 \OT1/ptm/m/n/10 Yen Tai, Wei Zhu, Hongchul Choi, and Jian-Xin Zhu, TBM$[]$: Tig
-ht Bind-ing Model for Ma-te-ri-als at Mesoscale,
+ht-Binding Model for Ma-te-ri-als at Mesoscale,
  []
 
 [6] [7]
@@ -1094,7 +1094,13 @@ Missing character: There is no “ in font ptmr7t!
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 2912.
 Missing character: There is no ä in font ptmr7t!
- [41 <./TBMCube.pdf> <./TBMCube-flow.pdf>]
+
+Underfull \hbox (badness 3769) in paragraph at lines 2931--2932
+[]\OT1/ptm/m/n/9 Yuan-Yen Tai, Wei Zhu, Hongchul Choi, and Jian-Xin Zhu, TBM$[]
+$: Tight-Binding Model for Ma-te-ri-als at Mesoscale,
+ []
+
+[41 <./TBMCube.pdf> <./TBMCube-flow.pdf>]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2954.
  [42]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 2954.
@@ -1112,7 +1118,7 @@ LaTeX Warning: There were multiply-defined labels.
 Here is how much of TeX's memory you used:
  12769 strings out of 493089
  181850 string characters out of 6134842
- 1025012 words of memory out of 5000000
+ 1025014 words of memory out of 5000000
  15036 multiletter control sequences out of 15000+600000
  38261 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1139,7 +1145,7 @@ s/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2015/texmf-dist/fonts/
 type1/urw/times/utmb8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/
 times/utmr8a.pfb></usr/local/texlive/2015/texmf-dist/fonts/type1/urw/times/utmr
 i8a.pfb>
-Output written on TBM3-document-1.0.pdf (42 pages, 3040870 bytes).
+Output written on TBM3-document-1.0.pdf (42 pages, 3040953 bytes).
 PDF statistics:
  1885 PDF objects out of 2073 (max. 8388607)
  1710 compressed objects within 18 object streams
