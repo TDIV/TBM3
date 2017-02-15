@@ -311,8 +311,8 @@ protected:
 			for (double i2=0; i2<N2; i2++)
 			for (double i3=0; i3<N3; i3++) {
 				r_mat B1 = (i1/N1)*b1;
-				r_mat B2 = (i2/N1)*b2;
-				r_mat B3 = (i3/N1)*b3;
+				r_mat B2 = (i2/N2)*b2;
+				r_mat B3 = (i3/N3)*b3;
 				auto kPoint = B1+B2+B3;
 				auto  tmpEVV = rtbd.HamEvd(kPoint);
 				if( tmpEVV.message == "Success")
